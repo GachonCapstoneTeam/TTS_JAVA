@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText inputText;
     private TextView audioContent;
     private Button ttsButton;
-    private final String API_KEY = "AIzaSyDIeqKKGDnDMqe2ykQt0fmYpUhUJNkmuZ4";
+    private final String API_KEY = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
