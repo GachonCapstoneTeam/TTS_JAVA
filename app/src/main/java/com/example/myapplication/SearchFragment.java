@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -37,26 +36,24 @@ public class SearchFragment extends Fragment {
         populateItemList();
 
         // ItemAdapter 생성 및 설정
-        itemAdapter = new ItemAdapter(getContext(), itemList, new ItemAdapter.OnItemClickListener() {
-            @Override
-            public void onSummaryClick(int position) {
-                Toast.makeText(getContext(), "요약본 버튼 클릭: " + itemList.get(position).getTitle(), Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onOriginalClick(int position) {
-                Toast.makeText(getContext(), "원문 버튼 클릭: " + itemList.get(position).getTitle(), Toast.LENGTH_SHORT).show();
-            }
-        });
-
+        itemAdapter = new ItemAdapter(getContext());
         recyclerView.setAdapter(itemAdapter);
+
+        // 데이터 설정
+        itemAdapter.setItems(itemList);
 
         return view;
     }
 
     private void populateItemList() {
         for (int i = 1; i <= 10; i++) {
-            itemList.add(new Item("종목명 " + i, i));
+            itemList.add(new Item(
+                    "종목명 " + i,           // stockName
+                    "제목 " + i,             // stockTitle
+                    "증권사 " + i,           // bank
+                    "스크립트 내용 " + i,     // script
+                    i                        // id
+            ));
         }
     }
 }

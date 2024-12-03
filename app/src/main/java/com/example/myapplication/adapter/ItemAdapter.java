@@ -16,68 +16,81 @@ import com.example.myapplication.R;
 import com.example.myapplication.SummaryActivity;
 import com.example.myapplication.item.Item;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
+public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder> {
 
     private Context context;
-    private List<Item> items;
-    private OnItemClickListener listener;
+    private List<Item> itemList;
 
-    public interface OnItemClickListener {
-        void onSummaryClick(int position);
-        void onOriginalClick(int position);
+    public ItemAdapter(Context context) {
+        this.context = context;
+        this.itemList = new ArrayList<>();
     }
 
-    public ItemAdapter(Context context, List<Item> items, OnItemClickListener listener) {
-        this.context = context;
-        this.items = items;
-        this.listener = listener;
+    public void setItems(List<Item> items) {
+        this.itemList = items;
+        notifyDataSetChanged(); // 데이터 변경 알림
     }
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_layout, parent, false);
-        return new ViewHolder(view);
+    public ItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.itembox, parent, false);
+        return new ItemViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Item item = items.get(position);
+    public void onBindViewHolder(@NonNull ItemViewHolder holder, int position) {
+        Item item = itemList.get(position);
 
-        holder.stockTitle.setText(item.getTitle());
+        // 데이터 바인딩
+        holder.stockName.setText(item.getStockName());
+        holder.stockTitle.setText(item.getStockTitle());
+        holder.bank.setText(item.getBank());
+        holder.script.setText(item.getScript());
 
-        holder.summaryButton.setOnClickListener(v -> {
-            Intent intent = new Intent(context, SummaryActivity.class); // SummaryActivity로 이동
-            intent.putExtra("item_title", item.getTitle()); // 데이터 전달
+        // "요약본" 버튼 클릭 이벤트
+        holder.sumButton.setOnClickListener(v -> {
+            Intent intent = new Intent(context, SummaryActivity.class);
+            intent.putExtra("stock_name", item.getStockName());
+            intent.putExtra("stock_title", item.getStockTitle());
+            intent.putExtra("bank", item.getBank());
+            intent.putExtra("script", item.getScript());
+            intent.putExtra("id", item.getId());
             context.startActivity(intent);
         });
 
-        holder.originalButton.setOnClickListener(v -> {
-            Intent intent = new Intent(context, OriginalActivity.class); // OriginalActivity로 이동
-            intent.putExtra("item_title", item.getTitle()); // 데이터 전달
+        // "원문" 버튼 클릭 이벤트
+        holder.oriButton.setOnClickListener(v -> {
+            Intent intent = new Intent(context, OriginalActivity.class);
+            intent.putExtra("stock_name", item.getStockName());
+            intent.putExtra("stock_title", item.getStockTitle());
+            intent.putExtra("bank", item.getBank());
+            intent.putExtra("script", item.getScript());
+            intent.putExtra("id", item.getId());
             context.startActivity(intent);
         });
-
     }
 
     @Override
     public int getItemCount() {
-        return items.size();
+        return itemList.size();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView stockTitle;
-        Button summaryButton;
-        Button originalButton;
+    public static class ItemViewHolder extends RecyclerView.ViewHolder {
+        TextView stockName, stockTitle, bank, script;
+        Button sumButton, oriButton;
 
-        public ViewHolder(@NonNull View itemView) {
+        public ItemViewHolder(@NonNull View itemView) {
             super(itemView);
-            stockTitle = itemView.findViewById(R.id.stock_title);
-            summaryButton = itemView.findViewById(R.id.summary_button);
-            originalButton = itemView.findViewById(R.id.original_button);
+            stockName = itemView.findViewById(R.id.stockName);
+            stockTitle = itemView.findViewById(R.id.stockTitle);
+            bank = itemView.findViewById(R.id.bank);
+            script = itemView.findViewById(R.id.script);
+            sumButton = itemView.findViewById(R.id.sum_button);
+            oriButton = itemView.findViewById(R.id.ori_button);
         }
     }
 }
