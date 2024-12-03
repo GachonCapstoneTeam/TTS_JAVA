@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="10dp"
+    android:background="#D9D9D9"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#D9D9D9"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="10sp">
+
+        <TextView
+            android:id="@+id/stockName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10sp"
+            android:layout_marginRight="10sp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="종목명"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/stockTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10sp"
+            android:layout_marginRight="10sp"
+            android:layout_toRightOf="@id/stockName"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="제목"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/bank"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10sp"
+            android:layout_marginRight="10sp"
+            android:layout_toRightOf="@id/stockTitle"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="증권사"
+            android:textSize="20sp" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/script"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:layout_margin="10dp"
+        android:background="#ffffff"
+        android:elevation="20dp"
+        android:gravity="center"
+        android:text="script" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginBottom="10dp"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <Button
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/button"
+                android:elevation="30dp"
+                android:gravity="center"
+                android:text="요약본"
+                android:textSize="20sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="요약보기 TTS"
+                android:textSize="15sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <Button
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/button"
+                android:elevation="30dp"
+                android:gravity="center"
+                android:text="원문"
+                android:textSize="20sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="요약보기 TTS"
+                android:textSize="15sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+
+</LinearLayout>
