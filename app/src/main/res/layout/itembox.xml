@@ -33,7 +33,6 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="10sp"
             android:layout_marginRight="10sp"
-            android:layout_toRightOf="@id/stockName"
             android:layout_weight="1"
             android:gravity="center"
             android:text="제목"
@@ -45,7 +44,6 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="10sp"
             android:layout_marginRight="10sp"
-            android:layout_toRightOf="@id/stockTitle"
             android:layout_weight="1"
             android:gravity="center"
             android:text="증권사"
@@ -77,6 +75,7 @@
             android:orientation="vertical">
 
             <Button
+                android:id="@+id/sum_button"
                 android:layout_width="120dp"
                 android:layout_height="wrap_content"
                 android:background="@drawable/button"
@@ -101,6 +100,7 @@
             android:orientation="vertical">
 
             <Button
+                android:id="@+id/ori_button"
                 android:layout_width="120dp"
                 android:layout_height="wrap_content"
                 android:background="@drawable/button"
@@ -113,7 +113,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="요약보기 TTS"
+                android:text="원문보기 TTS"
                 android:textSize="15sp" />
         </LinearLayout>
     </LinearLayout>

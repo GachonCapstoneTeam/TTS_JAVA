@@ -19,12 +19,12 @@ import com.example.myapplication.item.Item;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ReportViewHolder> {
+public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder> {
 
     private Context context;
     private List<Item> itemList;
 
-    public ReportAdapter(Context context) {
+    public ItemAdapter(Context context) {
         this.context = context;
         this.itemList = new ArrayList<>();
     }
@@ -36,13 +36,13 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ReportView
 
     @NonNull
     @Override
-    public ReportViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.itembox, parent, false);
-        return new ReportViewHolder(view);
+        return new ItemViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ReportViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ItemViewHolder holder, int position) {
         Item item = itemList.get(position);
 
         // 데이터 바인딩
@@ -79,11 +79,11 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ReportView
         return itemList.size();
     }
 
-    public static class ReportViewHolder extends RecyclerView.ViewHolder {
+    public static class ItemViewHolder extends RecyclerView.ViewHolder {
         TextView stockName, stockTitle, bank, script;
         Button sumButton, oriButton;
 
-        public ReportViewHolder(@NonNull View itemView) {
+        public ItemViewHolder(@NonNull View itemView) {
             super(itemView);
             stockName = itemView.findViewById(R.id.stockName);
             stockTitle = itemView.findViewById(R.id.stockTitle);
