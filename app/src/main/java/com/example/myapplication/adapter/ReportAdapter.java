@@ -31,7 +31,7 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ReportView
 
     public void setItems(List<Item> items) {
         this.itemList = items;
-        notifyDataSetChanged(); // 데이터 변경 알림
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -45,13 +45,11 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ReportView
     public void onBindViewHolder(@NonNull ReportViewHolder holder, int position) {
         Item item = itemList.get(position);
 
-        // 데이터 바인딩
         holder.stockName.setText(item.getStockName());
         holder.stockTitle.setText(item.getStockTitle());
         holder.bank.setText(item.getBank());
         holder.script.setText(item.getScript());
 
-        // "요약본" 버튼 클릭 이벤트
         holder.sumButton.setOnClickListener(v -> {
             Intent intent = new Intent(context, SummaryActivity.class);
             intent.putExtra("stock_name", item.getStockName());
@@ -62,7 +60,6 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ReportView
             context.startActivity(intent);
         });
 
-        // "원문" 버튼 클릭 이벤트
         holder.oriButton.setOnClickListener(v -> {
             Intent intent = new Intent(context, OriginalActivity.class);
             intent.putExtra("stock_name", item.getStockName());

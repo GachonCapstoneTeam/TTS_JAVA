@@ -35,25 +35,22 @@ public class SearchFragment extends Fragment {
         itemList = new ArrayList<>();
         populateItemList();
 
-        // ItemAdapter 생성 및 설정
         itemAdapter = new ItemAdapter(getContext());
         recyclerView.setAdapter(itemAdapter);
 
-        // 데이터 설정
         itemAdapter.setItems(itemList);
 
         return view;
     }
-
+//test
     private void populateItemList() {
         for (int i = 1; i <= 10; i++) {
-            itemList.add(new Item(
-                    "종목명 " + i,           // stockName
-                    "제목 " + i,             // stockTitle
-                    "증권사 " + i,           // bank
-                    "스크립트 내용 " + i,     // script
-                    i                        // id
-            ));
+
+            itemList.add(new Item("종목명 " + i,
+                    "제목 " + i,
+                    "증권사 " + i,
+                    "스크립트 내용 " + i,
+                    (int)(Math.random() * 100) * i));
         }
     }
 }

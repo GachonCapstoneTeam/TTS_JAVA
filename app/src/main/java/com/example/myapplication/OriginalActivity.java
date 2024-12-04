@@ -20,10 +20,10 @@ public class OriginalActivity extends AppCompatActivity {
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                finish(); // 현재 Activity 종료
+                finish();
             }
         });
-        // 데이터 받아오기
+
         Intent intent = getIntent();
         String stockName = intent.getStringExtra("stock_name");
         String stockTitle = intent.getStringExtra("stock_title");
@@ -31,7 +31,6 @@ public class OriginalActivity extends AppCompatActivity {
         String script = intent.getStringExtra("script");
         int id = intent.getIntExtra("id", -1);
 
-        // TextView에 데이터 설정
         TextView stockNameText = findViewById(R.id.oriName);
         TextView stockTitleText = findViewById(R.id.oriTitle);
         TextView bankText = findViewById(R.id.oriBank);
