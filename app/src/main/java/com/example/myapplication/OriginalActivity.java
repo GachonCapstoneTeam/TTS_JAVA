@@ -1,6 +1,7 @@
 package com.example.myapplication;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
@@ -33,7 +34,7 @@ public class OriginalActivity extends AppCompatActivity {
 
     private TextView oriScript;
     private ImageButton skipBack, stop, play, skipForward, pdf;
-    private Button handleButton;
+    private Button handleButton, backButton;
     private View bottomMenuContainer;
     private boolean isMenuVisible = true; // 메뉴의 가시성 상태
     private final String API_KEY = "\0";//BuildConfig.MY_KEY;
@@ -44,6 +45,7 @@ public class OriginalActivity extends AppCompatActivity {
         setContentView(R.layout.original);
 
         // View 초기화
+        backButton = findViewById(R.id.backbutton_ori);
         oriScript = findViewById(R.id.oriScript);
         handleButton = findViewById(R.id.handle_shape);
         skipBack = findViewById(R.id.skipback);
@@ -60,6 +62,12 @@ public class OriginalActivity extends AppCompatActivity {
         handleButton.setOnClickListener(v -> toggleBottomMenu());
 
         // 버튼 동작 처리
+        backButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
         skipBack.setOnClickListener(v -> Toast.makeText(this, "Skip Back", Toast.LENGTH_SHORT).show());
         stop.setOnClickListener(v -> Toast.makeText(this, "Stop", Toast.LENGTH_SHORT).show());
         play.setOnClickListener(v -> performTextToSpeech());
