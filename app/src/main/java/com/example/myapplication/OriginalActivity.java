@@ -37,7 +37,7 @@ public class OriginalActivity extends AppCompatActivity {
     private Button handleButton, backButton;
     private View bottomMenuContainer;
     private boolean isMenuVisible = true; // 메뉴의 가시성 상태
-    private final String API_KEY = "\0";//BuildConfig.MY_KEY;
+    private final String API_KEY = BuildConfig.MY_KEY;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
