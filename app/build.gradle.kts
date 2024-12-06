@@ -1,5 +1,11 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
+}
+
+val properties = Properties().apply {
+    load(project.rootProject.file("local.properties").inputStream())
 }
 
 android {
@@ -12,8 +18,8 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "MY_KEY", "\"${properties["GOOGLE_API_KEY"]}\"")
     }
 
     buildTypes {
@@ -41,4 +47,10 @@ dependencies {
     androidTestImplementation(libs.espresso.core);
     implementation("com.squareup.okhttp3:okhttp:4.9.2")
     implementation ("com.google.android.material:material:1.9.0")
+}
+
+android {
+    buildFeatures {
+        buildConfig = true
+    }
 }

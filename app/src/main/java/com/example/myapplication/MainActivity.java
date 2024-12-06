@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText inputText;
     private TextView audioContent;
     private Button ttsButton;
-    private final String API_KEY = "";
+    private final String API_KEY = BuildConfig.MY_KEY;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
