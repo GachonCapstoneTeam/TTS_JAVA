@@ -1,50 +1,52 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp"
     android:background="#F4F4F4">
 
+    <!-- 상단: 종목명, 제목, 증권사 -->
     <LinearLayout
+        android:id="@+id/content_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:weightSum="3"
-        android:paddingBottom="16dp">
+        android:padding="16dp"
+        android:layout_alignParentTop="true">
 
         <Button
             android:id="@+id/backbutton_ori"
             android:layout_width="40dp"
             android:layout_height="40dp"
+            android:layout_marginStart="8dp"
             android:text="back"
-            android:textSize="6sp"/>
+            android:textSize="6sp" />
 
         <LinearLayout
-
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:weightSum="4"
             android:orientation="vertical">
 
             <TextView
                 android:id="@+id/oriName"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="3"
                 android:text="종목명"
                 android:textSize="14sp"
                 android:gravity="center"
-                android:layout_weight="1"
-                android:textStyle="bold"/>
+                android:textStyle="bold" />
+
             <TextView
                 android:id="@+id/oriId"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="3"
+                android:layout_height="0dp"
+                android:layout_weight="1"
                 android:gravity="center"
                 android:text="serial number"
-                android:textSize="8sp"/>
+                android:textSize="8sp" />
         </LinearLayout>
 
         <TextView
@@ -67,11 +69,96 @@
             android:textStyle="bold"
             android:gravity="center" />
     </LinearLayout>
+<RelativeLayout
+    android:id="@+id/bottom_menu_container"
+    android:layout_width="match_parent"
+    android:layout_height="110dp"
+    android:layout_alignParentBottom="true"
+    android:elevation="10dp"
+    >
 
-    <FrameLayout
+    <Button
+        android:id="@+id/handle_shape"
+        android:layout_width="64dp"
+        android:layout_height="32dp"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/handle_shape"
+        android:layout_above="@+id/audio_container"
+        style="?android:attr/borderlessButtonStyle" />
+
+    <!-- 하단 메뉴바와 손잡이 버튼 -->
+    <RelativeLayout
+        android:id="@+id/audio_container"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_height="80dp"
+        android:backgroundTint="@color/gray_dark"
+        android:layout_alignParentBottom="true"
+        android:background="#FFFFFF">
+
+
+
+        <!-- 하단 메뉴바 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:padding="16dp"
+            android:weightSum="5">
+
+            <ImageButton
+                android:id="@+id/skipback"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:src="@drawable/skipback"
+                android:background="@null" />
+
+            <ImageButton
+                android:id="@+id/stop"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:src="@drawable/stop"
+                android:background="@null" />
+
+            <ImageButton
+                android:id="@+id/play"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:src="@drawable/play"
+                android:background="@null" />
+
+            <ImageButton
+                android:id="@+id/skipforward"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:src="@drawable/skipforward"
+                android:background="@null" />
+
+            <ImageButton
+                android:id="@+id/pdf"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:src="@drawable/pdf"
+                android:background="@null" />
+        </LinearLayout>
+
+        <!-- 둥근 손잡이 버튼 -->
+
+    </RelativeLayout>
+</RelativeLayout>
+
+    <!-- 본문 영역 -->
+    <FrameLayout
+        android:id="@+id/container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/content_container"
         android:background="#FFFFFF"
         android:elevation="4dp"
         android:gravity="center">
@@ -86,39 +173,6 @@
             android:gravity="center" />
     </FrameLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:weightSum="5">
 
-        <Button
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@drawable/skipback" />
-        <Button
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@drawable/stop" />
-        <Button
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@drawable/pause" />
-        <Button
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@drawable/skipforward" />
 
-        <Button
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@drawable/pdf" />
-    </LinearLayout>
-
-</LinearLayout>
+</RelativeLayout>
