@@ -96,7 +96,7 @@ public class OriginalActivity extends AppCompatActivity {
     private void fetchTextFromServer() {
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
-                .url("http://10.0.2.2:8000/textload/originaltext/") // Django 서버 URL
+                .url("http://10.0.2.2:8000/textload/content/") // Django 서버 URL
                 .get()
                 .build();
 
