@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/skipback"
+        android:enabled="true"
+        android:icon="@drawable/skipback"
+        android:title="main"
+        app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/stop"
+        android:enabled="true"
+        android:icon="@drawable/stop"
+        android:title="search"
+        app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/pause"
+        android:enabled="true"
+        android:icon="@drawable/pause"
+        android:title="setting"
+        app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/skipforward"
+        android:enabled="true"
+        android:icon="@drawable/skipforward"
+        android:title="search"
+        app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/pdf"
+        android:enabled="true"
+        android:icon="@drawable/pdf"
+        android:title="search"
+        app:showAsAction="always"/>
+
+</menu>

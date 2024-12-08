@@ -8,7 +8,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -46,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText inputText;
     private TextView audioContent;
     private Button ttsButton;
-    private final String API_KEY = "";
+    private final String API_KEY = BuildConfig.MY_KEY;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

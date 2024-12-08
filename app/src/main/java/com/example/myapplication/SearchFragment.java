@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -14,14 +15,28 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.myapplication.adapter.ItemAdapter;
 import com.example.myapplication.item.Item;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class SearchFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private ItemAdapter itemAdapter;
     private List<Item> itemList;
+    private boolean isLoading = false; // 로딩 상태 확인
+    private int currentPage = 1; // 현재 페이지 번호
+    private int totalPage = 5; // 총 페이지 수 (서버 데이터가 제한된 경우)
 
     @Nullable
     @Override
@@ -33,24 +48,95 @@ public class SearchFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         itemList = new ArrayList<>();
-        populateItemList();
+
+        // 초기 데이터 로드
+        fetchDataFromServer(currentPage);
 
         itemAdapter = new ItemAdapter(getContext());
         recyclerView.setAdapter(itemAdapter);
 
         itemAdapter.setItems(itemList);
 
+        // 스크롤 이벤트 리스너 추가
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                // 스크롤 끝 감지
+                LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                if (!isLoading && layoutManager != null &&
+                        layoutManager.findLastCompletelyVisibleItemPosition() == itemList.size() - 1) {
+                    // 추가 데이터 로드
+                    if (currentPage < totalPage) {
+                        currentPage++;
+                        fetchDataFromServer(currentPage);
+                    }
+                }
+            }
+        });
+
         return view;
     }
-//test
-    private void populateItemList() {
-        for (int i = 1; i <= 10; i++) {
 
-            itemList.add(new Item("종목명 " + i,
-                    "제목 " + i,
-                    "증권사 " + i,
-                    "스크립트 내용 " + i,
-                    (int)(Math.random() * 100) * i));
-        }
+    private void fetchDataFromServer(int page) {
+        isLoading = true; // 데이터 로딩 상태로 변경
+
+        String url = "http://10.0.2.2:8000/api/items?page=" + page; // 서버의 API URL (페이지 번호 포함)
+        OkHttpClient client = new OkHttpClient();
+
+        Request request = new Request.Builder()
+                .url(url)
+                .get()
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                isLoading = false;
+                getActivity().runOnUiThread(() ->
+                        Toast.makeText(getContext(), "Failed to fetch data", Toast.LENGTH_SHORT).show()
+                );
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful() && response.body() != null) {
+                    try {
+                        String responseBody = response.body().string();
+                        JSONArray jsonArray = new JSONArray(responseBody);
+
+                        List<Item> newItems = new ArrayList<>();
+                        for (int i = 0; i < jsonArray.length(); i++) {
+                            JSONObject jsonObject = jsonArray.getJSONObject(i);
+                            newItems.add(new Item(
+                                    jsonObject.getString("stockName"),
+                                    jsonObject.getString("stockTitle"),
+                                    jsonObject.getString("bank"),
+                                    jsonObject.getString("script"),
+                                    jsonObject.getInt("id")
+                            ));
+                        }
+
+                        getActivity().runOnUiThread(() -> {
+                            itemList.addAll(newItems);
+                            itemAdapter.setItems(itemList); // 데이터 갱신
+                            isLoading = false; // 로딩 상태 해제
+                        });
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        getActivity().runOnUiThread(() ->
+                                Toast.makeText(getContext(), "Error parsing data", Toast.LENGTH_SHORT).show()
+                        );
+                        isLoading = false;
+                    }
+                } else {
+                    getActivity().runOnUiThread(() ->
+                            Toast.makeText(getContext(), "Error fetching data", Toast.LENGTH_SHORT).show()
+                    );
+                    isLoading = false;
+                }
+            }
+        });
     }
 }
