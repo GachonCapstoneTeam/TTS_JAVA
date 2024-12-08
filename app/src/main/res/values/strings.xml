@@ -2,4 +2,8 @@
     <string name="app_name">My Application</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="tts_test">오브젝트가 식별되면 마우스 또는 키보드를 사용해 어떤 액션을 수행한다.
+        예를 들어, 해당 오브젝트를 클릭하거나, 더블클릭하거나, 위로 마우스를 가져다 대거나, 또는 끌어놓기한다.
+        때때로 텍스트 박스에 뭔가를 쓰기도 한다. 즉, 해당 오브젝트 상에 수행하는 모든 종류의 액션이 이 두 번째 스텝에서 커버된다.</string>
 </resources>

@@ -167,7 +167,7 @@
             android:id="@+id/oriScript"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="원문"
+            android:text="@string/tts_test"
             android:textSize="20sp"
             android:textStyle="bold"
             android:gravity="center" />

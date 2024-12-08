@@ -34,9 +34,9 @@ public class SearchFragment extends Fragment {
     private RecyclerView recyclerView;
     private ItemAdapter itemAdapter;
     private List<Item> itemList;
-    private boolean isLoading = false; // 로딩 상태 확인
-    private int currentPage = 1; // 현재 페이지 번호
-    private int totalPage = 5; // 총 페이지 수 (서버 데이터가 제한된 경우)
+    private boolean isLoading = false;
+    private int currentPage = 1;
+    private int totalPage = 5;
 
     @Nullable
     @Override
@@ -57,7 +57,6 @@ public class SearchFragment extends Fragment {
 
         itemAdapter.setItems(itemList);
 
-        // 스크롤 이벤트 리스너 추가
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
@@ -82,7 +81,7 @@ public class SearchFragment extends Fragment {
     private void fetchDataFromServer(int page) {
         isLoading = true; // 데이터 로딩 상태로 변경
 
-        String url = "http://10.0.2.2:8000/api/items?page=" + page; // 서버의 API URL (페이지 번호 포함)
+        String url = "http://10.0.2.2:8000/api/items?page=" + page;
         OkHttpClient client = new OkHttpClient();
 
         Request request = new Request.Builder()
@@ -120,8 +119,8 @@ public class SearchFragment extends Fragment {
 
                         getActivity().runOnUiThread(() -> {
                             itemList.addAll(newItems);
-                            itemAdapter.setItems(itemList); // 데이터 갱신
-                            isLoading = false; // 로딩 상태 해제
+                            itemAdapter.setItems(itemList);
+                            isLoading = false;
                         });
                     } catch (JSONException e) {
                         e.printStackTrace();

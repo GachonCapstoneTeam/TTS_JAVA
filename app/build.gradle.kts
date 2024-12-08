@@ -1,7 +1,12 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
 }
 
+val properties = Properties().apply {
+    load(project.rootProject.file("local.properties").inputStream())
+}
 android {
     namespace = "com.example.myapplication"
     compileSdk = 34
@@ -14,6 +19,7 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "MY_KEY", "\"${properties["GOOGLE_API_KEY"]}\"")
     }
 
     buildTypes {
@@ -28,6 +34,11 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
+    }
+}
+android {
+    buildFeatures {
+        buildConfig = true
     }
 }
 

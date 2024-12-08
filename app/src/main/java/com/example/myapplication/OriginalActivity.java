@@ -1,6 +1,5 @@
 package com.example.myapplication;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Base64;
@@ -32,12 +31,14 @@ import android.media.MediaPlayer;
 
 public class OriginalActivity extends AppCompatActivity {
 
-    private TextView oriScript;
+    private TextView oriName, oriId, oriTitle, oriBank, oriScript;
     private ImageButton skipBack, stop, play, skipForward, pdf;
     private Button handleButton, backButton;
     private View bottomMenuContainer;
     private boolean isMenuVisible = true; // 메뉴의 가시성 상태
-    private final String API_KEY = "\0";//BuildConfig.MY_KEY;
+    private boolean isPlaying = false; // 재생 상태 관리
+    private MediaPlayer mediaPlayer; // MediaPlayer 객체
+    private final String API_KEY = BuildConfig.MY_KEY;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +47,10 @@ public class OriginalActivity extends AppCompatActivity {
 
         // View 초기화
         backButton = findViewById(R.id.backbutton_ori);
+        oriName = findViewById(R.id.oriName);
+        oriId = findViewById(R.id.oriId);
+        oriTitle = findViewById(R.id.oriTitle);
+        oriBank = findViewById(R.id.oriBank);
         oriScript = findViewById(R.id.oriScript);
         handleButton = findViewById(R.id.handle_shape);
         skipBack = findViewById(R.id.skipback);
@@ -55,22 +60,30 @@ public class OriginalActivity extends AppCompatActivity {
         pdf = findViewById(R.id.pdf);
         bottomMenuContainer = findViewById(R.id.bottom_menu_container);
 
-        // 서버에서 텍스트 가져오기
+        // Intent에서 데이터 가져오기
+        Intent intent = getIntent();
+        String name = intent.getStringExtra("name");
+        String id = intent.getStringExtra("id");
+        String title = intent.getStringExtra("title");
+        String bank = intent.getStringExtra("bank");
+
+        // UI 업데이트
+        oriName.setText(name);
+        oriId.setText(id);
+        oriTitle.setText(title);
+        oriBank.setText(bank);
+
+        // 서버에서 스크립트 가져오기
         fetchTextFromServer();
 
         // 둥근 손잡이 버튼 클릭 이벤트
         handleButton.setOnClickListener(v -> toggleBottomMenu());
 
         // 버튼 동작 처리
-        backButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
+        backButton.setOnClickListener(v -> finish());
         skipBack.setOnClickListener(v -> Toast.makeText(this, "Skip Back", Toast.LENGTH_SHORT).show());
-        stop.setOnClickListener(v -> Toast.makeText(this, "Stop", Toast.LENGTH_SHORT).show());
-        play.setOnClickListener(v -> performTextToSpeech());
+        stop.setOnClickListener(v -> stopAudio());
+        play.setOnClickListener(v -> togglePlayPause());
         skipForward.setOnClickListener(v -> Toast.makeText(this, "Skip Forward", Toast.LENGTH_SHORT).show());
         pdf.setOnClickListener(v -> Toast.makeText(this, "Open PDF", Toast.LENGTH_SHORT).show());
     }
@@ -114,7 +127,6 @@ public class OriginalActivity extends AppCompatActivity {
                     try {
                         JSONObject jsonObject = new JSONObject(responseBody);
                         String originalText = jsonObject.getString("originaltext");
-                        Log.d("ServerResponse", responseBody);
 
                         // UI 업데이트
                         runOnUiThread(() -> oriScript.setText(originalText));
@@ -134,7 +146,7 @@ public class OriginalActivity extends AppCompatActivity {
         String text = oriScript.getText().toString();
 
         if (text.isEmpty()) {
-            Toast.makeText(this, "Please enter text", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "No text available", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -183,26 +195,58 @@ public class OriginalActivity extends AppCompatActivity {
         byte[] decodedAudio = Base64.decode(base64Audio, Base64.DEFAULT);
 
         try {
-            File tempAudioFile = File.createTempFile("tts_audio", ".mp3", getCacheDir());
+            File tempAudioFile = File.createTempFile("tts_audio_" + oriId.getText().toString(), ".mp3", getCacheDir());
             FileOutputStream fos = new FileOutputStream(tempAudioFile);
             fos.write(decodedAudio);
             fos.close();
 
-            MediaPlayer mediaPlayer = new MediaPlayer();
+            mediaPlayer = new MediaPlayer();
             mediaPlayer.setDataSource(tempAudioFile.getAbsolutePath());
             mediaPlayer.prepare();
             mediaPlayer.start();
 
-            runOnUiThread(() -> Toast.makeText(OriginalActivity.this, "Playing Audio", Toast.LENGTH_SHORT).show());
+            isPlaying = true;
+            runOnUiThread(() -> play.setImageResource(R.drawable.pause));
 
             mediaPlayer.setOnCompletionListener(mp -> {
                 mediaPlayer.release();
+                mediaPlayer = null;
+                isPlaying = false;
+                runOnUiThread(() -> play.setImageResource(R.drawable.play));
                 tempAudioFile.delete();
             });
 
         } catch (IOException e) {
             e.printStackTrace();
             runOnUiThread(() -> Toast.makeText(OriginalActivity.this, "Error playing audio", Toast.LENGTH_SHORT).show());
+        }
+    }
+
+    // 재생/일시정지 버튼 처리
+    private void togglePlayPause() {
+        if (mediaPlayer != null) {
+            if (isPlaying) {
+                mediaPlayer.pause();
+                isPlaying = false;
+                play.setImageResource(R.drawable.play);
+            } else {
+                mediaPlayer.start();
+                isPlaying = true;
+                play.setImageResource(R.drawable.pause);
+            }
+        } else {
+            performTextToSpeech(); // 처음 실행 시 TTS 시작
+        }
+    }
+
+    // 오디오 중지
+    private void stopAudio() {
+        if (mediaPlayer != null) {
+            mediaPlayer.stop();
+            mediaPlayer.release();
+            mediaPlayer = null;
+            isPlaying = false;
+            play.setImageResource(R.drawable.play);
         }
     }
 }
