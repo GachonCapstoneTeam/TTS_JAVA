@@ -1,4 +1,4 @@
-package com.example.myapplication.item;
+package com.example.myapplication.view;
 
 public class Item {
     private String stockName;   // 종목명

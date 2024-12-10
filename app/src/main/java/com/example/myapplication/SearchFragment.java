@@ -13,21 +13,17 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.myapplication.adapter.ItemAdapter;
-import com.example.myapplication.item.Item;
+import com.example.myapplication.entity.Item;
+import com.example.myapplication.service.ApiService;
+import com.example.myapplication.Client.RetrofitClient;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class SearchFragment extends Fragment {
 
@@ -36,7 +32,7 @@ public class SearchFragment extends Fragment {
     private List<Item> itemList;
     private boolean isLoading = false; // 로딩 상태 확인
     private int currentPage = 1; // 현재 페이지 번호
-    private int totalPage = 5; // 총 페이지 수 (서버 데이터가 제한된 경우)
+    private final int totalPage = 5; // 총 페이지 수 (서버 데이터가 제한된 경우)
 
     @Nullable
     @Override
@@ -63,7 +59,6 @@ public class SearchFragment extends Fragment {
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
 
-                // 스크롤 끝 감지
                 LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
                 if (!isLoading && layoutManager != null &&
                         layoutManager.findLastCompletelyVisibleItemPosition() == itemList.size() - 1) {
@@ -82,60 +77,49 @@ public class SearchFragment extends Fragment {
     private void fetchDataFromServer(int page) {
         isLoading = true; // 데이터 로딩 상태로 변경
 
-        String url = "http://10.0.2.2:8000/api/items?page=" + page; // 서버의 API URL (페이지 번호 포함)
-        OkHttpClient client = new OkHttpClient();
+        ApiService apiService = RetrofitClient.getRetrofitInstance().create(ApiService.class);
+        Call<Map<String, List<Map<String, String>>>> call = apiService.getContents(page);
 
-        Request request = new Request.Builder()
-                .url(url)
-                .get()
-                .build();
-
-        client.newCall(request).enqueue(new Callback() {
+        call.enqueue(new Callback<Map<String, List<Map<String, String>>>>() {
             @Override
-            public void onFailure(Call call, IOException e) {
-                isLoading = false;
-                getActivity().runOnUiThread(() ->
-                        Toast.makeText(getContext(), "Failed to fetch data", Toast.LENGTH_SHORT).show()
-                );
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
+            public void onResponse(Call<Map<String, List<Map<String, String>>>> call,
+                                   Response<Map<String, List<Map<String, String>>>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    try {
-                        String responseBody = response.body().string();
-                        JSONArray jsonArray = new JSONArray(responseBody);
+                    List<Map<String, String>> contents = response.body().get("contents");
+                    List<Item> newItems = new ArrayList<>();
 
-                        List<Item> newItems = new ArrayList<>();
-                        for (int i = 0; i < jsonArray.length(); i++) {
-                            JSONObject jsonObject = jsonArray.getJSONObject(i);
-                            newItems.add(new Item(
-                                    jsonObject.getString("stockName"),
-                                    jsonObject.getString("stockTitle"),
-                                    jsonObject.getString("bank"),
-                                    jsonObject.getString("script"),
-                                    jsonObject.getInt("id")
-                            ));
-                        }
-
-                        getActivity().runOnUiThread(() -> {
-                            itemList.addAll(newItems);
-                            itemAdapter.setItems(itemList); // 데이터 갱신
-                            isLoading = false; // 로딩 상태 해제
-                        });
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                        getActivity().runOnUiThread(() ->
-                                Toast.makeText(getContext(), "Error parsing data", Toast.LENGTH_SHORT).show()
-                        );
-                        isLoading = false;
+                    for (Map<String, String> content : contents) {
+                        newItems.add(new Item(
+                                content.get("Category"),
+                                content.get("Title"),
+                                content.get("증권사"),
+                                content.get("PDF URL"),
+                                content.get("작성일"),
+                                content.get("Views"),
+                                content.get("Content")
+                        ));
                     }
+
+                    getActivity().runOnUiThread(() -> {
+                        itemList.addAll(newItems);
+                        itemAdapter.setItems(itemList); // 데이터 갱신
+                        isLoading = false; // 로딩 상태 해제
+                    });
                 } else {
                     getActivity().runOnUiThread(() ->
                             Toast.makeText(getContext(), "Error fetching data", Toast.LENGTH_SHORT).show()
                     );
                     isLoading = false;
                 }
+            }
+
+            @Override
+            public void onFailure(Call<Map<String, List<Map<String, String>>>> call, Throwable t) {
+                t.printStackTrace();
+                getActivity().runOnUiThread(() ->
+                        Toast.makeText(getContext(), "Failed to fetch data", Toast.LENGTH_SHORT).show()
+                );
+                isLoading = false;
             }
         });
     }

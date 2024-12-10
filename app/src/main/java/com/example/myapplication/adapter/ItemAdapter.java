@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.myapplication.OriginalActivity;
 import com.example.myapplication.R;
 import com.example.myapplication.SummaryActivity;
-import com.example.myapplication.item.Item;
+import com.example.myapplication.entity.Item;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,22 +45,21 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
     public void onBindViewHolder(@NonNull ItemViewHolder holder, int position) {
         Item item = itemList.get(position);
 
-        holder.stockTitle.setText(item.getStockName());
-        holder.serialNumber.setText("ID: " + item.getId());
+        holder.stockTitle.setText(item.getTitle()); // 제목
+        holder.serialNumber.setText("증권사: " + item.getStockName()); // 증권사
 
         holder.summaryButton.setOnClickListener(v -> {
             Intent intent = new Intent(context, SummaryActivity.class);
-            intent.putExtra("stock_name", item.getStockName());
-            intent.putExtra("stock_title", item.getStockTitle());
-            intent.putExtra("id", item.getId());
+            intent.putExtra("title", item.getTitle());
+            intent.putExtra("content", item.getContent());
+            intent.putExtra("company", item.getStockName());
+            intent.putExtra("pdfUrl", item.getPdfUrl());
             context.startActivity(intent);
         });
 
         holder.originalButton.setOnClickListener(v -> {
             Intent intent = new Intent(context, OriginalActivity.class);
-            intent.putExtra("stock_name", item.getStockName());
-            intent.putExtra("stock_title", item.getStockTitle());
-            intent.putExtra("id", item.getId());
+            intent.putExtra("pdfUrl", item.getPdfUrl());
             context.startActivity(intent);
         });
     }
