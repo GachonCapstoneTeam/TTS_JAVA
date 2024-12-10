@@ -1,6 +1,7 @@
 package com.example.myapplication;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
@@ -31,7 +32,7 @@ import android.media.MediaPlayer;
 
 public class OriginalActivity extends AppCompatActivity {
 
-    private TextView oriName, oriId, oriTitle, oriBank, oriScript;
+    private TextView oriName, oriTitle, oriScript, oriDate;
     private ImageButton skipBack, stop, play, skipForward, pdf;
     private Button handleButton, backButton;
     private View bottomMenuContainer;
@@ -45,12 +46,12 @@ public class OriginalActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.original);
 
+        // View 초기화
         backButton = findViewById(R.id.backbutton_ori);
         oriName = findViewById(R.id.oriName);
-        oriId = findViewById(R.id.oriId);
         oriTitle = findViewById(R.id.oriTitle);
-        oriBank = findViewById(R.id.oriBank);
         oriScript = findViewById(R.id.oriScript);
+        oriDate = findViewById(R.id.ori_date);
         handleButton = findViewById(R.id.handle_shape);
         skipBack = findViewById(R.id.skipback);
         stop = findViewById(R.id.stop);
@@ -59,29 +60,49 @@ public class OriginalActivity extends AppCompatActivity {
         pdf = findViewById(R.id.pdf);
         bottomMenuContainer = findViewById(R.id.bottom_menu_container);
 
+        // Intent에서 데이터 가져오기
         Intent intent = getIntent();
-        String name = intent.getStringExtra("name");
-        String id = intent.getStringExtra("id");
-        String title = intent.getStringExtra("title");
-        String bank = intent.getStringExtra("bank");
+        String name = intent.getStringExtra("stockName");
+        String title = intent.getStringExtra("stockTitle");
+        String date = intent.getStringExtra("date");
+        String pdf_url = intent.getStringExtra("pdf");
 
-        oriName.setText(name);
-        oriId.setText(id);
-        oriTitle.setText(title);
-        oriBank.setText(bank);
+        // UI 업데이트
+        if (oriName != null) oriName.setText(name);
+        if (oriTitle != null) oriTitle.setText(title);
+        if (oriDate != null) oriDate.setText(date);
 
+        // 서버에서 스크립트 가져오기
         fetchTextFromServer();
 
+        // 둥근 손잡이 버튼 클릭 이벤트
         handleButton.setOnClickListener(v -> toggleBottomMenu());
 
+        // 버튼 동작 처리
         backButton.setOnClickListener(v -> finish());
         skipBack.setOnClickListener(v -> Toast.makeText(this, "Skip Back", Toast.LENGTH_SHORT).show());
         stop.setOnClickListener(v -> stopAudio());
         play.setOnClickListener(v -> togglePlayPause());
         skipForward.setOnClickListener(v -> Toast.makeText(this, "Skip Forward", Toast.LENGTH_SHORT).show());
-        pdf.setOnClickListener(v -> Toast.makeText(this, "Open PDF", Toast.LENGTH_SHORT).show());
+
+        pdf.setOnClickListener(v -> {
+            // PDF URL 가져오기
+
+            // Intent로 PDF 보기
+            Intent pdfintent = new Intent(Intent.ACTION_VIEW);
+            pdfintent.setDataAndType(Uri.parse(pdf_url), "application/pdf");
+            pdfintent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+
+            // PDF를 열 수 있는 앱이 있는지 확인
+            if (pdfintent.resolveActivity(getPackageManager()) != null) {
+                startActivity(pdfintent);
+            } else {
+                Toast.makeText(this, "PDF를 열 수 있는 앱이 없습니다.", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
+    // 메뉴 숨기기/보이기
     private void toggleBottomMenu() {
         if (isMenuVisible) {
             bottomMenuContainer.animate()
@@ -98,6 +119,7 @@ public class OriginalActivity extends AppCompatActivity {
         isMenuVisible = !isMenuVisible;
     }
 
+    // 서버에서 텍스트 가져오기
     private void fetchTextFromServer() {
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
@@ -121,18 +143,21 @@ public class OriginalActivity extends AppCompatActivity {
                         String originalText = jsonObject.getString("originaltext");
 
                         // UI 업데이트
-                        runOnUiThread(() -> oriScript.setText(originalText));
+                        runOnUiThread(() -> {
+                            if (oriScript != null) oriScript.setText(originalText);
+                        });
                     } catch (JSONException e) {
                         e.printStackTrace();
                         runOnUiThread(() -> Toast.makeText(OriginalActivity.this, "Error parsing JSON", Toast.LENGTH_SHORT).show());
                     }
                 } else {
-                    runOnUiThread(() -> Toast.makeText(OriginalActivity.this, "Error fetching text", Toast.LENGTH_SHORT).show());
+                    runOnUiThread(() -> Toast.makeText(OriginalActivity.this, "Error fetching data", Toast.LENGTH_SHORT).show());
                 }
             }
         });
     }
 
+    // TTS 기능 수행
     private void performTextToSpeech() {
         String text = oriScript.getText().toString();
 
@@ -181,11 +206,12 @@ public class OriginalActivity extends AppCompatActivity {
         });
     }
 
+    // 오디오 재생
     private void playAudio(String base64Audio) {
         byte[] decodedAudio = Base64.decode(base64Audio, Base64.DEFAULT);
 
         try {
-            File tempAudioFile = File.createTempFile("tts_audio_" + oriId.getText().toString(), ".mp3", getCacheDir());
+            File tempAudioFile = File.createTempFile("tts_audio_" + oriTitle.getText().toString(), ".mp3", getCacheDir());
             FileOutputStream fos = new FileOutputStream(tempAudioFile);
             fos.write(decodedAudio);
             fos.close();
@@ -212,6 +238,7 @@ public class OriginalActivity extends AppCompatActivity {
         }
     }
 
+    // 재생/일시정지 버튼 처리
     private void togglePlayPause() {
         if (mediaPlayer != null) {
             if (isPlaying) {
@@ -228,6 +255,7 @@ public class OriginalActivity extends AppCompatActivity {
         }
     }
 
+    // 오디오 중지
     private void stopAudio() {
         if (mediaPlayer != null) {
             mediaPlayer.stop();

@@ -109,11 +109,13 @@ public class SearchFragment extends Fragment {
                         for (int i = 0; i < jsonArray.length(); i++) {
                             JSONObject jsonObject = jsonArray.getJSONObject(i);
                             newItems.add(new Item(
-                                    jsonObject.getString("stockName"),
-                                    jsonObject.getString("stockTitle"),
-                                    jsonObject.getString("bank"),
-                                    jsonObject.getString("script"),
-                                    jsonObject.getInt("id")
+                                    jsonObject.getString("stockName"), //종목명
+                                    jsonObject.getString("stockTitle"), //제목
+                                    jsonObject.getString("bank"), //증권사
+                                    jsonObject.getString("script"), //스크립트
+                                    jsonObject.getInt("views"), //조회수
+                                    jsonObject.getString("date"),  //날짜
+                                    jsonObject.getString("PDF URL") //PDF URL
                             ));
                         }
 

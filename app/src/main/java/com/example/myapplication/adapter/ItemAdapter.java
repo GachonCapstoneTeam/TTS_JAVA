@@ -46,21 +46,21 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
         Item item = itemList.get(position);
 
         holder.stockTitle.setText(item.getStockName());
-        holder.serialNumber.setText("ID: " + item.getId());
+        holder.serialNumber.setText("Views: " + item.getViews());
 
         holder.summaryButton.setOnClickListener(v -> {
             Intent intent = new Intent(context, SummaryActivity.class);
-            intent.putExtra("stock_name", item.getStockName());
-            intent.putExtra("stock_title", item.getStockTitle());
-            intent.putExtra("id", item.getId());
+            intent.putExtra("stockName", item.getStockName());
+            intent.putExtra("stockTitle", item.getStockTitle());
+            intent.putExtra("views", item.getViews());
             context.startActivity(intent);
         });
 
         holder.originalButton.setOnClickListener(v -> {
             Intent intent = new Intent(context, OriginalActivity.class);
-            intent.putExtra("stock_name", item.getStockName());
-            intent.putExtra("stock_title", item.getStockTitle());
-            intent.putExtra("id", item.getId());
+            intent.putExtra("stockName", item.getStockName());
+            intent.putExtra("stockTitle", item.getStockTitle());
+            intent.putExtra("views", item.getViews());
             context.startActivity(intent);
         });
     }

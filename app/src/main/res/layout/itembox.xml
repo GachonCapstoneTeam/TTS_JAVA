@@ -32,7 +32,9 @@
                 android:layout_margin="5sp"
                 android:text="종목명"
                 android:textColor="#34A22C"
-                android:textSize="20sp" />
+                android:textSize="20sp"
+                android:ellipsize="end"
+                android:maxLines="1" />
 
             <TextView
                 android:id="@+id/stockTitle"
@@ -44,7 +46,10 @@
                 android:layout_marginRight="10sp"
                 android:gravity="center"
                 android:text="제목"
-                android:textSize="30sp" />
+                android:textColor="@color/black"
+                android:textSize="30sp"
+                android:ellipsize="end"
+                android:maxLines="1"/>
 
             <TextView
                 android:id="@+id/bank"
@@ -70,6 +75,14 @@
                 android:text="YYYY/MM/DD"
                 android:textSize="15sp"/>
 
+            <TextView
+                android:id="@+id/views"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="@+id/stockTitle"
+                app:layout_constraintBottom_toBottomOf="@+id/date"
+                android:text="조회수"
+                android:textSize="13sp"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

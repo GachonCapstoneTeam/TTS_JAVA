@@ -18,7 +18,6 @@ import com.example.myapplication.item.Item;
 
 import java.util.ArrayList;
 import java.util.List;
-
 public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ReportViewHolder> {
 
     private Context context;
@@ -45,28 +44,37 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ReportView
     public void onBindViewHolder(@NonNull ReportViewHolder holder, int position) {
         Item item = itemList.get(position);
 
+        // 기존 데이터 설정
         holder.stockName.setText(item.getStockName());
         holder.stockTitle.setText(item.getStockTitle());
         holder.bank.setText(item.getBank());
         holder.script.setText(item.getScript());
 
+        // 새로운 데이터 설정
+        holder.date.setText(item.getDate());
+        holder.views.setText("조회수: " + item.getViews());
+
+        // 요약 버튼 클릭 이벤트
         holder.sumButton.setOnClickListener(v -> {
             Intent intent = new Intent(context, SummaryActivity.class);
-            intent.putExtra("stock_name", item.getStockName());
-            intent.putExtra("stock_title", item.getStockTitle());
+            intent.putExtra("stockName", item.getStockName());
+            intent.putExtra("stockTitle", item.getStockTitle());
             intent.putExtra("bank", item.getBank());
             intent.putExtra("script", item.getScript());
-            intent.putExtra("id", item.getId());
+            intent.putExtra("views", item.getViews());
+            intent.putExtra("pdf", item.getPDF_URL());
             context.startActivity(intent);
         });
 
+        // 원문 버튼 클릭 이벤트
         holder.oriButton.setOnClickListener(v -> {
             Intent intent = new Intent(context, OriginalActivity.class);
-            intent.putExtra("stock_name", item.getStockName());
-            intent.putExtra("stock_title", item.getStockTitle());
+            intent.putExtra("stockName", item.getStockName());
+            intent.putExtra("stockTitle", item.getStockTitle());
             intent.putExtra("bank", item.getBank());
             intent.putExtra("script", item.getScript());
-            intent.putExtra("id", item.getId());
+            intent.putExtra("views", item.getViews());
+            intent.putExtra("pdf", item.getPDF_URL());
             context.startActivity(intent);
         });
     }
@@ -77,7 +85,7 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ReportView
     }
 
     public static class ReportViewHolder extends RecyclerView.ViewHolder {
-        TextView stockName, stockTitle, bank, script;
+        TextView stockName, stockTitle, bank, script, date, views;
         Button sumButton, oriButton;
 
         public ReportViewHolder(@NonNull View itemView) {
@@ -86,6 +94,8 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ReportView
             stockTitle = itemView.findViewById(R.id.stockTitle);
             bank = itemView.findViewById(R.id.bank);
             script = itemView.findViewById(R.id.script);
+            date = itemView.findViewById(R.id.date);
+            views = itemView.findViewById(R.id.views);
             sumButton = itemView.findViewById(R.id.sum_button);
             oriButton = itemView.findViewById(R.id.ori_button);
         }
