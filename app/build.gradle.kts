@@ -52,4 +52,6 @@ dependencies {
     androidTestImplementation(libs.espresso.core);
     implementation("com.squareup.okhttp3:okhttp:4.9.2")
     implementation ("com.google.android.material:material:1.9.0")
+    implementation ("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+
 }

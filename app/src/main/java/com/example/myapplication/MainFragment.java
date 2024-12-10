@@ -11,6 +11,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.myapplication.adapter.ReportAdapter;
 import com.example.myapplication.item.Item;
@@ -33,6 +34,7 @@ public class MainFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private ReportAdapter reportAdapter;
+    private SwipeRefreshLayout swipeRefreshLayout; // SwipeRefreshLayout 추가
     private List<Item> itemList = new ArrayList<>();
     private boolean isLoading = false; // 데이터 로딩 상태
     private int currentPage = 1; // 현재 페이지
@@ -44,6 +46,14 @@ public class MainFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_main, container, false);
 
+        // SwipeRefreshLayout 초기화
+        swipeRefreshLayout = view.findViewById(R.id.swiper);
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            currentPage = 1;
+            itemList.clear();
+            fetchDataFromServer(currentPage);
+        });
+
         // RecyclerView 초기화
         recyclerView = view.findViewById(R.id.reportRecycler);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -52,12 +62,7 @@ public class MainFragment extends Fragment {
         reportAdapter = new ReportAdapter(getContext());
         recyclerView.setAdapter(reportAdapter);
 
-        // 더미 데이터 추가
-        List<Item> testItems = generateTestItems();
-        itemList.addAll(testItems); // 더미 데이터를 먼저 itemList에 추가
-        reportAdapter.setItems(itemList); // 어댑터에 초기 데이터 설정
-
-        // 서버에서 데이터 로드
+        // 초기 데이터 로드
         fetchDataFromServer(currentPage);
 
         // 스크롤 이벤트 추가 (페이지네이션)
@@ -95,9 +100,10 @@ public class MainFragment extends Fragment {
             @Override
             public void onFailure(Call call, IOException e) {
                 isLoading = false;
-                getActivity().runOnUiThread(() ->
-                        Toast.makeText(getContext(), "Failed to fetch data", Toast.LENGTH_SHORT).show()
-                );
+                getActivity().runOnUiThread(() -> {
+                    swipeRefreshLayout.setRefreshing(false); // 로딩 UI 숨김
+                    Toast.makeText(getContext(), "Failed to fetch data", Toast.LENGTH_SHORT).show();
+                });
             }
 
             @Override
@@ -112,52 +118,40 @@ public class MainFragment extends Fragment {
                             JSONObject jsonObject = jsonArray.getJSONObject(i);
                             newItems.add(new Item(
                                     jsonObject.getString("stockName"), //종목명
-                                    jsonObject.getString("stockTitle"), //제목
-                                    jsonObject.getString("bank"), //증권사
-                                    jsonObject.getString("script"), //스크립트
-                                    jsonObject.getInt("views"), //조회수
-                                    jsonObject.getString("date"),  //날짜
-                                    jsonObject.getString("PDF URL") //PDF URL
+                                    jsonObject.getString("stockTitle"), // 제목
+                                    jsonObject.getString("bank"), // 증권사
+                                    jsonObject.getString("script"), // 스크립트
+                                    jsonObject.getInt("views"), // 조회수
+                                    jsonObject.getString("date"), // 날짜
+                                    jsonObject.getString("PDF URL") // PDF URL
                             ));
                         }
 
                         getActivity().runOnUiThread(() -> {
+                            if (page == 1) {
+                                itemList.clear(); // 새로고침 시 기존 데이터 삭제
+                            }
                             itemList.addAll(newItems); // 서버에서 가져온 데이터 추가
                             reportAdapter.setItems(itemList);
+                            swipeRefreshLayout.setRefreshing(false); // 로딩 UI 숨김
                             isLoading = false;
                         });
                     } catch (JSONException e) {
                         e.printStackTrace();
-                        getActivity().runOnUiThread(() ->
-                                Toast.makeText(getContext(), "Error parsing data", Toast.LENGTH_SHORT).show()
-                        );
+                        getActivity().runOnUiThread(() -> {
+                            swipeRefreshLayout.setRefreshing(false); // 로딩 UI 숨김
+                            Toast.makeText(getContext(), "Error parsing data", Toast.LENGTH_SHORT).show();
+                        });
                         isLoading = false;
                     }
                 } else {
-                    getActivity().runOnUiThread(() ->
-                            Toast.makeText(getContext(), "Error fetching data", Toast.LENGTH_SHORT).show()
-                    );
+                    getActivity().runOnUiThread(() -> {
+                        swipeRefreshLayout.setRefreshing(false); // 로딩 UI 숨김
+                        Toast.makeText(getContext(), "Error fetching data", Toast.LENGTH_SHORT).show();
+                    });
                     isLoading = false;
                 }
             }
         });
     }
-
-    // 테스트 데이터 생성
-    private List<Item> generateTestItems() {
-        List<Item> items = new ArrayList<>();
-        for (int i = 1; i <= 3; i++) {
-            items.add(new Item(
-                    "테스트 종목명 " + i,          // 종목명
-                    "테스트 제목 " + i,           // 제목
-                    "테스트 증권사 " + i,         // 증권사
-                    "테스트 스크립트 내용 " + i,   // 스크립트
-                    100 * i,                      // 조회수
-                    "2024/12/10",                 // 날짜
-                    "http://example.com/pdf" + i  // PDF URL
-            ));
-        }
-        return items;
-    }
-
 }
