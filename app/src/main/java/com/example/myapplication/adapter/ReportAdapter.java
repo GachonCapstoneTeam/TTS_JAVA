@@ -14,80 +14,81 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.myapplication.OriginalActivity;
 import com.example.myapplication.R;
 import com.example.myapplication.SummaryActivity;
-import com.example.myapplication.item.Item;
+import com.example.myapplication.entity.Item;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ReportViewHolder> {
-
     private Context context;
-    private List<Item> itemList;
+    private List<Item> items;
 
     public ReportAdapter(Context context) {
         this.context = context;
-        this.itemList = new ArrayList<>();
+        this.items = new ArrayList<>();
     }
 
     public void setItems(List<Item> items) {
-        this.itemList = items;
+        this.items = items;
         notifyDataSetChanged();
     }
 
     @NonNull
     @Override
     public ReportViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.itembox, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.itembox, parent, false);
         return new ReportViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ReportViewHolder holder, int position) {
-        Item item = itemList.get(position);
+        Item item = items.get(position);
+        holder.titleTextView.setText(item.getTitle());  // Title 매핑
+        holder.stockNameTextView.setText(item.getCategory());  // 종목명 -> Category 매핑
+        holder.bankTextView.setText(item.getStockName());  // 증권사
+        holder.scriptTextView.setText(item.getContent());  // script
 
-        holder.stockName.setText(item.getStockName());
-        holder.stockTitle.setText(item.getStockTitle());
-        holder.bank.setText(item.getBank());
-        holder.script.setText(item.getScript());
-
-        holder.sumButton.setOnClickListener(v -> {
+        // 버튼 클릭 이벤트 처리
+        holder.summaryButton.setOnClickListener(v -> {
             Intent intent = new Intent(context, SummaryActivity.class);
-            intent.putExtra("stock_name", item.getStockName());
-            intent.putExtra("stock_title", item.getStockTitle());
-            intent.putExtra("bank", item.getBank());
-            intent.putExtra("script", item.getScript());
-            intent.putExtra("id", item.getId());
+            intent.putExtra("pdfUrl", item.getPdfUrl());  // pdfUrl 전달
             context.startActivity(intent);
         });
 
-        holder.oriButton.setOnClickListener(v -> {
+        // ReportAdapter에서 onBindViewHolder 수정
+
+        holder.originalButton.setOnClickListener(v -> {
+            // 클릭된 아이템의 정보를 intent로 전달
             Intent intent = new Intent(context, OriginalActivity.class);
-            intent.putExtra("stock_name", item.getStockName());
-            intent.putExtra("stock_title", item.getStockTitle());
-            intent.putExtra("bank", item.getBank());
-            intent.putExtra("script", item.getScript());
-            intent.putExtra("id", item.getId());
+            intent.putExtra("title", item.getTitle()); // 제목
+            intent.putExtra("content", item.getContent()); // 내용
+            intent.putExtra("pdfUrl", item.getPdfUrl()); // PDF URL
+            intent.putExtra("company", item.getStockName()); // 증권사
+            intent.putExtra("category",item.getCategory()); // 종목명
             context.startActivity(intent);
         });
     }
 
     @Override
     public int getItemCount() {
-        return itemList.size();
+        return items.size();
     }
 
     public static class ReportViewHolder extends RecyclerView.ViewHolder {
-        TextView stockName, stockTitle, bank, script;
-        Button sumButton, oriButton;
+        TextView titleTextView;
+        TextView stockNameTextView;
+        TextView bankTextView;
+        TextView scriptTextView;
+        Button summaryButton, originalButton;
 
-        public ReportViewHolder(@NonNull View itemView) {
+        public ReportViewHolder(View itemView) {
             super(itemView);
-            stockName = itemView.findViewById(R.id.stockName);
-            stockTitle = itemView.findViewById(R.id.stockTitle);
-            bank = itemView.findViewById(R.id.bank);
-            script = itemView.findViewById(R.id.script);
-            sumButton = itemView.findViewById(R.id.sum_button);
-            oriButton = itemView.findViewById(R.id.ori_button);
+            titleTextView = itemView.findViewById(R.id.stockTitle);  // Title
+            stockNameTextView = itemView.findViewById(R.id.stockName);  // 종목명
+            bankTextView = itemView.findViewById(R.id.bank);  // 증권사
+            scriptTextView = itemView.findViewById(R.id.script);  // script
+            summaryButton = itemView.findViewById(R.id.sum_button); // 요약본 버튼
+            originalButton = itemView.findViewById(R.id.ori_button); // 원문 버튼
         }
     }
 }
