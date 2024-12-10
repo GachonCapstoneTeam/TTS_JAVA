@@ -44,7 +44,7 @@ public class MainFragment extends Fragment {
 
     private List<Item> populateItems() {
         List<Item> items = new ArrayList<>();
-        for (int i = 1; i <= 10; i++) {
+        for (int i = 1; i <= 3; i++) {
             items.add(new Item("종목명 " + i, "제목 " + i, "증권사 " + i, "스크립트 내용 " + i, i));
         }
         return items;

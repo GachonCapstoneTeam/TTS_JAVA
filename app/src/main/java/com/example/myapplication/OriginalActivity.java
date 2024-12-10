@@ -45,7 +45,6 @@ public class OriginalActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.original);
 
-        // View 초기화
         backButton = findViewById(R.id.backbutton_ori);
         oriName = findViewById(R.id.oriName);
         oriId = findViewById(R.id.oriId);
@@ -60,26 +59,21 @@ public class OriginalActivity extends AppCompatActivity {
         pdf = findViewById(R.id.pdf);
         bottomMenuContainer = findViewById(R.id.bottom_menu_container);
 
-        // Intent에서 데이터 가져오기
         Intent intent = getIntent();
         String name = intent.getStringExtra("name");
         String id = intent.getStringExtra("id");
         String title = intent.getStringExtra("title");
         String bank = intent.getStringExtra("bank");
 
-        // UI 업데이트
         oriName.setText(name);
         oriId.setText(id);
         oriTitle.setText(title);
         oriBank.setText(bank);
 
-        // 서버에서 스크립트 가져오기
         fetchTextFromServer();
 
-        // 둥근 손잡이 버튼 클릭 이벤트
         handleButton.setOnClickListener(v -> toggleBottomMenu());
 
-        // 버튼 동작 처리
         backButton.setOnClickListener(v -> finish());
         skipBack.setOnClickListener(v -> Toast.makeText(this, "Skip Back", Toast.LENGTH_SHORT).show());
         stop.setOnClickListener(v -> stopAudio());
@@ -88,7 +82,6 @@ public class OriginalActivity extends AppCompatActivity {
         pdf.setOnClickListener(v -> Toast.makeText(this, "Open PDF", Toast.LENGTH_SHORT).show());
     }
 
-    // 메뉴 숨기기/보이기
     private void toggleBottomMenu() {
         if (isMenuVisible) {
             bottomMenuContainer.animate()
@@ -105,7 +98,6 @@ public class OriginalActivity extends AppCompatActivity {
         isMenuVisible = !isMenuVisible;
     }
 
-    // 서버에서 텍스트 가져오기
     private void fetchTextFromServer() {
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
@@ -141,7 +133,6 @@ public class OriginalActivity extends AppCompatActivity {
         });
     }
 
-    // TTS 기능 수행
     private void performTextToSpeech() {
         String text = oriScript.getText().toString();
 
@@ -190,7 +181,6 @@ public class OriginalActivity extends AppCompatActivity {
         });
     }
 
-    // 오디오 재생
     private void playAudio(String base64Audio) {
         byte[] decodedAudio = Base64.decode(base64Audio, Base64.DEFAULT);
 
@@ -222,7 +212,6 @@ public class OriginalActivity extends AppCompatActivity {
         }
     }
 
-    // 재생/일시정지 버튼 처리
     private void togglePlayPause() {
         if (mediaPlayer != null) {
             if (isPlaying) {
@@ -235,11 +224,10 @@ public class OriginalActivity extends AppCompatActivity {
                 play.setImageResource(R.drawable.pause);
             }
         } else {
-            performTextToSpeech(); // 처음 실행 시 TTS 시작
+            performTextToSpeech();
         }
     }
 
-    // 오디오 중지
     private void stopAudio() {
         if (mediaPlayer != null) {
             mediaPlayer.stop();

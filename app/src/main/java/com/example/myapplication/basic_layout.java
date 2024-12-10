@@ -12,6 +12,7 @@ public class basic_layout extends AppCompatActivity {
     SearchFragment searchFragment;
     SettingFragment settingFragment;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,18 +32,24 @@ public class basic_layout extends AppCompatActivity {
 
                 if (itemId == R.id.main) {
                     getSupportFragmentManager().beginTransaction().replace(R.id.container, mainFragment).commit();
+
                     return true;
-                } else if (itemId == R.id.search) {
+
+                } /*else if (itemId == R.id.search) {
                     getSupportFragmentManager().beginTransaction().replace(R.id.container, searchFragment).commit();
                     return true;
                 } else if (itemId == R.id.setting) {
                     getSupportFragmentManager().beginTransaction().replace(R.id.container, settingFragment).commit();
                     return true;
-                } else {
+                }*/ else {
                     return false;
                 }
+
             }
         });
 
+
     }
+
+
 }
