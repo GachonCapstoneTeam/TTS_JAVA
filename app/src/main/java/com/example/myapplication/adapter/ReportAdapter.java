@@ -13,82 +13,88 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.myapplication.OriginalActivity;
 import com.example.myapplication.R;
-import com.example.myapplication.SummaryActivity;
-import com.example.myapplication.entity.Item;
+import com.example.myapplication.view.Item;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ReportViewHolder> {
+
     private Context context;
-    private List<Item> items;
+    private List<Item> itemList;
 
     public ReportAdapter(Context context) {
         this.context = context;
-        this.items = new ArrayList<>();
     }
 
     public void setItems(List<Item> items) {
-        this.items = items;
+        this.itemList = items;
         notifyDataSetChanged();
     }
 
     @NonNull
     @Override
     public ReportViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.itembox, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.itembox, parent, false);
         return new ReportViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ReportViewHolder holder, int position) {
-        Item item = items.get(position);
-        holder.titleTextView.setText(item.getTitle());  // Title 매핑
-        holder.stockNameTextView.setText(item.getCategory());  // 종목명 -> Category 매핑
-        holder.bankTextView.setText(item.getStockName());  // 증권사
-        holder.scriptTextView.setText(item.getContent());  // script
+        Item item = itemList.get(position);
 
-        // 버튼 클릭 이벤트 처리
-        holder.summaryButton.setOnClickListener(v -> {
-            Intent intent = new Intent(context, SummaryActivity.class);
-            intent.putExtra("pdfUrl", item.getPdfUrl());  // pdfUrl 전달
+        holder.stockName.setText(item.getCategory());
+        holder.stockTitle.setText(item.getTitle());
+        holder.bank.setText(item.getBank());
+        holder.date.setText(item.getDate());
+        holder.views.setText(String.valueOf(item.getViews()));
+        holder.script.setText(item.getContent());
+
+        //original button
+        holder.oriButton.setOnClickListener(v -> {
+            Intent intent = new Intent(context, OriginalActivity.class);
+            intent.putExtra("Category", item.getCategory());
+            intent.putExtra("Title", item.getTitle());
+            intent.putExtra("Bank", item.getBank());
+            intent.putExtra("Content", item.getContent()); //이 부분 본문 정보로 바꿔야함.
+            intent.putExtra("Views", item.getViews());
+            intent.putExtra("Date", item.getDate());
+            intent.putExtra("PDF_URL", item.getPdfUrl());
             context.startActivity(intent);
         });
 
-        // ReportAdapter에서 onBindViewHolder 수정
-
-        holder.originalButton.setOnClickListener(v -> {
-            // 클릭된 아이템의 정보를 intent로 전달
+        //summary button
+        holder.sumButton.setOnClickListener(v -> {
             Intent intent = new Intent(context, OriginalActivity.class);
-            intent.putExtra("title", item.getTitle()); // 제목
-            intent.putExtra("content", item.getContent()); // 내용
-            intent.putExtra("pdfUrl", item.getPdfUrl()); // PDF URL
-            intent.putExtra("company", item.getStockName()); // 증권사
-            intent.putExtra("category",item.getCategory()); // 종목명
+            intent.putExtra("Category", item.getCategory());
+            intent.putExtra("Title", item.getTitle());
+            intent.putExtra("Bank", item.getBank());
+            intent.putExtra("Content", item.getContent());
+            intent.putExtra("Views", item.getViews());
+            intent.putExtra("Date", item.getDate());
+            intent.putExtra("PDF_URL", item.getPdfUrl());
             context.startActivity(intent);
         });
     }
 
     @Override
     public int getItemCount() {
-        return items.size();
+        return itemList == null ? 0 : itemList.size();
     }
 
     public static class ReportViewHolder extends RecyclerView.ViewHolder {
-        TextView titleTextView;
-        TextView stockNameTextView;
-        TextView bankTextView;
-        TextView scriptTextView;
-        Button summaryButton, originalButton;
+        TextView stockName, stockTitle, bank, date, views, script;
+        Button oriButton, sumButton;
 
-        public ReportViewHolder(View itemView) {
+        public ReportViewHolder(@NonNull View itemView) {
             super(itemView);
-            titleTextView = itemView.findViewById(R.id.stockTitle);  // Title
-            stockNameTextView = itemView.findViewById(R.id.stockName);  // 종목명
-            bankTextView = itemView.findViewById(R.id.bank);  // 증권사
-            scriptTextView = itemView.findViewById(R.id.script);  // script
-            summaryButton = itemView.findViewById(R.id.sum_button); // 요약본 버튼
-            originalButton = itemView.findViewById(R.id.ori_button); // 원문 버튼
+            stockName = itemView.findViewById(R.id.stockName);
+            stockTitle = itemView.findViewById(R.id.stockTitle);
+            bank = itemView.findViewById(R.id.bank);
+            date = itemView.findViewById(R.id.date);
+            views = itemView.findViewById(R.id.views);
+            script = itemView.findViewById(R.id.script);
+            oriButton = itemView.findViewById(R.id.ori_button);
+            sumButton = itemView.findViewById(R.id.sum_button);
         }
     }
 }

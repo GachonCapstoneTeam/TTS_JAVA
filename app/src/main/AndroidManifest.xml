@@ -24,7 +24,6 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".SummaryActivity" />
         <activity android:name=".OriginalActivity" />
     </application>
 

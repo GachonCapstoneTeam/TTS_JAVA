@@ -4,19 +4,21 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.myapplication.adapter.ReportAdapter;
-import com.example.myapplication.entity.Item;
+import com.example.myapplication.view.Item;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -24,49 +26,21 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-import java.io.IOException;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
-
-import java.lang.reflect.Type;
-import java.util.List;
-
-
-
-import android.os.Handler;
-import android.os.Looper;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class MainFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private ReportAdapter reportAdapter;
+    private SwipeRefreshLayout swipeRefreshLayout;
+    private List<Item> allItems = new ArrayList<>(); // 전체 데이터를 저장
+    private List<Item> currentItems = new ArrayList<>(); // 현재 페이지 데이터를 저장
+    private int currentPage = 1; // 현재 페이지 번호
+    private final int pageSize = 7; // 한 페이지에 표시할 데이터 개수
 
-    private Handler handler; // 핸들러 선언
-    private Runnable dataFetchRunnable; // 반복 실행할 작업 선언
-    private static final int FETCH_INTERVAL = 100000; // 데이터 갱신 간격 (밀리초)
-
-    private List<Item> parseJson(String jsonResponse) {
-        Gson gson = new Gson();
-        List<Item> items = new ArrayList<>();
-
-        try {
-            JsonObject jsonObject = gson.fromJson(jsonResponse, JsonObject.class);
-            JsonArray contentsArray = jsonObject.getAsJsonArray("contents");
-            for (JsonElement element : contentsArray) {
-                Item item = gson.fromJson(element, Item.class);
-                items.add(item);
-            }
-        } catch (JsonSyntaxException e) {
-            e.printStackTrace();
-        }
-
-        return items;
-    }
-
+    @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
@@ -78,55 +52,114 @@ public class MainFragment extends Fragment {
         reportAdapter = new ReportAdapter(getContext());
         recyclerView.setAdapter(reportAdapter);
 
-        handler = new Handler(Looper.getMainLooper());
-        startDataFetchLoop();
+        swipeRefreshLayout = view.findViewById(R.id.swiper);
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            currentPage = 1; // 페이지를 초기화
+            allItems.clear(); // 기존 데이터 초기화
+            fetchItemsFromServer(); // 서버에서 새 데이터 가져오기
+            swipeRefreshLayout.setRefreshing(false); // 리프레시 종료
+        });
+
+        // 데이터 가져오기
+        fetchItemsFromServer();
 
         return view;
     }
 
+    // 서버에서 데이터 가져오기
     private void fetchItemsFromServer() {
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
-                .url("http://10.0.2.2:8000/textload/content/") // API 엔드포인트
+                .url("http://40.82.148.190:8000/textload/content/") // 서버 API URL
                 .build();
 
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 e.printStackTrace();
+                getActivity().runOnUiThread(() ->
+                        Toast.makeText(getContext(), "Failed to fetch data", Toast.LENGTH_SHORT).show()
+                );
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
-                    String jsonResponse = response.body().string();
-                    List<Item> itemList = parseJson(jsonResponse);
-                    getActivity().runOnUiThread(() -> reportAdapter.setItems(itemList));
+                    try {
+                        String jsonResponse = response.body().string();
+                        parseJsonAndAddItems(jsonResponse);
+
+                        getActivity().runOnUiThread(() -> {
+                            loadPage(currentPage); // 첫 페이지 로드
+                        });
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        getActivity().runOnUiThread(() ->
+                                Toast.makeText(getContext(), "Error parsing data", Toast.LENGTH_SHORT).show()
+                        );
+                    }
+                } else {
+                    getActivity().runOnUiThread(() ->
+                            Toast.makeText(getContext(), "Error fetching data", Toast.LENGTH_SHORT).show()
+                    );
                 }
             }
         });
     }
 
-    private void startDataFetchLoop() {
-        dataFetchRunnable = new Runnable() {
-            @Override
-            public void run() {
-                fetchItemsFromServer(); // 데이터 가져오기
-                handler.postDelayed(this, FETCH_INTERVAL); // 일정 시간 후 다시 실행
-            }
-        };
-        handler.post(dataFetchRunnable); // 즉시 실행
+    // JSON 데이터를 파싱하고 allItems 리스트에 추가
+    private void parseJsonAndAddItems(String jsonResponse) throws JSONException {
+        JSONObject jsonObject = new JSONObject(jsonResponse);
+        JSONArray contentsArray = jsonObject.getJSONArray("contents");
+
+        for (int i = 0; i < contentsArray.length(); i++) {
+            JSONObject itemObject = contentsArray.getJSONObject(i);
+
+            Item item = new Item(
+                    itemObject.getString("Category"),
+                    itemObject.getString("Title"),
+                    itemObject.getString("증권사"),
+                    itemObject.getString("Content"),
+                    Integer.parseInt(itemObject.getString("Views")),
+                    itemObject.getString("작성일"),
+                    itemObject.getString("PDF URL")
+            );
+
+            allItems.add(item);
+        }
     }
 
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        stopDataFetchLoop(); // Fragment 종료 시 루프 중단
+    // 특정 페이지의 데이터 로드
+    private void loadPage(int page) {
+        int startIndex = (page - 1) * pageSize;
+        int endIndex = Math.min(startIndex + pageSize, allItems.size());
+
+        if (startIndex < allItems.size()) {
+            currentItems.clear();
+            currentItems.addAll(allItems.subList(startIndex, endIndex));
+            reportAdapter.setItems(currentItems);
+        } else {
+            Toast.makeText(getContext(), "No more data to load", Toast.LENGTH_SHORT).show();
+        }
     }
 
-    private void stopDataFetchLoop() {
-        if (handler != null && dataFetchRunnable != null) {
-            handler.removeCallbacks(dataFetchRunnable); // 반복 작업 제거
+    // 다음 페이지 로드
+    public void loadNextPage() {
+        if (currentPage * pageSize < allItems.size()) {
+            currentPage++;
+            loadPage(currentPage);
+        } else {
+            Toast.makeText(getContext(), "You are on the last page", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    // 이전 페이지 로드
+    public void loadPreviousPage() {
+        if (currentPage > 1) {
+            currentPage--;
+            loadPage(currentPage);
+        } else {
+            Toast.makeText(getContext(), "You are on the first page", Toast.LENGTH_SHORT).show();
         }
     }
 }
