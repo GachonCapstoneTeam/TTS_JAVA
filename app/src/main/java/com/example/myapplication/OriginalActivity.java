@@ -77,6 +77,8 @@ public class OriginalActivity extends AppCompatActivity {
 
         if (title != null) {
             oriTitle.setText(title);
+            oriTitle.setSelected(true); // 마키 효과를 위한 선택 상태 설정
+
         }
 
         if(date != null) {

@@ -57,6 +57,13 @@
             android:textStyle="bold"
             android:autoSizeTextType="uniform"
             android:autoSizePresetSizes="@array/text_size"
+            android:maxLines="1"
+            android:ellipsize = "marquee"
+            android:marqueeRepeatLimit = "marquee_forever"
+            android:singleLine="true"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:scrollHorizontally="true"
             />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

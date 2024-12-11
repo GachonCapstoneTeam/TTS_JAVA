@@ -44,6 +44,7 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ReportView
 
         holder.stockName.setText(item.getCategory());
         holder.stockTitle.setText(item.getTitle());
+        holder.stockTitle.setSelected(true); // 마키 효과를 위한 선택 상태 설정
         holder.bank.setText(item.getBank());
         holder.date.setText(item.getDate());
         holder.views.setText(String.valueOf(item.getViews()));
