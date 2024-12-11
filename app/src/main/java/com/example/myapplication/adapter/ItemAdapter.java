@@ -13,7 +13,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.myapplication.OriginalActivity;
 import com.example.myapplication.R;
-import com.example.myapplication.SummaryActivity;
 import com.example.myapplication.entity.Item;
 
 import java.util.ArrayList;
@@ -49,7 +48,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
         holder.serialNumber.setText("증권사: " + item.getStockName()); // 증권사
 
         holder.summaryButton.setOnClickListener(v -> {
-            Intent intent = new Intent(context, SummaryActivity.class);
+            Intent intent = new Intent(context, OriginalActivity.class);
             intent.putExtra("title", item.getTitle());
             intent.putExtra("content", item.getContent());
             intent.putExtra("company", item.getStockName());

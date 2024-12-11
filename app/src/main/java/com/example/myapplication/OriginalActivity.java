@@ -1,5 +1,6 @@
 package com.example.myapplication;
 
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -29,14 +30,14 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 public class OriginalActivity extends AppCompatActivity {
 
-    private TextView oriScript, oriTitle, oriBank, oriCategory;
+    private TextView oriScript, oriTitle, oriDate, oriName;
     private ImageButton skipBack, stop, play, skipForward, pdf;
     private Button handleButton, backButton;
     private View bottomMenuContainer;
     private boolean isMenuVisible = true;
-    private boolean isPlaying = false; // 재생 상태 관리
+    private boolean isPlaying = false;
 
-    private MediaPlayer mediaPlayer; // MediaPlayer 객체
+    private MediaPlayer mediaPlayer;
 
     private final String API_KEY = BuildConfig.MY_KEY;
 
@@ -56,29 +57,39 @@ public class OriginalActivity extends AppCompatActivity {
         pdf = findViewById(R.id.pdf);
         bottomMenuContainer = findViewById(R.id.bottom_menu_container);
         oriTitle = findViewById(R.id.oriTitle);
+        oriName = findViewById(R.id.oriName);
+        oriDate = findViewById(R.id.ori_date);
 
         // Intent에서 데이터 받아오기
         Intent intent = getIntent();
-        String title = intent.getStringExtra("title");
-        String content = intent.getStringExtra("content");
-        String pdfUrl = intent.getStringExtra("pdfUrl");
-        String company = intent.getStringExtra("company");
-        String category = intent.getStringExtra("category");
+        String title = intent.getStringExtra("Title");
+        String content = intent.getStringExtra("Content");
+        String pdfUrl = intent.getStringExtra("PDF_URL");
+        String company = intent.getStringExtra("Bank");
+        String category = intent.getStringExtra("Category");
+        String date = intent.getStringExtra("Date");
+
 
         // 제목과 내용 설정
         if (content != null) {
-            oriScript.setText(content);  // 전달받은 내용 설정
+            oriScript.setText(content);
         }
 
         if (title != null) {
-            oriTitle.setText(title);  // 전달받은 내용 설정
+            oriTitle.setText(title);
+            oriTitle.setSelected(true); // 마키 효과를 위한 선택 상태 설정
+
+        }
+
+        if(date != null) {
+            oriDate.setText(date);
         }
 
 
         // 서버에서 텍스트 가져오기
         // fetchTextFromServer(); // 기존 서버에서 텍스트를 가져오는 부분을 수정하려면 주석 해제하세요.
 
-        // 둥근 손잡이 버튼 클릭 이벤트
+        // 손잡이 버튼 클릭 이벤트
         handleButton.setOnClickListener(v -> toggleBottomMenu());
 
         // 버튼 동작 처리
@@ -87,10 +98,25 @@ public class OriginalActivity extends AppCompatActivity {
         stop.setOnClickListener(v -> stopAudio());
         play.setOnClickListener(v -> togglePlayPause());
         skipForward.setOnClickListener(v -> Toast.makeText(this, "Skip Forward", Toast.LENGTH_SHORT).show());
+
         pdf.setOnClickListener(v -> {
-            // PDF URL을 통해 PDF를 열거나 처리
-            Toast.makeText(this, "Open PDF", Toast.LENGTH_SHORT).show();
+            String url_pdf = intent.getStringExtra("PDF_URL"); // 인텐트에서 URL 가져오기
+            if (url_pdf != null && !url_pdf.isEmpty()) {
+                Intent pdfintent = new Intent(Intent.ACTION_VIEW);
+                pdfintent.setDataAndType(Uri.parse(url_pdf), "application/pdf");
+                pdfintent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+
+                // PDF를 열 수 있는 앱이 있는지 확인
+                try {
+                    startActivity(pdfintent);
+                } catch (ActivityNotFoundException e) {
+                    Toast.makeText(this, "PDF를 열 수 있는 앱이 설치되어 있지 않습니다.", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                Toast.makeText(this, "PDF URL이 없습니다.", Toast.LENGTH_SHORT).show();
+            }
         });
+
     }
 
     // 메뉴 숨기기/보이기
