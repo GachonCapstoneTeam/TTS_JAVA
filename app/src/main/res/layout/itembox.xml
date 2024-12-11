@@ -3,51 +3,90 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_margin="10dp"
     android:background="#D9D9D9"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:elevation="10dp">
 
     <LinearLayout
-        android:id="@+id/title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#D9D9D9"
+        android:background="@drawable/title_box"
+        android:layout_margin="10dp"
         android:gravity="center"
         android:orientation="horizontal"
-        android:padding="10sp">
+        >
 
-        <TextView
-            android:id="@+id/stockName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10sp"
-            android:layout_marginRight="10sp"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="종목명"
-            android:textSize="20sp" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/title_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-        <TextView
-            android:id="@+id/stockTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10sp"
-            android:layout_marginRight="10sp"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="제목"
-            android:textSize="20sp" />
+            <TextView
+                android:id="@+id/stockName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="@+id/title_layout"
+                app:layout_constraintTop_toTopOf="@+id/title_layout"
+                android:layout_margin="5sp"
+                android:text="종목명"
+                android:textColor="#34A22C"
+                android:textSize="20sp"
+                android:ellipsize="end"
+                android:maxLines="1" />
 
-        <TextView
-            android:id="@+id/bank"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10sp"
-            android:layout_marginRight="10sp"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="증권사"
-            android:textSize="20sp" />
+            <TextView
+                android:id="@+id/stockTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="@+id/title_layout"
+                app:layout_constraintTop_toBottomOf="@+id/stockName"
+                android:layout_marginLeft="10sp"
+                android:layout_marginRight="10sp"
+                android:gravity="center"
+                android:text="제목"
+                android:textColor="@color/black"
+                android:textSize="30sp"
+                android:ellipsize="end"
+                android:maxLines="1"/>
+
+            <TextView
+                android:id="@+id/bank"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10sp"
+                android:layout_marginRight="10sp"
+                app:layout_constraintBottom_toBottomOf="@+id/stockName"
+                app:layout_constraintStart_toEndOf="@+id/stockName"
+                android:gravity="center"
+                android:text="증권사"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5sp"
+                android:layout_marginBottom="10sp"
+                app:layout_constraintBottom_toBottomOf="@id/title_layout"
+                app:layout_constraintEnd_toEndOf="@id/title_layout"
+                app:layout_constraintTop_toBottomOf="@id/stockTitle"
+                android:text="YYYY/MM/DD"
+                android:textSize="15sp"/>
+
+            <TextView
+                android:id="@+id/views"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="@+id/stockTitle"
+                app:layout_constraintBottom_toBottomOf="@+id/date"
+                android:text="조회수"
+                android:textSize="13sp"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
     </LinearLayout>
 
     <TextView
@@ -78,7 +117,7 @@
                 android:id="@+id/sum_button"
                 android:layout_width="120dp"
                 android:layout_height="wrap_content"
-                android:background="@drawable/button"
+                android:background="@drawable/round_button"
                 android:elevation="30dp"
                 android:gravity="center"
                 android:text="요약본"
@@ -103,7 +142,7 @@
                 android:id="@+id/ori_button"
                 android:layout_width="120dp"
                 android:layout_height="wrap_content"
-                android:background="@drawable/button"
+                android:background="@drawable/round_button"
                 android:elevation="30dp"
                 android:gravity="center"
                 android:text="원문"

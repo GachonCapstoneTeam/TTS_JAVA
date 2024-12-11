@@ -34,6 +34,10 @@ public class OriginalActivity extends AppCompatActivity {
     private Button handleButton, backButton;
     private View bottomMenuContainer;
     private boolean isMenuVisible = true;
+    private boolean isPlaying = false; // 재생 상태 관리
+
+    private MediaPlayer mediaPlayer; // MediaPlayer 객체
+
     private final String API_KEY = BuildConfig.MY_KEY;
 
     @Override
@@ -52,8 +56,6 @@ public class OriginalActivity extends AppCompatActivity {
         pdf = findViewById(R.id.pdf);
         bottomMenuContainer = findViewById(R.id.bottom_menu_container);
         oriTitle = findViewById(R.id.oriTitle);
-        oriBank = findViewById(R.id.oriBank);
-        oriCategory = findViewById(R.id.oriCategory);
 
         // Intent에서 데이터 받아오기
         Intent intent = getIntent();
@@ -72,13 +74,6 @@ public class OriginalActivity extends AppCompatActivity {
             oriTitle.setText(title);  // 전달받은 내용 설정
         }
 
-        if (company != null) {
-            oriBank.setText(company);  // 전달받은 내용 설정
-        }
-
-        if (category != null) {
-            oriCategory.setText(category);  // 전달받은 내용 설정
-        }
 
         // 서버에서 텍스트 가져오기
         // fetchTextFromServer(); // 기존 서버에서 텍스트를 가져오는 부분을 수정하려면 주석 해제하세요.
@@ -89,8 +84,8 @@ public class OriginalActivity extends AppCompatActivity {
         // 버튼 동작 처리
         backButton.setOnClickListener(v -> finish());
         skipBack.setOnClickListener(v -> Toast.makeText(this, "Skip Back", Toast.LENGTH_SHORT).show());
-        stop.setOnClickListener(v -> Toast.makeText(this, "Stop", Toast.LENGTH_SHORT).show());
-        play.setOnClickListener(v -> performTextToSpeech());
+        stop.setOnClickListener(v -> stopAudio());
+        play.setOnClickListener(v -> togglePlayPause());
         skipForward.setOnClickListener(v -> Toast.makeText(this, "Skip Forward", Toast.LENGTH_SHORT).show());
         pdf.setOnClickListener(v -> {
             // PDF URL을 통해 PDF를 열거나 처리
@@ -169,26 +164,58 @@ public class OriginalActivity extends AppCompatActivity {
         byte[] decodedAudio = Base64.decode(base64Audio, Base64.DEFAULT);
 
         try {
-            File tempAudioFile = File.createTempFile("tts_audio", ".mp3", getCacheDir());
+            File tempAudioFile = File.createTempFile("tts_audio_" + oriTitle.getText().toString(), ".mp3", getCacheDir());
             FileOutputStream fos = new FileOutputStream(tempAudioFile);
             fos.write(decodedAudio);
             fos.close();
 
-            MediaPlayer mediaPlayer = new MediaPlayer();
+            mediaPlayer = new MediaPlayer();
             mediaPlayer.setDataSource(tempAudioFile.getAbsolutePath());
             mediaPlayer.prepare();
             mediaPlayer.start();
 
-            runOnUiThread(() -> Toast.makeText(OriginalActivity.this, "Playing Audio", Toast.LENGTH_SHORT).show());
+            isPlaying = true;
+            runOnUiThread(() -> play.setImageResource(R.drawable.pause));
 
             mediaPlayer.setOnCompletionListener(mp -> {
                 mediaPlayer.release();
+                mediaPlayer = null;
+                isPlaying = false;
+                runOnUiThread(() -> play.setImageResource(R.drawable.play));
                 tempAudioFile.delete();
             });
 
         } catch (IOException e) {
             e.printStackTrace();
             runOnUiThread(() -> Toast.makeText(OriginalActivity.this, "Error playing audio", Toast.LENGTH_SHORT).show());
+        }
+    }
+
+    // 재생/일시정지 버튼 처리
+    private void togglePlayPause() {
+        if (mediaPlayer != null) {
+            if (isPlaying) {
+                mediaPlayer.pause();
+                isPlaying = false;
+                play.setImageResource(R.drawable.play);
+            } else {
+                mediaPlayer.start();
+                isPlaying = true;
+                play.setImageResource(R.drawable.pause);
+            }
+        } else {
+            performTextToSpeech();
+        }
+    }
+
+    // 오디오 중지
+    private void stopAudio() {
+        if (mediaPlayer != null) {
+            mediaPlayer.stop();
+            mediaPlayer.release();
+            mediaPlayer = null;
+            isPlaying = false;
+            play.setImageResource(R.drawable.play);
         }
     }
 }

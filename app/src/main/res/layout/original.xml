@@ -1,16 +1,14 @@
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="#F4F4F4">
 
-    <!-- 상단: 종목명, 제목, 증권사 -->
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/content_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:weightSum="3"
+        android:background="@drawable/title_box"
         android:padding="16dp"
         android:layout_alignParentTop="true">
 
@@ -18,140 +16,131 @@
             android:id="@+id/backbutton_ori"
             android:layout_width="40dp"
             android:layout_height="40dp"
+            app:layout_constraintStart_toStartOf="@+id/content_container"
+            app:layout_constraintTop_toTopOf="@+id/content_container"
             android:layout_marginStart="8dp"
-            android:text="back"
-            android:textSize="6sp" />
+            android:background="@drawable/back_button" />
 
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:weightSum="4"
-            android:orientation="vertical">
+        <TextView
+            android:id="@+id/oriName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            app:layout_constraintStart_toEndOf="@id/backbutton_ori"
+            app:layout_constraintTop_toTopOf="@id/content_container"
+            android:text="종목명"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:textColor="#34A22C"
+            android:ellipsize="end"
+            android:maxLines="1" />
 
-            <TextView
-                android:id="@+id/oriCategory"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="3"
-                android:text="종목명"
-                android:textSize="14sp"
-                android:gravity="center"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/oriId"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:text="serial number"
-                android:textSize="8sp" />
-        </LinearLayout>
+        <TextView
+            android:id="@+id/ori_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="@id/content_container"
+            app:layout_constraintBottom_toBottomOf="@+id/content_container"
+            android:text="YYYY/MM/DD"
+            android:textSize="10sp" />
 
         <TextView
             android:id="@+id/oriTitle"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="제목"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:gravity="center" />
-
-        <TextView
-            android:id="@+id/oriBank"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="증권사"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:gravity="center" />
-    </LinearLayout>
-<RelativeLayout
-    android:id="@+id/bottom_menu_container"
-    android:layout_width="match_parent"
-    android:layout_height="110dp"
-    android:layout_alignParentBottom="true"
-    android:elevation="10dp"
-    >
-
-    <Button
-        android:id="@+id/handle_shape"
-        android:layout_width="64dp"
-        android:layout_height="32dp"
-        android:layout_centerHorizontal="true"
-        android:background="@drawable/handle_shape"
-        android:layout_above="@+id/audio_container"
-        style="?android:attr/borderlessButtonStyle" />
-
-    <!-- 하단 메뉴바와 손잡이 버튼 -->
-    <RelativeLayout
-        android:id="@+id/audio_container"
-        android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:backgroundTint="@color/gray_dark"
-        android:layout_alignParentBottom="true"
-        android:background="#FFFFFF">
-
-
-
-        <!-- 하단 메뉴바 -->
-        <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/oriName"
+            app:layout_constraintBottom_toTopOf="@id/ori_date"
+            app:layout_constraintStart_toStartOf="@id/oriName"
+            android:text="제목"
+            android:textSize="22sp"
+            android:textColor="@color/black"
+            android:textStyle="bold" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    <RelativeLayout
+        android:id="@+id/bottom_menu_container"
+        android:layout_width="match_parent"
+        android:layout_height="110dp"
+        android:layout_alignParentBottom="true"
+        android:elevation="10dp"
+        >
+
+        <Button
+            android:id="@+id/handle_shape"
+            android:layout_width="64dp"
+            android:layout_height="32dp"
+            android:layout_centerHorizontal="true"
+            android:background="@drawable/handle_shape"
+            android:layout_above="@+id/audio_container"
+            style="?android:attr/borderlessButtonStyle" />
+
+        <!-- 하단 메뉴바와 손잡이 버튼 -->
+        <RelativeLayout
+            android:id="@+id/audio_container"
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:backgroundTint="@color/gray_dark"
             android:layout_alignParentBottom="true"
-            android:orientation="horizontal"
-            android:gravity="center"
-            android:padding="16dp"
-            android:weightSum="5">
+            android:background="#FFFFFF">
 
-            <ImageButton
-                android:id="@+id/skipback"
-                android:layout_width="0dp"
+
+
+            <!-- 하단 메뉴바 -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:src="@drawable/skipback"
-                android:background="@null" />
+                android:layout_alignParentBottom="true"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:padding="16dp"
+                android:weightSum="5">
 
-            <ImageButton
-                android:id="@+id/stop"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:src="@drawable/stop"
-                android:background="@null" />
+                <ImageButton
+                    android:id="@+id/skipback"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:src="@drawable/skipback"
+                    android:background="@null" />
 
-            <ImageButton
-                android:id="@+id/play"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:src="@drawable/play"
-                android:background="@null" />
+                <ImageButton
+                    android:id="@+id/stop"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:src="@drawable/stop"
+                    android:background="@null" />
 
-            <ImageButton
-                android:id="@+id/skipforward"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:src="@drawable/skipforward"
-                android:background="@null" />
+                <ImageButton
+                    android:id="@+id/play"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:src="@drawable/play"
+                    android:background="@null" />
 
-            <ImageButton
-                android:id="@+id/pdf"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:src="@drawable/pdf"
-                android:background="@null" />
-        </LinearLayout>
+                <ImageButton
+                    android:id="@+id/skipforward"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:src="@drawable/skipforward"
+                    android:background="@null" />
 
-        <!-- 둥근 손잡이 버튼 -->
+                <ImageButton
+                    android:id="@+id/pdf"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:src="@drawable/pdf"
+                    android:background="@null" />
+            </LinearLayout>
 
+
+        </RelativeLayout>
     </RelativeLayout>
-</RelativeLayout>
 
     <!-- 본문 영역 -->
     <FrameLayout
@@ -167,7 +156,7 @@
             android:id="@+id/oriScript"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="원문"
+            android:text="로딩중..."
             android:textSize="20sp"
             android:textStyle="bold"
             android:gravity="center" />

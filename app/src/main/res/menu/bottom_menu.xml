@@ -8,20 +8,20 @@
         android:icon="@drawable/ic_home"
         android:title="main"
         app:showAsAction="always"/>
+    <!--
+        <item
+            android:id="@+id/search"
+            android:enabled="true"
+            android:icon="@drawable/plan"
+            android:title="search"
+            app:showAsAction="always"/>
 
-    <item
-        android:id="@+id/search"
-        android:enabled="true"
-        android:icon="@drawable/plan"
-        android:title="search"
-        app:showAsAction="always"/>
-
-    <item
-        android:id="@+id/setting"
-        android:enabled="true"
-        android:icon="@drawable/ic_settings"
-        android:title="setting"
-        app:showAsAction="always"/>
-
+        <item
+            android:id="@+id/setting"
+            android:enabled="true"
+            android:icon="@drawable/ic_settings"
+            android:title="setting"
+            app:showAsAction="always"/>
+    -->
 
 </menu>
