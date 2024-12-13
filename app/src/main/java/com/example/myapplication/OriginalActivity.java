@@ -68,11 +68,16 @@ public class OriginalActivity extends AppCompatActivity {
         String company = intent.getStringExtra("Bank");
         String category = intent.getStringExtra("Category");
         String date = intent.getStringExtra("Date");
+        String pdfcontent = intent.getStringExtra("PDF Content");
 
 
         // 제목과 내용 설정
         if (content != null) {
             oriScript.setText(content);
+        }
+
+        if (pdfcontent != null) {
+            oriScript.setText(pdfcontent);
         }
 
         if (title != null) {

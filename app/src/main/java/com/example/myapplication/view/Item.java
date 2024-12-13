@@ -8,8 +8,9 @@ public class Item {
     private int views;          // 조회수
     private String date;        // 작성일
     private String pdfUrl;      // PDF URL
+    private String pdfcontent;  // PDF content
 
-    public Item(String category, String title, String bank, String content, int views, String date, String pdfUrl) {
+    public Item(String category, String title, String bank, String content, int views, String date, String pdfUrl, String pdfcontent) {
         this.category = category;
         this.title = title;
         this.bank = bank;
@@ -17,6 +18,7 @@ public class Item {
         this.views = views;
         this.date = date;
         this.pdfUrl = pdfUrl;
+        this.pdfcontent = pdfcontent;
     }
 
     public String getCategory() {
@@ -45,5 +47,9 @@ public class Item {
 
     public String getPdfUrl() {
         return pdfUrl;
+    }
+
+    public String getPdfcontent() {
+        return pdfcontent;
     }
 }

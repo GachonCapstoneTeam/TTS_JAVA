@@ -47,7 +47,7 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ReportView
         holder.stockTitle.setSelected(true); // 마키 효과를 위한 선택 상태 설정
         holder.bank.setText(item.getBank());
         holder.date.setText(item.getDate());
-        holder.views.setText(String.valueOf(item.getViews()));
+        holder.views.setText("조회수 : " +String.valueOf(item.getViews()));
         holder.script.setText(item.getContent());
 
         //original button
@@ -56,7 +56,7 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ReportView
             intent.putExtra("Category", item.getCategory());
             intent.putExtra("Title", item.getTitle());
             intent.putExtra("Bank", item.getBank());
-            intent.putExtra("Content", item.getContent()); //이 부분 본문 정보로 바꿔야함.
+            intent.putExtra("PDF Content", item.getPdfcontent()); //이 부분 본문 정보로 바꿔야함.
             intent.putExtra("Views", item.getViews());
             intent.putExtra("Date", item.getDate());
             intent.putExtra("PDF_URL", item.getPdfUrl());

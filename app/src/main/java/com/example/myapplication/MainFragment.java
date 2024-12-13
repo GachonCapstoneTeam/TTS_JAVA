@@ -70,7 +70,7 @@ public class MainFragment extends Fragment {
     private void fetchItemsFromServer() {
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
-                .url("http://40.82.148.190:8000/textload/content/") // 서버 API URL
+                .url("http://10.0.2.2:8000/textload/content/") // 서버 API URL
                 .build();
 
         client.newCall(request).enqueue(new Callback() {
@@ -122,7 +122,8 @@ public class MainFragment extends Fragment {
                     itemObject.getString("Content"),
                     Integer.parseInt(itemObject.getString("Views")),
                     itemObject.getString("작성일"),
-                    itemObject.getString("PDF URL")
+                    itemObject.getString("PDF URL"),
+                    itemObject.getString("PDF Content")
             );
 
             allItems.add(item);

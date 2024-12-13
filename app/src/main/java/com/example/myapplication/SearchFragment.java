@@ -97,7 +97,7 @@ public class SearchFragment extends Fragment {
                                 content.get("작성일"),
                                 content.get("Views"),
                                 content.get("Content")
-                        ));
+                                ));
                     }
 
                     getActivity().runOnUiThread(() -> {
