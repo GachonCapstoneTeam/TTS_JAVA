@@ -36,7 +36,7 @@ public class MainFragment extends Fragment {
     private ReportAdapter reportAdapter;
     private SwipeRefreshLayout swipeRefreshLayout;
     private List<Item> allItems = new ArrayList<>(); // 전체 데이터를 저장
-    private List<Item> currentItems = new ArrayList<>(); // 현재 페이지 데이터를 저장
+    private boolean isLoading = false; // 로딩 상태를 추적
     private int currentPage = 1; // 현재 페이지 번호
     private final int pageSize = 7; // 한 페이지에 표시할 데이터 개수
 
@@ -60,6 +60,23 @@ public class MainFragment extends Fragment {
             swipeRefreshLayout.setRefreshing(false); // 리프레시 종료
         });
 
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+
+                // 스크롤의 끝에 가까워졌을 때만 로드 (현재 위치 + 여유 항목 >= 총 항목)
+                int visibleThreshold = 1; // 트리거를 위한 남은 항목 수
+                int lastVisibleItem = layoutManager.findLastVisibleItemPosition();
+                int totalItemCount = layoutManager.getItemCount();
+
+                if (!isLoading && totalItemCount <= (lastVisibleItem + visibleThreshold)) {
+                    loadNextPage();
+                }
+            }
+        });
+
         // 데이터 가져오기
         fetchItemsFromServer();
 
@@ -68,14 +85,17 @@ public class MainFragment extends Fragment {
 
     // 서버에서 데이터 가져오기
     private void fetchItemsFromServer() {
+        isLoading = true; // 로딩 중 상태로 설정
+
         OkHttpClient client = new OkHttpClient();
-        Request request = new Request.Builder()
-                .url("http://10.0.2.2:8000/textload/content/") // 서버 API URL
-                .build();
+        String url = "http://10.0.2.2:8000/textload/content/?page=" + currentPage + "&size=" + pageSize; // 페이지 번호와 크기 전달
+
+        Request request = new Request.Builder().url(url).build();
 
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
+                isLoading = false; // 로딩 상태 해제
                 e.printStackTrace();
                 getActivity().runOnUiThread(() ->
                         Toast.makeText(getContext(), "Failed to fetch data", Toast.LENGTH_SHORT).show()
@@ -90,15 +110,18 @@ public class MainFragment extends Fragment {
                         parseJsonAndAddItems(jsonResponse);
 
                         getActivity().runOnUiThread(() -> {
-                            loadPage(currentPage); // 첫 페이지 로드
+                            reportAdapter.setItems(allItems); // 어댑터에 전체 데이터 갱신
+                            isLoading = false; // 로딩 상태 해제
                         });
                     } catch (JSONException e) {
                         e.printStackTrace();
+                        isLoading = false; // 로딩 상태 해제
                         getActivity().runOnUiThread(() ->
                                 Toast.makeText(getContext(), "Error parsing data", Toast.LENGTH_SHORT).show()
                         );
                     }
                 } else {
+                    isLoading = false; // 로딩 상태 해제
                     getActivity().runOnUiThread(() ->
                             Toast.makeText(getContext(), "Error fetching data", Toast.LENGTH_SHORT).show()
                     );
@@ -130,37 +153,9 @@ public class MainFragment extends Fragment {
         }
     }
 
-    // 특정 페이지의 데이터 로드
-    private void loadPage(int page) {
-        int startIndex = (page - 1) * pageSize;
-        int endIndex = Math.min(startIndex + pageSize, allItems.size());
-
-        if (startIndex < allItems.size()) {
-            currentItems.clear();
-            currentItems.addAll(allItems.subList(startIndex, endIndex));
-            reportAdapter.setItems(currentItems);
-        } else {
-            Toast.makeText(getContext(), "No more data to load", Toast.LENGTH_SHORT).show();
-        }
-    }
-
     // 다음 페이지 로드
-    public void loadNextPage() {
-        if (currentPage * pageSize < allItems.size()) {
-            currentPage++;
-            loadPage(currentPage);
-        } else {
-            Toast.makeText(getContext(), "You are on the last page", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    // 이전 페이지 로드
-    public void loadPreviousPage() {
-        if (currentPage > 1) {
-            currentPage--;
-            loadPage(currentPage);
-        } else {
-            Toast.makeText(getContext(), "You are on the first page", Toast.LENGTH_SHORT).show();
-        }
+    private void loadNextPage() {
+        currentPage++; // 다음 페이지 번호 증가
+        fetchItemsFromServer(); // 서버에서 데이터 가져오기
     }
 }
