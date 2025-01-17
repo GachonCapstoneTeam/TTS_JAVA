@@ -11,6 +11,7 @@ public class basic_layout extends AppCompatActivity {
     MainFragment mainFragment;
     SearchFragment searchFragment;
     SettingFragment settingFragment;
+    HomeFragment homeFragment;
 
 
     @Override
@@ -21,8 +22,9 @@ public class basic_layout extends AppCompatActivity {
         mainFragment = new MainFragment();
         searchFragment = new SearchFragment();
         settingFragment = new SettingFragment();
+        homeFragment = new HomeFragment();
 
-        getSupportFragmentManager().beginTransaction().replace(R.id.container, mainFragment).commit();
+        getSupportFragmentManager().beginTransaction().replace(R.id.container, homeFragment).commit();
 
         NavigationBarView navigationBarView = findViewById(R.id.navigation_menu);
         navigationBarView.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
@@ -31,7 +33,7 @@ public class basic_layout extends AppCompatActivity {
                 int itemId = item.getItemId();
 
                 if (itemId == R.id.main) {
-                    getSupportFragmentManager().beginTransaction().replace(R.id.container, mainFragment).commit();
+                    getSupportFragmentManager().beginTransaction().replace(R.id.container, homeFragment).commit();
 
                     return true;
 

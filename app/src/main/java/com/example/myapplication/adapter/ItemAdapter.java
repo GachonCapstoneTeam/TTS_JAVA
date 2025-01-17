@@ -1,31 +1,41 @@
 package com.example.myapplication.adapter;
 
 import android.content.Context;
-import android.content.Intent;
+import android.media.MediaPlayer;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.myapplication.OriginalActivity;
 import com.example.myapplication.R;
 import com.example.myapplication.entity.Item;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder> {
 
     private Context context;
     private List<Item> itemList;
+    private OnItemClickListener listener;
+    private MediaPlayer mediaPlayer;
 
-    public ItemAdapter(Context context) {
+    // 클릭 리스너 인터페이스
+    public interface OnItemClickListener {
+        void onItemClick(Item item); // 아이템 클릭 시 동작 정의
+    }
+
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        this.listener = listener;
+    }
+
+    // 생성자
+    public ItemAdapter(Context context, List<Item> itemList) {
         this.context = context;
-        this.itemList = new ArrayList<>();
+        this.itemList = itemList;
     }
 
     public void setItems(List<Item> items) {
@@ -44,22 +54,17 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
     public void onBindViewHolder(@NonNull ItemViewHolder holder, int position) {
         Item item = itemList.get(position);
 
+        // 데이터 바인딩
         holder.stockTitle.setText(item.getTitle()); // 제목
-        holder.serialNumber.setText("증권사: " + item.getStockName()); // 증권사
+        holder.category.setText(item.getCategory()); // 분류
+        holder.stockName.setText(item.getStockName()); // 종목명
+        holder.uploadTime.setText(item.getDate()); // 업로드 시간
 
-        holder.summaryButton.setOnClickListener(v -> {
-            Intent intent = new Intent(context, OriginalActivity.class);
-            intent.putExtra("title", item.getTitle());
-            intent.putExtra("content", item.getContent());
-            intent.putExtra("company", item.getStockName());
-            intent.putExtra("pdfUrl", item.getPdfUrl());
-            context.startActivity(intent);
-        });
-
-        holder.originalButton.setOnClickListener(v -> {
-            Intent intent = new Intent(context, OriginalActivity.class);
-            intent.putExtra("pdfUrl", item.getPdfUrl());
-            context.startActivity(intent);
+        // 아이템 클릭 시 동작
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onItemClick(item);
+            }
         });
     }
 
@@ -69,15 +74,16 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
     }
 
     public static class ItemViewHolder extends RecyclerView.ViewHolder {
-        TextView stockTitle, serialNumber;
-        Button summaryButton, originalButton;
+        TextView stockTitle, category, stockName, uploadTime;
 
         public ItemViewHolder(@NonNull View itemView) {
             super(itemView);
-            stockTitle = itemView.findViewById(R.id.stock_title);
-            serialNumber = itemView.findViewById(R.id.serial_number);
-            summaryButton = itemView.findViewById(R.id.summary_button);
-            originalButton = itemView.findViewById(R.id.original_button);
+
+            // XML 레이아웃의 뷰 연결
+            stockTitle = itemView.findViewById(R.id.item_title);
+            category = itemView.findViewById(R.id.item_category);
+            stockName = itemView.findViewById(R.id.stockName);
+            uploadTime = itemView.findViewById(R.id.item_date);
         }
     }
 }

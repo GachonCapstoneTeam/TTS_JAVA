@@ -48,7 +48,7 @@ public class SearchFragment extends Fragment {
         // 초기 데이터 로드
         fetchDataFromServer(currentPage);
 
-        itemAdapter = new ItemAdapter(getContext());
+        //itemAdapter = new ItemAdapter(getContext());
         recyclerView.setAdapter(itemAdapter);
 
         itemAdapter.setItems(itemList);
