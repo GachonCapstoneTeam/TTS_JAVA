@@ -32,9 +32,7 @@ public class OriginalActivity extends AppCompatActivity {
 
     private TextView oriScript, oriTitle, oriDate, oriName;
     private ImageButton skipBack, stop, play, skipForward, pdf;
-    private Button handleButton, backButton;
-    private View bottomMenuContainer;
-    private boolean isMenuVisible = true;
+    private Button backButton;
     private boolean isPlaying = false;
 
     private MediaPlayer mediaPlayer;
@@ -49,13 +47,11 @@ public class OriginalActivity extends AppCompatActivity {
         // View 초기화
         backButton = findViewById(R.id.backbutton_ori);
         oriScript = findViewById(R.id.oriScript);
-        handleButton = findViewById(R.id.handle_shape);
         skipBack = findViewById(R.id.skipback);
         stop = findViewById(R.id.stop);
         play = findViewById(R.id.play);
         skipForward = findViewById(R.id.skipforward);
         pdf = findViewById(R.id.pdf);
-        bottomMenuContainer = findViewById(R.id.bottom_menu_container);
         oriTitle = findViewById(R.id.oriTitle);
         oriName = findViewById(R.id.oriName);
         oriDate = findViewById(R.id.ori_date);
@@ -95,7 +91,6 @@ public class OriginalActivity extends AppCompatActivity {
         // fetchTextFromServer(); // 기존 서버에서 텍스트를 가져오는 부분을 수정하려면 주석 해제하세요.
 
         // 손잡이 버튼 클릭 이벤트
-        handleButton.setOnClickListener(v -> toggleBottomMenu());
 
         // 버튼 동작 처리
         backButton.setOnClickListener(v -> finish());
@@ -125,21 +120,7 @@ public class OriginalActivity extends AppCompatActivity {
     }
 
     // 메뉴 숨기기/보이기
-    private void toggleBottomMenu() {
-        if (isMenuVisible) {
-            bottomMenuContainer.animate()
-                    .translationY(bottomMenuContainer.getHeight() - 80)
-                    .setDuration(300)
-                    .start();
-        } else {
-            bottomMenuContainer.setVisibility(View.VISIBLE);
-            bottomMenuContainer.animate()
-                    .translationY(0)
-                    .setDuration(300)
-                    .start();
-        }
-        isMenuVisible = !isMenuVisible;
-    }
+
 
     // TTS 기능 수행
     private void performTextToSpeech() {
