@@ -1,9 +1,98 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rec_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@drawable/background_round">
+
+    <View
+        android:id="@+id/rec_search"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@drawable/search_bar"
+        android:backgroundTint="@color/white"
+        app:layout_constraintTop_toTopOf="@id/rec_layout"
+        app:layout_constraintStart_toStartOf="@id/rec_layout"
+        android:layout_margin="15dp"/>
+
+    <EditText
+        android:id="@+id/rec_search_text"
+        android:layout_width="300dp"
+        android:layout_height="50dp"
+        android:hint="검색어를 입력하시오."
+        android:background="@null"
+        app:layout_constraintStart_toStartOf="@id/rec_search"
+        app:layout_constraintBottom_toBottomOf="@id/rec_search"
+        app:layout_constraintEnd_toStartOf="@id/rec_search_button"/>
+
+
+    <ImageButton
+        android:id="@+id/rec_search_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/search"
+        android:backgroundTint="@color/black"
+        app:layout_constraintTop_toTopOf="@id/rec_search"
+        app:layout_constraintEnd_toEndOf="@id/rec_search"
+        app:layout_constraintBottom_toBottomOf="@id/rec_search"
+        android:layout_margin="15dp"/>
+
+    <View
+        android:id="@+id/rec_guide_line"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/black"
+        app:layout_constraintTop_toBottomOf="@id/rec_search"
+        app:layout_constraintStart_toStartOf="@id/rec_layout"
+        app:layout_constraintEnd_toEndOf="@id/rec_layout"
+        android:layout_margin="10dp"/>
+
+    <TextView
+        android:id="@+id/rec_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="추천 리포트"
+        android:textSize="25sp"
+        android:textColor="@color/black"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/rec_guide_line"
+        app:layout_constraintTop_toBottomOf="@id/rec_guide_line"
+        android:layout_marginTop="15dp"
+        android:layout_marginLeft="10dp"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rec_recycler"
+        android:layout_width="match_parent"
+        android:layout_height="400dp"
+        android:background="@color/white"
+        app:layout_constraintStart_toStartOf="@+id/rec_guide_line"
+        app:layout_constraintEnd_toEndOf="@id/rec_guide_line"
+        app:layout_constraintTop_toBottomOf="@id/rec_text"
+        android:layout_margin="20dp"/>
+
+    <TextView
+        android:id="@+id/rec_hot"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="인기 리포트"
+        android:textSize="25sp"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        app:layout_constraintStart_toStartOf="@id/rec_text"
+        app:layout_constraintTop_toBottomOf="@id/rec_recycler"
+        android:layout_marginTop="15dp"/>
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/rec_swiper"
+        android:layout_width="350dp"
+        android:layout_height="70dp"
+        app:layout_constraintStart_toStartOf="@id/rec_guide_line"
+        app:layout_constraintEnd_toEndOf="@id/rec_guide_line"
+        app:layout_constraintTop_toBottomOf="@id/rec_hot"
+        android:background="@color/white"
+        android:layout_marginTop="10dp" />
+<!--thema -> tabstyle.xml 수정 필요-->
 
 
 

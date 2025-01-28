@@ -40,7 +40,7 @@ public class RecentFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_recent, container, false);
 
-        recyclerView = view.findViewById(R.id.search_recycler_view);
+        recyclerView = view.findViewById(R.id.rec_recycler);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         itemList = new ArrayList<>();
