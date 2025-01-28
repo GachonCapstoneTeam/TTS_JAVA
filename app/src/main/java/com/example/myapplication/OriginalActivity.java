@@ -6,8 +6,6 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Base64;
-import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,11 +26,11 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+
 public class OriginalActivity extends AppCompatActivity {
 
     private TextView oriScript, oriTitle, oriDate, oriName;
-    private ImageButton skipBack, stop, play, skipForward, pdf;
-    private Button backButton;
+    private ImageButton skipBackButton, stopButton, playButton, skipForwardButton, backButton, pdfButton;
     private boolean isPlaying = false;
 
     private MediaPlayer mediaPlayer;
@@ -47,14 +45,17 @@ public class OriginalActivity extends AppCompatActivity {
         // View 초기화
         backButton = findViewById(R.id.backbutton_ori);
         oriScript = findViewById(R.id.oriScript);
-        skipBack = findViewById(R.id.skipback);
-        stop = findViewById(R.id.stop);
-        play = findViewById(R.id.play);
-        skipForward = findViewById(R.id.skipforward);
-        pdf = findViewById(R.id.pdf);
         oriTitle = findViewById(R.id.oriTitle);
         oriName = findViewById(R.id.oriName);
         oriDate = findViewById(R.id.ori_date);
+        playButton = findViewById(R.id.button_play);
+        skipBackButton = findViewById(R.id.skipback);
+        skipForwardButton = findViewById(R.id.skipforward);
+        stopButton = findViewById(R.id.stop);
+
+        // PDF 열기 버튼 초기화
+        pdfButton = findViewById(R.id.full_screen);
+        pdfButton.setImageResource(R.drawable.pdf);
 
         // Intent에서 데이터 받아오기
         Intent intent = getIntent();
@@ -66,49 +67,33 @@ public class OriginalActivity extends AppCompatActivity {
         String date = intent.getStringExtra("Date");
         String pdfcontent = intent.getStringExtra("PDF Content");
 
-
         // 제목과 내용 설정
         if (content != null) {
             oriScript.setText(content);
         }
-
+        if (category != null) {
+            oriName.setText(category);
+        }
         if (pdfcontent != null) {
             oriScript.setText(pdfcontent);
         }
-
         if (title != null) {
             oriTitle.setText(title);
-            oriTitle.setSelected(true); // 마키 효과를 위한 선택 상태 설정
-
+            oriTitle.setSelected(true);
         }
-
-        if(date != null) {
+        if (date != null) {
             oriDate.setText(date);
         }
 
+        // PDF 열기 버튼 클릭 이벤트
+        pdfButton.setOnClickListener(v -> {
+            if (pdfUrl != null && !pdfUrl.isEmpty()) {
+                Intent pdfIntent = new Intent(Intent.ACTION_VIEW);
+                pdfIntent.setDataAndType(Uri.parse(pdfUrl), "application/pdf");
+                pdfIntent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
 
-        // 서버에서 텍스트 가져오기
-        // fetchTextFromServer(); // 기존 서버에서 텍스트를 가져오는 부분을 수정하려면 주석 해제하세요.
-
-        // 손잡이 버튼 클릭 이벤트
-
-        // 버튼 동작 처리
-        backButton.setOnClickListener(v -> finish());
-        skipBack.setOnClickListener(v -> Toast.makeText(this, "Skip Back", Toast.LENGTH_SHORT).show());
-        stop.setOnClickListener(v -> stopAudio());
-        play.setOnClickListener(v -> togglePlayPause());
-        skipForward.setOnClickListener(v -> Toast.makeText(this, "Skip Forward", Toast.LENGTH_SHORT).show());
-
-        pdf.setOnClickListener(v -> {
-            String url_pdf = intent.getStringExtra("PDF_URL"); // 인텐트에서 URL 가져오기
-            if (url_pdf != null && !url_pdf.isEmpty()) {
-                Intent pdfintent = new Intent(Intent.ACTION_VIEW);
-                pdfintent.setDataAndType(Uri.parse(url_pdf), "application/pdf");
-                pdfintent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-
-                // PDF를 열 수 있는 앱이 있는지 확인
                 try {
-                    startActivity(pdfintent);
+                    startActivity(pdfIntent);
                 } catch (ActivityNotFoundException e) {
                     Toast.makeText(this, "PDF를 열 수 있는 앱이 설치되어 있지 않습니다.", Toast.LENGTH_SHORT).show();
                 }
@@ -117,10 +102,13 @@ public class OriginalActivity extends AppCompatActivity {
             }
         });
 
+        // 버튼 동작 처리
+        backButton.setOnClickListener(v -> finish());
+        playButton.setOnClickListener(v -> togglePlayPause());
+        stopButton.setOnClickListener(v -> stopAudio());
+        skipBackButton.setOnClickListener(v -> Toast.makeText(this, "Skip Back", Toast.LENGTH_SHORT).show());
+        skipForwardButton.setOnClickListener(v -> Toast.makeText(this, "Skip Forward", Toast.LENGTH_SHORT).show());
     }
-
-    // 메뉴 숨기기/보이기
-
 
     // TTS 기능 수행
     private void performTextToSpeech() {
@@ -187,13 +175,13 @@ public class OriginalActivity extends AppCompatActivity {
             mediaPlayer.start();
 
             isPlaying = true;
-            runOnUiThread(() -> play.setImageResource(R.drawable.pause));
+            runOnUiThread(() -> playButton.setImageResource(R.drawable.pause));
 
             mediaPlayer.setOnCompletionListener(mp -> {
                 mediaPlayer.release();
                 mediaPlayer = null;
                 isPlaying = false;
-                runOnUiThread(() -> play.setImageResource(R.drawable.play));
+                runOnUiThread(() -> playButton.setImageResource(R.drawable.play));
                 tempAudioFile.delete();
             });
 
@@ -209,11 +197,11 @@ public class OriginalActivity extends AppCompatActivity {
             if (isPlaying) {
                 mediaPlayer.pause();
                 isPlaying = false;
-                play.setImageResource(R.drawable.play);
+                playButton.setImageResource(R.drawable.play);
             } else {
                 mediaPlayer.start();
                 isPlaying = true;
-                play.setImageResource(R.drawable.pause);
+                playButton.setImageResource(R.drawable.pause);
             }
         } else {
             performTextToSpeech();
@@ -227,7 +215,7 @@ public class OriginalActivity extends AppCompatActivity {
             mediaPlayer.release();
             mediaPlayer = null;
             isPlaying = false;
-            play.setImageResource(R.drawable.play);
+            playButton.setImageResource(R.drawable.play);
         }
     }
 }
