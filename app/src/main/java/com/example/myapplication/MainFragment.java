@@ -15,6 +15,11 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.myapplication.adapter.ReportAdapter;
 import com.example.myapplication.view.Item;
+import com.google.android.material.tabs.TabLayout;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,19 +31,17 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 public class MainFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private ReportAdapter reportAdapter;
     private SwipeRefreshLayout swipeRefreshLayout;
     private List<Item> allItems = new ArrayList<>(); // 전체 데이터를 저장
+    private List<Item> filteredItems = new ArrayList<>(); // 필터링된 데이터를 저장
     private boolean isLoading = false; // 로딩 상태를 추적
     private int currentPage = 1; // 현재 페이지 번호
     private final int pageSize = 7; // 한 페이지에 표시할 데이터 개수
+    private TabLayout tabLayout;
 
     @Nullable
     @Override
@@ -76,6 +79,9 @@ public class MainFragment extends Fragment {
                 }
             }
         });
+
+        tabLayout = view.findViewById(R.id.tab_layout); // TabLayout 초기화
+        setupTabListener(); // Tab 클릭 리스너 설정
 
         // 데이터 가져오기
         fetchItemsFromServer();
@@ -157,5 +163,55 @@ public class MainFragment extends Fragment {
     private void loadNextPage() {
         currentPage++; // 다음 페이지 번호 증가
         fetchItemsFromServer(); // 서버에서 데이터 가져오기
+    }
+
+    // Tab 클릭 리스너 설정
+    private void setupTabListener() {
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                filterItemsByTab(tab.getPosition());
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {}
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {}
+        });
+    }
+
+    // 탭에 따라 아이템 필터링
+    private void filterItemsByTab(int tabPosition) {
+        filteredItems.clear();
+
+        switch (tabPosition) {
+            case 0: // "전체"
+                filteredItems.addAll(allItems);
+                break;
+            case 1: // "기업"
+                for (Item item : allItems) {
+                    if (item.getCategory().equals("기업")) {
+                        filteredItems.add(item);
+                    }
+                }
+                break;
+            case 2: // "산업"
+                for (Item item : allItems) {
+                    if (item.getCategory().equals("산업")) {
+                        filteredItems.add(item);
+                    }
+                }
+                break;
+            case 3: // "정기"
+                for (Item item : allItems) {
+                    if (item.getCategory().equals("정기")) {
+                        filteredItems.add(item);
+                    }
+                }
+                break;
+        }
+
+        reportAdapter.setItems(filteredItems); // 필터링된 데이터를 어댑터에 설정
     }
 }

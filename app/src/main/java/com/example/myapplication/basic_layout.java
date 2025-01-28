@@ -1,55 +1,61 @@
 package com.example.myapplication;
 
+import android.os.Bundle;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import android.os.Bundle;
-import android.view.MenuItem;
-import com.google.android.material.navigation.NavigationBarView;
+import androidx.viewpager2.widget.ViewPager2;
+
+import com.example.myapplication.adapter.ViewPagerAdapter;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class basic_layout extends AppCompatActivity {
 
-    MainFragment mainFragment;
-    SearchFragment searchFragment;
-    SettingFragment settingFragment;
-
+    private ViewPager2 viewPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.basic_layout);
 
-        mainFragment = new MainFragment();
-        searchFragment = new SearchFragment();
-        settingFragment = new SettingFragment();
+        viewPager = findViewById(R.id.view_pager);
 
-        getSupportFragmentManager().beginTransaction().replace(R.id.container, mainFragment).commit();
+        ViewPagerAdapter adapter = new ViewPagerAdapter(this);
+        viewPager.setAdapter(adapter);
 
-        NavigationBarView navigationBarView = findViewById(R.id.navigation_menu);
-        navigationBarView.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                int itemId = item.getItemId();
+        BottomNavigationView navigationMenu = findViewById(R.id.navigation_menu);
 
-                if (itemId == R.id.main) {
-                    getSupportFragmentManager().beginTransaction().replace(R.id.container, mainFragment).commit();
+        viewPager.setCurrentItem(1);
+        navigationMenu.setSelectedItemId(R.id.home);
 
-                    return true;
-
-                } /*else if (itemId == R.id.search) {
-                    getSupportFragmentManager().beginTransaction().replace(R.id.container, searchFragment).commit();
-                    return true;
-                } else if (itemId == R.id.setting) {
-                    getSupportFragmentManager().beginTransaction().replace(R.id.container, settingFragment).commit();
-                    return true;
-                }*/ else {
-                    return false;
-                }
-
+        navigationMenu.setOnItemSelectedListener(item -> {
+            if (item.getItemId() == R.id.recent) {
+                viewPager.setCurrentItem(0); // SearchFragment
+            } else if (item.getItemId() == R.id.home) {
+                viewPager.setCurrentItem(1); // HomeFragment
+            } else if (item.getItemId() == R.id.thema) {
+                viewPager.setCurrentItem(2); // MainFragment
+            } else if (item.getItemId() == R.id.setting) {
+                viewPager.setCurrentItem(3); // SettingFragment
             }
+            return true;
         });
 
 
+        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+                if (position == 0) {
+                    navigationMenu.setSelectedItemId(R.id.recent);
+                } else if (position == 1) {
+                    navigationMenu.setSelectedItemId(R.id.home);
+                } else if (position == 2) {
+                    navigationMenu.setSelectedItemId(R.id.thema);
+                } else if (position == 3) {
+                    navigationMenu.setSelectedItemId(R.id.setting);
+                }
+            }
+        });
     }
-
-
 }

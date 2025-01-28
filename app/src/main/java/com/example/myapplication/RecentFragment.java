@@ -25,7 +25,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class SearchFragment extends Fragment {
+public class RecentFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private ItemAdapter itemAdapter;
@@ -38,7 +38,7 @@ public class SearchFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_search, container, false);
+        View view = inflater.inflate(R.layout.fragment_recent, container, false);
 
         recyclerView = view.findViewById(R.id.search_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -48,7 +48,7 @@ public class SearchFragment extends Fragment {
         // 초기 데이터 로드
         fetchDataFromServer(currentPage);
 
-        itemAdapter = new ItemAdapter(getContext());
+        itemAdapter = new ItemAdapter(getContext(), itemList);
         recyclerView.setAdapter(itemAdapter);
 
         itemAdapter.setItems(itemList);

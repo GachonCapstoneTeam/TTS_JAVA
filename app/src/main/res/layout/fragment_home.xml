@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:weightSum="10"
+    android:orientation="vertical">
+
+    <!-- 오디오 플레이어-->
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/home_media_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="4"
+        android:background="@drawable/background_round">
+
+        <!--로고 부분 임시-->
+        <TextView
+            android:id="@+id/home_logo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="@+id/home_media_container"
+            app:layout_constraintStart_toStartOf="@id/home_media_container"
+            app:layout_constraintEnd_toEndOf="@id/home_media_container"
+            android:layout_margin="15dp"
+            android:text="TalkStock"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            android:textSize="15dp"
+            android:shadowColor="@color/gray_dark"
+            android:shadowDx="5"
+            android:shadowDy="5"
+            android:shadowRadius="2"/>
+
+        <!--현재 재생 중인 트랙, 크기, 색상, 위치 조정 필요-->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/home_display"
+                android:layout_width="300dp"
+                android:layout_height="150dp"
+                android:background="@color/white"
+                app:layout_constraintTop_toBottomOf="@id/home_logo"
+                app:layout_constraintStart_toStartOf="@id/home_media_container"
+                app:layout_constraintEnd_toEndOf="@id/home_media_container"
+                android:layout_marginTop="15dp"/>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/home_player"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toBottomOf="@id/home_display"
+            app:layout_constraintStart_toStartOf="@id/home_media_container"
+            app:layout_constraintEnd_toEndOf="@id/home_media_container"
+            app:layout_constraintBottom_toBottomOf="@id/home_media_container"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"
+            android:layout_marginBottom="10dp">
+
+            <include
+                layout="@layout/audio_parts"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- 플레이 리스트-->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/home_playlist"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="6">
+
+        <TextView
+            android:id="@+id/mylist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="My List"
+            android:textStyle="normal"
+            android:textColor="@color/black"
+            android:textSize="25dp"
+            app:layout_constraintStart_toStartOf="@id/home_playlist"
+            app:layout_constraintEnd_toEndOf="@id/home_playlist"
+            app:layout_constraintTop_toTopOf="@id/home_playlist"
+            android:layout_margin="8dp"/>
+
+        <View
+            android:id="@+id/home_guide_line"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="@color/black"
+            app:layout_constraintTop_toBottomOf="@id/mylist"
+            app:layout_constraintStart_toStartOf="@id/mylist"
+            app:layout_constraintEnd_toEndOf="@id/mylist"
+            android:layout_margin="10dp"/>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/home_button_part"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/home_guide_line">
+
+            <Button
+                android:id="@+id/myWish"
+                android:layout_width="60dp"
+                android:layout_height="25dp"
+                android:layout_margin="5dp"
+                android:background="@drawable/list_button_black"
+                android:text="내 관심"
+                android:textColor="@color/white"
+                android:textSize="10sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/top10"/>
+
+            <Button
+                android:id="@+id/top10"
+                android:layout_width="60dp"
+                android:layout_height="25dp"
+                android:layout_margin="5dp"
+                android:background="@drawable/list_button"
+                android:text="TOP 30"
+                android:textColor="@color/black"
+                android:textSize="10sp"
+                app:layout_constraintStart_toEndOf="@id/myWish"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/mysave"/>
+
+            <Button
+                android:id="@+id/mysave"
+                android:layout_width="60dp"
+                android:layout_height="25dp"
+                android:layout_margin="5dp"
+                android:background="@drawable/list_button"
+                android:text="저장 목록"
+                android:textColor="@color/black"
+                android:textSize="10sp"
+                app:layout_constraintStart_toEndOf="@id/top10"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/current_list"
+                />
+
+            <Button
+                android:id="@+id/current_list"
+                android:layout_width="60dp"
+                android:layout_height="25dp"
+                android:layout_margin="5dp"
+                android:background="@drawable/list_button"
+                android:text="최신 목록"
+                android:textColor="@color/black"
+                android:textSize="10sp"
+                app:layout_constraintStart_toEndOf="@id/mysave"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/home_swiper"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/home_button_part"
+            app:layout_constraintBottom_toBottomOf="@id/home_playlist">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/home_recycler"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="5dp"
+                android:orientation="vertical"/>
+
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>

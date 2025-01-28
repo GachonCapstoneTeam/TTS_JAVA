@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:background="#74FF92"
+        android:background="@color/green"
         android:padding="10dp">
 
         <TextView
@@ -47,44 +47,42 @@
     <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#74FF92">
+        android:background="@color/green">
 
-        <LinearLayout
-            android:layout_width="wrap_content"
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tab_layout"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:layout_margin="5dp">
 
-            <Button
+            <com.google.android.material.tabs.TabItem
+                android:id="@+id/main_tab_all"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="전체"
-                android:background="@android:color/transparent"
-                android:textColor="#000"/>
+                android:text="전체"/>
 
-            <Button
+            <com.google.android.material.tabs.TabItem
+                android:id="@+id/main_tab_company"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="기업"
-                android:background="@android:color/transparent"
-                android:textColor="#000"/>
+                android:text="기업"/>
 
-            <Button
+            <com.google.android.material.tabs.TabItem
+                android:id="@+id/main_tab_industry"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="산업"
-                android:background="@android:color/transparent"
-                android:textColor="#000"/>
+                android:text="산업"/>
 
-            <Button
+            <com.google.android.material.tabs.TabItem
+                android:id="@+id/main_tab_regular"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="정기"
-                android:background="@android:color/transparent"
-                android:textColor="#000"/>
-        </LinearLayout>
+                android:text="정기"/>
+
+        </com.google.android.material.tabs.TabLayout>
+
     </HorizontalScrollView>
 
-    <!-- RecyclerView Section -->
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swiper"
         android:layout_width="match_parent"
