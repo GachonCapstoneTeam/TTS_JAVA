@@ -94,7 +94,7 @@ public class MainFragment extends Fragment {
         isLoading = true; // 로딩 중 상태로 설정
 
         OkHttpClient client = new OkHttpClient();
-        String url = "http://10.0.2.2:8000/textload/content/?page=" + currentPage + "&size=" + pageSize; // 페이지 번호와 크기 전달
+        String url = "https://40.80.148.190:8000/textload/content/?page=" + currentPage + "&size=" + pageSize; // 페이지 번호와 크기 전달
 
         Request request = new Request.Builder().url(url).build();
 
