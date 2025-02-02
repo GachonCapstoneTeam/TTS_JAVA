@@ -123,7 +123,7 @@ public class HomeFragment extends Fragment {
     // 서버에서 데이터 가져오기
     private void fetchDataFromServer() {
         OkHttpClient client = new OkHttpClient();
-        String url = "https://40.80.148.190:8000"; // 서버 API URL
+        String url = "https://40.82.148.190:8000"; // 서버 API URL
 
         Request request = new Request.Builder()
                 .url(url)
