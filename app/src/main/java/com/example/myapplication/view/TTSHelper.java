@@ -6,84 +6,159 @@ import android.util.Base64;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.example.myapplication.BuildConfig;
 import com.example.myapplication.R;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
 public class TTSHelper {
+    private final Context context;
     private MediaPlayer mediaPlayer;
-    private Context context;
-    private boolean isPlaying = false; // 재생 상태를 추적
+    private boolean isPlaying = false;
+    private PlaybackCallback playbackCallback;
+    private final String API_KEY = BuildConfig.MY_KEY;
+
+    public interface PlaybackCallback {
+        void onTrackCompleted(); // 트랙 완료 시 호출
+    }
+
+    public void setPlaybackCallback(PlaybackCallback callback) {
+        this.playbackCallback = callback;
+    }
 
     public TTSHelper(Context context) {
         this.context = context;
     }
 
-    // 텍스트를 TTS로 변환하고 재생
-    public void performTextToSpeech(String text, String apiKey, ImageButton playButton) {
-        // 여기에서 TTS API 호출 및 음성 데이터 가져오기 로직을 구현합니다.
-        // 이 예제에서는 받은 base64 오디오 데이터를 사용합니다.
-        String audioContentEncoded = "base64_encoded_audio"; // 예제 데이터
+    public void performTextToSpeech(String text, String fileName, ImageButton playButton) {
+        File audioFile = new File(context.getCacheDir(), fileName);
+        if (audioFile.exists()) {
+            playAudio(audioFile, playButton);
+            return;
+        }
 
-        playAudio(audioContentEncoded, playButton);
+        OkHttpClient client = new OkHttpClient();
+        JSONObject data = new JSONObject();
+        try {
+            data.put("input", new JSONObject().put("text", text));
+            data.put("voice", new JSONObject().put("languageCode", "ko-KR"));
+            data.put("audioConfig", new JSONObject().put("audioEncoding", "MP3"));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        RequestBody body = RequestBody.create(data.toString(), MediaType.parse("application/json; charset=utf-8"));
+        Request request = new Request.Builder()
+                .url("https://texttospeech.googleapis.com/v1/text:synthesize?key=" + API_KEY)
+                .post(body)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+                showToast("TTS 요청 실패");
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful() && response.body() != null) {
+                    try {
+                        String json = response.body().string();
+                        JSONObject jsonObject = new JSONObject(json);
+                        String audioContentEncoded = jsonObject.getString("audioContent");
+                        saveAudioFile(audioContentEncoded, fileName, playButton);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        showToast("TTS 응답 파싱 실패");
+                    }
+                } else {
+                    int statusCode = response.code();
+                    String errorMessage = response.body() != null ? response.body().string() : "No error message";
+                    showToast("TTS 응답 실패: " + statusCode + " - " + errorMessage);
+                    System.out.println("TTS 응답 실패: " + statusCode + " - " + errorMessage);
+                }
+            }
+        });
     }
 
-    // 오디오 재생
-    private void playAudio(String base64Audio, ImageButton playButton) {
+    private void saveAudioFile(String base64Audio, String fileName, ImageButton playButton) {
         byte[] decodedAudio = Base64.decode(base64Audio, Base64.DEFAULT);
+        File audioFile = new File(context.getCacheDir(), fileName);
 
-        try {
-            File tempAudioFile = File.createTempFile("tts_audio", ".mp3", context.getCacheDir());
-            FileOutputStream fos = new FileOutputStream(tempAudioFile);
+        try (FileOutputStream fos = new FileOutputStream(audioFile)) {
             fos.write(decodedAudio);
-            fos.close();
 
-            mediaPlayer = new MediaPlayer();
-            mediaPlayer.setDataSource(tempAudioFile.getAbsolutePath());
-            mediaPlayer.prepare();
-            mediaPlayer.start();
-
-            isPlaying = true;
-            updatePlayButton(playButton);
-
-            mediaPlayer.setOnCompletionListener(mp -> {
-                mediaPlayer.release();
-                mediaPlayer = null;
-                isPlaying = false;
-                updatePlayButton(playButton);
-                tempAudioFile.delete();
-            });
-
+            runOnUiThread(() -> playAudio(audioFile, playButton));
         } catch (IOException e) {
             e.printStackTrace();
-            Toast.makeText(context, "오디오 재생 중 오류 발생", Toast.LENGTH_SHORT).show();
+            showToast("오디오 파일 저장 실패");
         }
     }
 
-    // 재생/일시정지 토글
+    private void playAudio(File audioFile, ImageButton playButton) {
+        if (mediaPlayer != null) {
+            mediaPlayer.release();
+        }
+
+        mediaPlayer = new MediaPlayer();
+        try {
+            mediaPlayer.setDataSource(audioFile.getAbsolutePath());
+            mediaPlayer.prepare();
+            mediaPlayer.start();
+            isPlaying = true;
+            playButton.setImageResource(R.drawable.pause);
+
+            mediaPlayer.setOnCompletionListener(mp -> {
+                isPlaying = false;
+                playButton.setImageResource(R.drawable.play);
+
+                if (playbackCallback != null) {
+                    playbackCallback.onTrackCompleted();
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+            showToast("오디오 재생 실패");
+        }
+    }
+
     public void togglePlayPause(ImageButton playButton) {
         if (mediaPlayer != null) {
             if (isPlaying) {
                 mediaPlayer.pause();
                 isPlaying = false;
+                playButton.setImageResource(R.drawable.play);
             } else {
                 mediaPlayer.start();
                 isPlaying = true;
+                playButton.setImageResource(R.drawable.pause);
             }
-            updatePlayButton(playButton);
-        } else {
-            Toast.makeText(context, "오디오가 없습니다.", Toast.LENGTH_SHORT).show();
         }
     }
 
-    // 버튼 상태 업데이트
-    private void updatePlayButton(ImageButton playButton) {
-        if (isPlaying) {
-            playButton.setImageResource(R.drawable.button_pause);
-        } else {
-            playButton.setImageResource(R.drawable.button_play);
+    private void showToast(String message) {
+        runOnUiThread(() ->
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        );
+    }
+
+    private void runOnUiThread(Runnable action) {
+        if (context instanceof android.app.Activity) {
+            ((android.app.Activity) context).runOnUiThread(action);
         }
     }
 }

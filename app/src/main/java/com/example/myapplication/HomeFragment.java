@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -59,23 +60,24 @@ public class HomeFragment extends Fragment {
         // 어댑터 초기화
         itemList = new ArrayList<>();
         adapter = new ItemAdapter(requireContext(), itemList);
-        adapter.setItems(itemList);
         recyclerView.setAdapter(adapter);
 
-        // TTSHelper 초기화
+        // TTSHelper 초기화 및 PlaybackCallback 설정
         ttsHelper = new TTSHelper(requireContext());
+        ttsHelper.setPlaybackCallback(() -> requireActivity().runOnUiThread(this::playNextTrack));
 
         // 서버에서 데이터 가져오기
         fetchDataFromServer();
 
-        // 더미 데이터 추가 (서버가 없을 때만)
-        addDummyData();
-
         // RecyclerView 아이템 클릭 이벤트
         adapter.setOnItemClickListener(item -> {
             currentTrackIndex = itemList.indexOf(item); // 클릭된 트랙의 인덱스 저장
-            ttsHelper.performTextToSpeech(item.getContent(), BuildConfig.MY_KEY, playButton);
+
+            playTrackAtIndex(currentTrackIndex);
+
+            ttsHelper.performTextToSpeech(item.getContent(), item.getTitle() + ".mp3", playButton);
         });
+
 
         // Play 버튼 이벤트
         playButton.setOnClickListener(v -> ttsHelper.togglePlayPause(playButton));
@@ -84,25 +86,20 @@ public class HomeFragment extends Fragment {
         prevButton.setOnClickListener(v -> {
             if (currentTrackIndex > 0) {
                 currentTrackIndex--;
-                Item prevTrack = itemList.get(currentTrackIndex);
-                ttsHelper.performTextToSpeech(prevTrack.getContent(), BuildConfig.MY_KEY, playButton);
+                playTrackAtIndex(currentTrackIndex);
             } else {
                 Toast.makeText(requireContext(), "이전 트랙이 없습니다.", Toast.LENGTH_SHORT).show();
             }
         });
 
         // 다시 듣기 버튼 이벤트
-        restartButton.setOnClickListener(v -> {
-            Item currentTrack = itemList.get(currentTrackIndex);
-            ttsHelper.performTextToSpeech(currentTrack.getContent(), BuildConfig.MY_KEY, playButton);
-        });
+        restartButton.setOnClickListener(v -> playTrackAtIndex(currentTrackIndex));
 
         // 다음 트랙 버튼 이벤트
         nextButton.setOnClickListener(v -> {
             if (currentTrackIndex < itemList.size() - 1) {
                 currentTrackIndex++;
-                Item nextTrack = itemList.get(currentTrackIndex);
-                ttsHelper.performTextToSpeech(nextTrack.getContent(), BuildConfig.MY_KEY, playButton);
+                playTrackAtIndex(currentTrackIndex);
             } else {
                 Toast.makeText(requireContext(), "다음 트랙이 없습니다.", Toast.LENGTH_SHORT).show();
             }
@@ -111,10 +108,41 @@ public class HomeFragment extends Fragment {
         return view;
     }
 
+    private void playTrackAtIndex(int index) {
+        if (index >= 0 && index < itemList.size()) {
+            Item track = itemList.get(index);
+
+            // UI 업데이트를 TTS 요청과 무관하게 수행
+            requireActivity().runOnUiThread(() -> {
+                TextView titleView = requireView().findViewById(R.id.home_display_title);
+                TextView scriptView = requireView().findViewById(R.id.home_display_script);
+
+                if (titleView != null && scriptView != null) {
+                    titleView.setText(track.getTitle());
+                    scriptView.setText(track.getContent());
+                    System.out.println("Title: " + track.getTitle());
+                    System.out.println("Content: " + track.getContent());
+                }
+            });
+
+            ttsHelper.performTextToSpeech(track.getContent(), track.getTitle() + ".mp3", playButton);
+        }
+    }
+
+
+    private void playNextTrack() {
+        if (currentTrackIndex < itemList.size() - 1) {
+            currentTrackIndex++;
+            playTrackAtIndex(currentTrackIndex);
+        } else {
+            Toast.makeText(requireContext(), "마지막 트랙입니다.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     // 서버에서 데이터 가져오기
     private void fetchDataFromServer() {
         OkHttpClient client = new OkHttpClient();
-        String url = "http://your-server-url/api/reports"; // 서버 API URL
+        String url = "https://40.82.148.190:8000"; // 서버 API URL
 
         Request request = new Request.Builder()
                 .url(url)
@@ -125,9 +153,10 @@ public class HomeFragment extends Fragment {
             @Override
             public void onFailure(Call call, IOException e) {
                 e.printStackTrace();
-                requireActivity().runOnUiThread(() ->
-                        Toast.makeText(requireContext(), "데이터를 가져오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
-                );
+                requireActivity().runOnUiThread(() -> {
+                    Toast.makeText(requireContext(), "서버 연결 실패. 더미 데이터를 로드합니다.", Toast.LENGTH_SHORT).show();
+                    loadDummyData(); // 실패 시 더미 데이터 로드
+                });
             }
 
             @Override
@@ -140,15 +169,28 @@ public class HomeFragment extends Fragment {
                         e.printStackTrace();
                     }
                 } else {
-                    requireActivity().runOnUiThread(() ->
-                            Toast.makeText(requireContext(), "서버 응답이 올바르지 않습니다.", Toast.LENGTH_SHORT).show()
-                    );
+                    requireActivity().runOnUiThread(() -> {
+                        Toast.makeText(requireContext(), "서버 응답 오류. 더미 데이터를 로드합니다.", Toast.LENGTH_SHORT).show();
+                        loadDummyData(); // 응답 오류 시 더미 데이터 로드
+                    });
                 }
             }
         });
     }
 
-    // JSON 데이터를 파싱하고 RecyclerView에 설정
+    private void loadDummyData() {
+        List<Item> dummyItems = new ArrayList<>();
+        dummyItems.add(new Item("경제", "더미 리포트 1", "삼성증권", "https://example.com/dummy1.pdf", "2025-02-01", "123", "더미 데이터 내용 1입니다."));
+        dummyItems.add(new Item("기술", "더미 리포트 2", "LG증권", "https://example.com/dummy2.pdf", "2025-02-02", "234", "더미 데이터 내용 2입니다."));
+        dummyItems.add(new Item("산업", "더미 리포트 3", "한화증권", "https://example.com/dummy3.pdf", "2025-02-03", "345", "더미 데이터 내용 3입니다."));
+
+        requireActivity().runOnUiThread(() -> {
+            itemList.clear();
+            itemList.addAll(dummyItems);
+            adapter.notifyDataSetChanged();
+        });
+    }
+
     private void parseAndSetData(String jsonResponse) throws JSONException {
         List<Item> fetchedItems = new ArrayList<>();
         JSONArray jsonArray = new JSONArray(jsonResponse);
@@ -172,13 +214,5 @@ public class HomeFragment extends Fragment {
             itemList.addAll(fetchedItems);
             adapter.notifyDataSetChanged();
         });
-    }
-
-    // 더미 데이터 추가
-    private void addDummyData() {
-        itemList.add(new Item("경제", "더미 데이터 1", "ABC증권", "https://example.com/dummy1.pdf", "2025-01-13", "10", "이것은 더미 데이터 1입니다."));
-        itemList.add(new Item("기술", "더미 데이터 2", "XYZ증권", "https://example.com/dummy2.pdf", "2025-01-14", "20", "이것은 더미 데이터 2입니다."));
-        itemList.add(new Item("사회", "더미 데이터 3", "LMN증권", "https://example.com/dummy3.pdf", "2025-01-15", "30", "이것은 더미 데이터 3입니다."));
-        adapter.notifyDataSetChanged();
     }
 }

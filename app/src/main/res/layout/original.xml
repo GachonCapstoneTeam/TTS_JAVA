@@ -21,7 +21,7 @@
             app:layout_constraintEnd_toEndOf="@id/ori_container">
 
             <ImageButton
-                android:id="@+id/backbutton_ori"
+                android:id="@+id/ori_back"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/back_button"
@@ -40,7 +40,7 @@
                 android:shadowDx="3"
                 android:shadowDy="3"
                 android:shadowColor="@color/gray_dark"
-                app:layout_constraintTop_toBottomOf="@id/backbutton_ori"
+                app:layout_constraintTop_toBottomOf="@id/ori_back"
                 app:layout_constraintStart_toStartOf="@id/ori_title_container"
                 android:layout_marginLeft="15dp"
                 android:layout_marginRight="15dp"/>
@@ -117,7 +117,7 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <LinearLayout
             android:id="@+id/ori_player"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -126,9 +126,100 @@
             app:layout_constraintBottom_toBottomOf="@id/ori_container"
             app:layout_constraintEnd_toEndOf="@id/ori_content_container">
 
-            <include
-                layout="@layout/audio_parts"/>
-        </androidx.constraintlayout.widget.ConstraintLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/ori_progressbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginLeft="30dp"
+                    android:layout_marginRight="30dp">
+
+                    <TextView
+                        android:id="@+id/ori_current_time"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        android:text="0:00"
+                        android:textColor="@color/black"
+                        android:textSize="13dp" />
+
+                    <TextView
+                        android:id="@+id/ori_full_time"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        android:text="0:00"
+                        android:textColor="@color/black"
+                        android:textSize="13dp" />
+
+                    <ProgressBar
+                        android:id="@+id/ori_progress_bar"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintStart_toEndOf="@id/ori_current_time"
+                        app:layout_constraintEnd_toStartOf="@id/ori_full_time"
+                        app:layout_constraintTop_toTopOf="parent"
+                        style="?android:attr/progressBarStyleHorizontal"
+                        android:layout_marginLeft="8dp"
+                        android:layout_marginRight="8dp"/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+                <LinearLayout
+                    android:id="@+id/ori_audio_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center">
+
+                    <ImageButton
+                        android:id="@+id/ori_restart"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/restart"
+                        android:layout_margin="15dp"/>
+
+                    <ImageButton
+                        android:id="@+id/ori_prev"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/prev"
+                        android:layout_margin="15dp"/>
+
+                    <ImageButton
+                        android:id="@+id/ori_button_play"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/button_play"
+                        android:layout_margin="5dp"/>
+
+                    <ImageButton
+                        android:id="@+id/ori_next"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/next"
+                        android:layout_margin="15dp"/>
+
+                    <ImageButton
+                        android:id="@+id/ori_pdf"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:background="@drawable/pdf"
+                        android:layout_margin="15dp"/>
+
+
+
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
