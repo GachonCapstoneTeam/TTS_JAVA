@@ -1,10 +1,14 @@
 package com.example.myapplication;
 
+import android.content.Intent;
+import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -17,7 +21,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.myapplication.adapter.ItemAdapter;
 import com.example.myapplication.entity.Item;
 import com.example.myapplication.view.TTSHelper;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -37,9 +40,12 @@ public class HomeFragment extends Fragment {
     private RecyclerView recyclerView;
     private ItemAdapter adapter;
     private TTSHelper ttsHelper;
-    private ImageButton playButton;
+    private ImageButton playButton, fullScreenButton;
     private int currentTrackIndex = 0; // 현재 재생 중인 트랙 인덱스
     private List<Item> itemList;
+    private ProgressBar progressBar;
+    private TextView currentTimeText, fullTimeText;
+    private Handler progressHandler = new Handler();
 
     @Nullable
     @Override
@@ -52,6 +58,12 @@ public class HomeFragment extends Fragment {
         ImageButton prevButton = view.findViewById(R.id.prev);
         playButton = view.findViewById(R.id.button_play);
         ImageButton nextButton = view.findViewById(R.id.next);
+        ImageButton fullScreenButton = view.findViewById(R.id.full_screen);
+
+        //재생바 초기화
+        progressBar = view.findViewById(R.id.progress_bar);
+        currentTimeText = view.findViewById(R.id.current_time);
+        fullTimeText = view.findViewById(R.id.full_time);
 
         // RecyclerView 초기화
         recyclerView = view.findViewById(R.id.home_recycler);
@@ -72,12 +84,8 @@ public class HomeFragment extends Fragment {
         // RecyclerView 아이템 클릭 이벤트
         adapter.setOnItemClickListener(item -> {
             currentTrackIndex = itemList.indexOf(item); // 클릭된 트랙의 인덱스 저장
-
             playTrackAtIndex(currentTrackIndex);
-
-            ttsHelper.performTextToSpeech(item.getContent(), item.getTitle() + ".mp3", playButton);
         });
-
 
         // Play 버튼 이벤트
         playButton.setOnClickListener(v -> ttsHelper.togglePlayPause(playButton));
@@ -105,6 +113,23 @@ public class HomeFragment extends Fragment {
             }
         });
 
+        fullScreenButton.setOnClickListener(v -> {
+            if (currentTrackIndex >= 0 && currentTrackIndex < itemList.size()) {
+                Item currentItem = itemList.get(currentTrackIndex);
+
+                Intent intent = new Intent(getContext(), OriginalActivity.class);
+                intent.putExtra("Title", currentItem.getTitle());
+                intent.putExtra("Content", currentItem.getContent());
+                intent.putExtra("Category", currentItem.getCategory());
+                intent.putExtra("Date", currentItem.getDate());
+                intent.putExtra("PDF_URL", currentItem.getPdfUrl());
+
+                startActivity(intent);
+            } else {
+                Toast.makeText(getContext(), "선택된 트랙이 없습니다.", Toast.LENGTH_SHORT).show();
+            }
+        });
+
         return view;
     }
 
@@ -112,7 +137,6 @@ public class HomeFragment extends Fragment {
         if (index >= 0 && index < itemList.size()) {
             Item track = itemList.get(index);
 
-            // UI 업데이트를 TTS 요청과 무관하게 수행
             requireActivity().runOnUiThread(() -> {
                 TextView titleView = requireView().findViewById(R.id.home_display_title);
                 TextView scriptView = requireView().findViewById(R.id.home_display_script);
@@ -120,9 +144,21 @@ public class HomeFragment extends Fragment {
                 if (titleView != null && scriptView != null) {
                     titleView.setText(track.getTitle());
                     scriptView.setText(track.getContent());
-                    System.out.println("Title: " + track.getTitle());
-                    System.out.println("Content: " + track.getContent());
                 }
+
+                // ProgressBar 초기화
+                progressBar.setProgress(0);
+                currentTimeText.setText("00:00");
+                fullTimeText.setText("00:00");
+
+                // 🔹 오디오가 준비된 후 ProgressBar 업데이트 실행
+                ttsHelper.setPlaybackCallback(() -> {
+                    requireActivity().runOnUiThread(() -> {
+                        progressHandler.post(updateProgressRunnable);
+                    });
+                });
+
+                playButton.setImageResource(R.drawable.pause);
             });
 
             ttsHelper.performTextToSpeech(track.getContent(), track.getTitle() + ".mp3", playButton);
@@ -135,7 +171,9 @@ public class HomeFragment extends Fragment {
             currentTrackIndex++;
             playTrackAtIndex(currentTrackIndex);
         } else {
-            Toast.makeText(requireContext(), "마지막 트랙입니다.", Toast.LENGTH_SHORT).show();
+            requireActivity().runOnUiThread(() ->
+                    Toast.makeText(requireContext(), "마지막 트랙입니다.", Toast.LENGTH_SHORT).show()
+            );
         }
     }
 
@@ -191,6 +229,41 @@ public class HomeFragment extends Fragment {
         });
     }
 
+
+    private Runnable updateProgressRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (ttsHelper.getMediaPlayer() != null) {
+                MediaPlayer mediaPlayer = ttsHelper.getMediaPlayer();
+
+                if (mediaPlayer.isPlaying()) {
+                    int currentPosition = mediaPlayer.getCurrentPosition();
+                    int totalDuration = mediaPlayer.getDuration();
+
+                    if (totalDuration > 0) {
+                        int progress = (int) ((currentPosition / (float) totalDuration) * 100);
+                        progressBar.setProgress(progress);
+                    }
+
+                    // 시간 표시 업데이트
+                    currentTimeText.setText(formatTime(currentPosition));
+                    fullTimeText.setText(formatTime(totalDuration));
+
+                    // 1초마다 갱신
+                    progressHandler.postDelayed(this, 1000);
+                }
+            }
+        }
+    };
+
+
+    //시간 변환 함수
+    private String formatTime(int milliseconds) {
+        int minutes = (milliseconds / 1000) / 60;
+        int seconds = (milliseconds / 1000) % 60;
+        return String.format("%02d:%02d", minutes, seconds);
+    }
+
     private void parseAndSetData(String jsonResponse) throws JSONException {
         List<Item> fetchedItems = new ArrayList<>();
         JSONArray jsonArray = new JSONArray(jsonResponse);
@@ -215,4 +288,6 @@ public class HomeFragment extends Fragment {
             adapter.notifyDataSetChanged();
         });
     }
+
 }
+

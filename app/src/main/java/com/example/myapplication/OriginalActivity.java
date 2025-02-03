@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
@@ -13,18 +14,18 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.myapplication.R;
-
+import java.io.File;
 import java.io.IOException;
 
 public class OriginalActivity extends AppCompatActivity {
 
     private TextView oriScript, oriTitle, oriDate, oriName;
     private TextView oriCurrentTime, oriFullTime;
-    private ImageButton playButton, skipBackButton, skipForwardButton, restartButton, nextButton, pdfButton, backButton;
+    private ImageButton playButton, skipBackButton, skipForwardButton, restartButton, pdfButton, backButton;
     private ProgressBar progressBar;
     private MediaPlayer mediaPlayer;
     private boolean isPlaying = false;
+    private Handler progressHandler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +62,9 @@ public class OriginalActivity extends AppCompatActivity {
         if (category != null) oriName.setText(category);
         if (date != null) oriDate.setText(date);
 
+        // 🔹 화면이 로드될 때 자동으로 오디오 파일을 로드하여 준비
+        playAudio(content, title + ".mp3");
+
         // 버튼 이벤트 설정
         backButton.setOnClickListener(v -> finish());
         playButton.setOnClickListener(v -> togglePlayPause());
@@ -73,21 +77,57 @@ public class OriginalActivity extends AppCompatActivity {
         progressBar.setProgress(0);
     }
 
-    private void togglePlayPause() {
+    private void playAudio(String content, String fileName) {
+        File audioFile = new File(getCacheDir(), fileName);
+        if (!audioFile.exists()) {
+            Toast.makeText(this, "오디오 파일이 존재하지 않습니다.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         if (mediaPlayer != null) {
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
+
+        mediaPlayer = new MediaPlayer();
+        try {
+            mediaPlayer.setDataSource(audioFile.getAbsolutePath());
+            mediaPlayer.prepare();
+            mediaPlayer.start();
+            isPlaying = true;
+            playButton.setBackgroundResource(R.drawable.button_pause);
+
+            // ProgressBar 업데이트 시작
+            progressHandler.post(updateProgressRunnable);
+
+            mediaPlayer.setOnCompletionListener(mp -> {
+                isPlaying = false;
+                playButton.setBackgroundResource(R.drawable.button_play);
+                progressBar.setProgress(0);
+            });
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            Toast.makeText(this, "오디오 재생 실패", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void togglePlayPause() {
+        if (mediaPlayer == null) {
+            playAudio(oriScript.getText().toString(), oriTitle.getText().toString() + ".mp3");
+        } else {
             if (isPlaying) {
                 mediaPlayer.pause();
                 isPlaying = false;
-                playButton.setBackgroundResource(R.drawable.button_play); // play 아이콘으로 변경
+                playButton.setBackgroundResource(R.drawable.button_play);
             } else {
                 mediaPlayer.start();
                 isPlaying = true;
-                playButton.setBackgroundResource(R.drawable.button_pause); // pause 아이콘으로 변경
+                playButton.setBackgroundResource(R.drawable.button_pause);
             }
-        } else {
-            Toast.makeText(this, "재생할 오디오가 없습니다.", Toast.LENGTH_SHORT).show();
         }
     }
+
 
     private void restartAudio() {
         if (mediaPlayer != null) {
@@ -101,7 +141,7 @@ public class OriginalActivity extends AppCompatActivity {
     private void skipBack() {
         if (mediaPlayer != null) {
             int currentPosition = mediaPlayer.getCurrentPosition();
-            int skipTime = 5000; // 5초 이전으로 이동
+            int skipTime = 5000;
             mediaPlayer.seekTo(Math.max(currentPosition - skipTime, 0));
         }
     }
@@ -109,10 +149,11 @@ public class OriginalActivity extends AppCompatActivity {
     private void skipForward() {
         if (mediaPlayer != null) {
             int currentPosition = mediaPlayer.getCurrentPosition();
-            int skipTime = 5000; // 5초 이후로 이동
+            int skipTime = 5000;
             mediaPlayer.seekTo(Math.min(currentPosition + skipTime, mediaPlayer.getDuration()));
         }
     }
+
 
     private void openPdf(String pdfUrl) {
         if (pdfUrl != null && !pdfUrl.isEmpty()) {
@@ -128,6 +169,33 @@ public class OriginalActivity extends AppCompatActivity {
         } else {
             Toast.makeText(this, "PDF URL이 없습니다.", Toast.LENGTH_SHORT).show();
         }
+    }
+
+
+    private Runnable updateProgressRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+                int currentPosition = mediaPlayer.getCurrentPosition();
+                int totalDuration = mediaPlayer.getDuration();
+
+                if (totalDuration > 0) {
+                    int progress = (int) ((currentPosition / (float) totalDuration) * 100);
+                    progressBar.setProgress(progress);
+                }
+
+                oriCurrentTime.setText(formatTime(currentPosition));
+                oriFullTime.setText(formatTime(totalDuration));
+
+                progressHandler.postDelayed(this, 1000);
+            }
+        }
+    };
+
+    private String formatTime(int milliseconds) {
+        int minutes = (milliseconds / 1000) / 60;
+        int seconds = (milliseconds / 1000) % 60;
+        return String.format("%02d:%02d", minutes, seconds);
     }
 
     @Override
