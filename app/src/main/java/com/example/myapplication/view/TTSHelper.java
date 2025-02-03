@@ -32,7 +32,7 @@ public class TTSHelper {
     private final String API_KEY = BuildConfig.MY_KEY;
 
     public interface PlaybackCallback {
-        void onTrackCompleted(); // 트랙 완료 시 호출
+        void onTrackCompleted();
     }
 
     public void setPlaybackCallback(PlaybackCallback callback) {
@@ -86,10 +86,7 @@ public class TTSHelper {
                         showToast("TTS 응답 파싱 실패");
                     }
                 } else {
-                    int statusCode = response.code();
-                    String errorMessage = response.body() != null ? response.body().string() : "No error message";
-                    showToast("TTS 응답 실패: " + statusCode + " - " + errorMessage);
-                    System.out.println("TTS 응답 실패: " + statusCode + " - " + errorMessage);
+                    showToast("TTS 응답 실패: " + response.code());
                 }
             }
         });
@@ -101,59 +98,70 @@ public class TTSHelper {
 
         try (FileOutputStream fos = new FileOutputStream(audioFile)) {
             fos.write(decodedAudio);
-
-            runOnUiThread(() -> playAudio(audioFile, playButton));
+            playAudio(audioFile, playButton);
         } catch (IOException e) {
             e.printStackTrace();
             showToast("오디오 파일 저장 실패");
         }
     }
 
-    private void playAudio(File audioFile, ImageButton playButton) {
+    public void playAudio(File audioFile, ImageButton playButton) {
         if (mediaPlayer != null) {
             mediaPlayer.release();
+            mediaPlayer = null;
         }
 
         mediaPlayer = new MediaPlayer();
         try {
             mediaPlayer.setDataSource(audioFile.getAbsolutePath());
-            mediaPlayer.prepare();
-            mediaPlayer.start();
-            isPlaying = true;
-            playButton.setImageResource(R.drawable.pause);
-
-            mediaPlayer.setOnCompletionListener(mp -> {
-                isPlaying = false;
-                playButton.setImageResource(R.drawable.play);
+            mediaPlayer.prepareAsync();
+            mediaPlayer.setOnPreparedListener(mp -> {
+                mp.start();
+                isPlaying = true;
+                playButton.setImageResource(R.drawable.pause);
 
                 if (playbackCallback != null) {
                     playbackCallback.onTrackCompleted();
                 }
             });
+
+            mediaPlayer.setOnCompletionListener(mp -> {
+                isPlaying = false;
+                runOnUiThread(() -> {
+                    playButton.setImageResource(R.drawable.play);
+                    if (playbackCallback != null) {
+                        playbackCallback.onTrackCompleted();
+                    }
+                });
+            });
+
         } catch (IOException e) {
             e.printStackTrace();
             showToast("오디오 재생 실패");
         }
     }
 
+
     public void togglePlayPause(ImageButton playButton) {
-        if (mediaPlayer != null) {
-            if (isPlaying) {
-                mediaPlayer.pause();
-                isPlaying = false;
-                playButton.setImageResource(R.drawable.play);
-            } else {
-                mediaPlayer.start();
-                isPlaying = true;
-                playButton.setImageResource(R.drawable.pause);
-            }
+        if (mediaPlayer == null) return;
+
+        if (mediaPlayer.isPlaying()) {
+            mediaPlayer.pause();
+            isPlaying = false;
+            playButton.setImageResource(R.drawable.play);
+        } else {
+            mediaPlayer.start();
+            isPlaying = true;
+            playButton.setImageResource(R.drawable.pause);
         }
     }
 
+    public MediaPlayer getMediaPlayer() {
+        return mediaPlayer;
+    }
+
     private void showToast(String message) {
-        runOnUiThread(() ->
-                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-        );
+        runOnUiThread(() -> Toast.makeText(context, message, Toast.LENGTH_SHORT).show());
     }
 
     private void runOnUiThread(Runnable action) {
