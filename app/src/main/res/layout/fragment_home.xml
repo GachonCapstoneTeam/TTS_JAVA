@@ -34,7 +34,7 @@
             android:shadowRadius="2"/>
 
         <!--현재 재생 중인 트랙, 크기, 색상, 위치 조정 필요-->
-            <androidx.recyclerview.widget.RecyclerView
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/home_display"
                 android:layout_width="300dp"
                 android:layout_height="150dp"
@@ -42,7 +42,38 @@
                 app:layout_constraintTop_toBottomOf="@id/home_logo"
                 app:layout_constraintStart_toStartOf="@id/home_media_container"
                 app:layout_constraintEnd_toEndOf="@id/home_media_container"
-                android:layout_marginTop="15dp"/>
+                android:layout_marginTop="15dp">
+
+                <TextView
+                    android:id="@+id/home_display_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="title"
+                    android:textColor="@color/black"
+                    android:textStyle="bold"
+                    android:textSize="20dp"
+                    app:layout_constraintStart_toStartOf="@id/home_display"
+                    app:layout_constraintEnd_toEndOf="@id/home_display"
+                    app:layout_constraintTop_toTopOf="@id/home_display"
+                    android:layout_marginTop="5dp" />
+
+                <ScrollView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fillViewport="true"
+                    android:scrollbars="none"
+                    app:layout_constraintTop_toBottomOf="@id/home_display_title"
+                    app:layout_constraintStart_toStartOf="@id/home_display"
+                    app:layout_constraintEnd_toEndOf="@id/home_display"
+                    app:layout_constraintBottom_toBottomOf="@id/home_display">
+                    <TextView
+                        android:id="@+id/home_display_script"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="script"
+                        android:textSize="16sp"/>
+                </ScrollView>
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/home_player"

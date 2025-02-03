@@ -86,12 +86,24 @@
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/rec_swiper"
         android:layout_width="350dp"
-        android:layout_height="70dp"
+        android:layout_height="80dp"
         app:layout_constraintStart_toStartOf="@id/rec_guide_line"
         app:layout_constraintEnd_toEndOf="@id/rec_guide_line"
         app:layout_constraintTop_toBottomOf="@id/rec_hot"
         android:background="@color/white"
         android:layout_marginTop="10dp" />
+
+    <com.tbuonomo.viewpagerdotsindicator.SpringDotsIndicator
+        android:id="@+id/rec_dots_indicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:dotsColor="@color/gray"
+        app:dotsSize="5dp"
+        app:dotsSpacing="2dp"
+        app:layout_constraintBottom_toBottomOf="@id/rec_swiper"
+        app:layout_constraintStart_toStartOf="@id/rec_swiper"
+        app:layout_constraintEnd_toEndOf="@id/rec_swiper"
+        android:layout_marginBottom="5dp"/>
 <!--thema -> tabstyle.xml 수정 필요-->
 
 

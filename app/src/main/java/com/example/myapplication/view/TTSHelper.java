@@ -31,12 +31,10 @@ public class TTSHelper {
     private PlaybackCallback playbackCallback;
     private final String API_KEY = BuildConfig.MY_KEY;
 
-    // 인터페이스 정의
     public interface PlaybackCallback {
         void onTrackCompleted(); // 트랙 완료 시 호출
     }
 
-    // PlaybackCallback 설정 메서드
     public void setPlaybackCallback(PlaybackCallback callback) {
         this.playbackCallback = callback;
     }
@@ -72,7 +70,7 @@ public class TTSHelper {
             @Override
             public void onFailure(Call call, IOException e) {
                 e.printStackTrace();
-                Toast.makeText(context, "TTS 요청 실패", Toast.LENGTH_SHORT).show();
+                showToast("TTS 요청 실패");
             }
 
             @Override
@@ -85,9 +83,13 @@ public class TTSHelper {
                         saveAudioFile(audioContentEncoded, fileName, playButton);
                     } catch (JSONException e) {
                         e.printStackTrace();
+                        showToast("TTS 응답 파싱 실패");
                     }
                 } else {
-                    Toast.makeText(context, "TTS 응답 실패", Toast.LENGTH_SHORT).show();
+                    int statusCode = response.code();
+                    String errorMessage = response.body() != null ? response.body().string() : "No error message";
+                    showToast("TTS 응답 실패: " + statusCode + " - " + errorMessage);
+                    System.out.println("TTS 응답 실패: " + statusCode + " - " + errorMessage);
                 }
             }
         });
@@ -99,10 +101,11 @@ public class TTSHelper {
 
         try (FileOutputStream fos = new FileOutputStream(audioFile)) {
             fos.write(decodedAudio);
-            playAudio(audioFile, playButton);
+
+            runOnUiThread(() -> playAudio(audioFile, playButton));
         } catch (IOException e) {
             e.printStackTrace();
-            Toast.makeText(context, "오디오 파일 저장 실패", Toast.LENGTH_SHORT).show();
+            showToast("오디오 파일 저장 실패");
         }
     }
 
@@ -123,14 +126,13 @@ public class TTSHelper {
                 isPlaying = false;
                 playButton.setImageResource(R.drawable.play);
 
-                // PlaybackCallback 호출
                 if (playbackCallback != null) {
                     playbackCallback.onTrackCompleted();
                 }
             });
         } catch (IOException e) {
             e.printStackTrace();
-            Toast.makeText(context, "오디오 재생 실패", Toast.LENGTH_SHORT).show();
+            showToast("오디오 재생 실패");
         }
     }
 
@@ -145,6 +147,18 @@ public class TTSHelper {
                 isPlaying = true;
                 playButton.setImageResource(R.drawable.pause);
             }
+        }
+    }
+
+    private void showToast(String message) {
+        runOnUiThread(() ->
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        );
+    }
+
+    private void runOnUiThread(Runnable action) {
+        if (context instanceof android.app.Activity) {
+            ((android.app.Activity) context).runOnUiThread(action);
         }
     }
 }

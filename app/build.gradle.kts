@@ -50,6 +50,8 @@ dependencies {
     implementation ("com.google.android.material:material:1.9.0")
     implementation ("com.squareup.retrofit2:retrofit:2.6.4")
     implementation ("com.squareup.retrofit2:converter-gson:2.6.4")
+    implementation ("androidx.viewpager2:viewpager2:1.0.0")
+    implementation ("com.tbuonomo:dotsindicator:5.0")
 
 }
 
