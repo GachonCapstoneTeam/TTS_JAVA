@@ -1,3 +1,4 @@
+// MainFragment.java
 package com.example.myapplication;
 
 import android.os.Bundle;
@@ -103,9 +104,10 @@ public class MainFragment extends Fragment {
             public void onFailure(Call call, IOException e) {
                 isLoading = false; // 로딩 상태 해제
                 e.printStackTrace();
-                getActivity().runOnUiThread(() ->
-                        Toast.makeText(getContext(), "Failed to fetch data", Toast.LENGTH_SHORT).show()
-                );
+                getActivity().runOnUiThread(() -> {
+                    Toast.makeText(getContext(), "Failed to fetch data, loading dummy data", Toast.LENGTH_SHORT).show();
+                    loadDummyData(); // 더미 데이터 로드
+                });
             }
 
             @Override
@@ -122,18 +124,31 @@ public class MainFragment extends Fragment {
                     } catch (JSONException e) {
                         e.printStackTrace();
                         isLoading = false; // 로딩 상태 해제
-                        getActivity().runOnUiThread(() ->
-                                Toast.makeText(getContext(), "Error parsing data", Toast.LENGTH_SHORT).show()
-                        );
+                        getActivity().runOnUiThread(() -> {
+                            Toast.makeText(getContext(), "Error parsing data", Toast.LENGTH_SHORT).show();
+                            loadDummyData(); // 파싱 오류 시 더미 데이터 로드
+                        });
                     }
                 } else {
                     isLoading = false; // 로딩 상태 해제
-                    getActivity().runOnUiThread(() ->
-                            Toast.makeText(getContext(), "Error fetching data", Toast.LENGTH_SHORT).show()
-                    );
+                    getActivity().runOnUiThread(() -> {
+                        Toast.makeText(getContext(), "Error fetching data, loading dummy data", Toast.LENGTH_SHORT).show();
+                        loadDummyData(); // 오류 시 더미 데이터 로드
+                    });
                 }
             }
         });
+    }
+
+    // 더미 데이터를 추가하는 메서드
+    private void loadDummyData() {
+        allItems.clear(); // 기존 데이터 초기화
+
+        allItems.add(new Item("기업", "더미 데이터 1", "삼성증권", "내용1", 100, "2025-02-01", "http://dummy.pdf", "PDF 내용 1"));
+        allItems.add(new Item("산업", "더미 데이터 2", "LG증권", "내용2", 200, "2025-02-02", "http://dummy.pdf", "PDF 내용 2"));
+        allItems.add(new Item("정기", "더미 데이터 3", "한화증권", "내용3", 300, "2025-02-03", "http://dummy.pdf", "PDF 내용 3"));
+
+        getActivity().runOnUiThread(() -> reportAdapter.setItems(allItems)); // 더미 데이터 어댑터에 설정
     }
 
     // JSON 데이터를 파싱하고 allItems 리스트에 추가
