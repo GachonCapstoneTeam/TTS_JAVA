@@ -35,6 +35,10 @@ public class TTSHelper {
         void onTrackCompleted();
     }
 
+    public interface OnPlaybackReadyListener {
+        void onReady();
+    }
+
     public void setPlaybackCallback(PlaybackCallback callback) {
         this.playbackCallback = callback;
     }
@@ -43,10 +47,10 @@ public class TTSHelper {
         this.context = context;
     }
 
-    public void performTextToSpeech(String text, String fileName, ImageButton playButton) {
+    public void performTextToSpeech(String text, String fileName, ImageButton playButton, OnPlaybackReadyListener listener) {
         File audioFile = new File(context.getCacheDir(), fileName);
         if (audioFile.exists()) {
-            playAudio(audioFile, playButton);
+            playAudio(audioFile, playButton, listener);
             return;
         }
 
@@ -80,67 +84,46 @@ public class TTSHelper {
                         String json = response.body().string();
                         JSONObject jsonObject = new JSONObject(json);
                         String audioContentEncoded = jsonObject.getString("audioContent");
-                        saveAudioFile(audioContentEncoded, fileName, playButton);
+                        saveAudioFile(audioContentEncoded, fileName, playButton, listener);
                     } catch (JSONException e) {
                         e.printStackTrace();
                         showToast("TTS 응답 파싱 실패");
                     }
                 } else {
-                    showToast("TTS 응답 실패: " + response.code());
+                    showToast("TTS 응답 실패");
                 }
             }
         });
     }
 
-    private void saveAudioFile(String base64Audio, String fileName, ImageButton playButton) {
+    private void saveAudioFile(String base64Audio, String fileName, ImageButton playButton, OnPlaybackReadyListener listener) {
         byte[] decodedAudio = Base64.decode(base64Audio, Base64.DEFAULT);
         File audioFile = new File(context.getCacheDir(), fileName);
 
         try (FileOutputStream fos = new FileOutputStream(audioFile)) {
             fos.write(decodedAudio);
-            playAudio(audioFile, playButton);
+            runOnUiThread(() -> playAudio(audioFile, playButton, listener));
         } catch (IOException e) {
             e.printStackTrace();
             showToast("오디오 파일 저장 실패");
         }
     }
 
-    public void playAudio(File audioFile, ImageButton playButton) {
+    private void playAudio(File audioFile, ImageButton playButton, OnPlaybackReadyListener listener) {
         if (mediaPlayer != null) {
             mediaPlayer.release();
-            mediaPlayer = null;
         }
 
         mediaPlayer = new MediaPlayer();
         try {
             mediaPlayer.setDataSource(audioFile.getAbsolutePath());
-            mediaPlayer.prepareAsync();
-            mediaPlayer.setOnPreparedListener(mp -> {
-                mp.start();
-                isPlaying = true;
-                playButton.setImageResource(R.drawable.pause);
-
-                if (playbackCallback != null) {
-                    playbackCallback.onTrackCompleted();
-                }
-            });
-
-            mediaPlayer.setOnCompletionListener(mp -> {
-                isPlaying = false;
-                runOnUiThread(() -> {
-                    playButton.setImageResource(R.drawable.play);
-                    if (playbackCallback != null) {
-                        playbackCallback.onTrackCompleted();
-                    }
-                });
-            });
-
+            mediaPlayer.prepare();
+            listener.onReady();
         } catch (IOException e) {
             e.printStackTrace();
             showToast("오디오 재생 실패");
         }
     }
-
 
     public void togglePlayPause(ImageButton playButton) {
         if (mediaPlayer == null) return;
@@ -148,11 +131,11 @@ public class TTSHelper {
         if (mediaPlayer.isPlaying()) {
             mediaPlayer.pause();
             isPlaying = false;
-            playButton.setImageResource(R.drawable.play);
+            runOnUiThread(() -> playButton.setImageResource(R.drawable.button_play));
         } else {
             mediaPlayer.start();
             isPlaying = true;
-            playButton.setImageResource(R.drawable.pause);
+            runOnUiThread(() -> playButton.setImageResource(R.drawable.pause));
         }
     }
 

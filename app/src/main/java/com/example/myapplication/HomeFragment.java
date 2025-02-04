@@ -161,7 +161,16 @@ public class HomeFragment extends Fragment {
                 playButton.setImageResource(R.drawable.pause);
             });
 
-            ttsHelper.performTextToSpeech(track.getContent(), track.getTitle() + ".mp3", playButton);
+            ttsHelper.performTextToSpeech(track.getContent(), track.getTitle() + ".mp3", playButton, new TTSHelper.OnPlaybackReadyListener() {
+                @Override
+                public void onReady() {
+                    if (ttsHelper.getMediaPlayer() != null) {
+                        ttsHelper.getMediaPlayer().start();
+                        progressHandler.post(updateProgressRunnable);
+                    }
+                }
+            });
+
         }
     }
 
@@ -180,7 +189,7 @@ public class HomeFragment extends Fragment {
     // 서버에서 데이터 가져오기
     private void fetchDataFromServer() {
         OkHttpClient client = new OkHttpClient();
-        String url = "https://40.82.148.190:8000"; // 서버 API URL
+        String url = "https://40.82.148.190:8000/textload/home";
 
         Request request = new Request.Builder()
                 .url(url)
