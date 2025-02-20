@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/rank_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/rank_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="제목"
+        android:textColor="@color/black"
+        android:textStyle="bold"
+        android:textSize="22sp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_margin="10dp"
+        android:maxLines="1"
+        android:ellipsize="end"/>
+
+    <TextView
+        android:id="@+id/rank_bank"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="증권사"
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="@id/rank_title"
+        app:layout_constraintTop_toBottomOf="@id/rank_title"
+        app:layout_constraintEnd_toStartOf="@id/rank_views"
+        android:layout_margin="10dp"/>
+
+    <TextView
+        android:id="@+id/rank_views"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="1000회"
+        android:textSize="12sp"
+        app:layout_constraintTop_toBottomOf="@id/rank_title"
+        app:layout_constraintStart_toEndOf="@id/rank_bank"
+        app:layout_constraintEnd_toStartOf="@id/rank_date"
+        android:layout_margin="10dp"/>
+
+    <TextView
+        android:id="@+id/rank_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="hh:mm"
+        android:textSize="12sp"
+        app:layout_constraintStart_toEndOf="@id/rank_views"
+        app:layout_constraintTop_toBottomOf="@id/rank_title"
+        android:layout_margin="10sp"/>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

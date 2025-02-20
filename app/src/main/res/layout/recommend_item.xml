@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/rit_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/rit_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="종목명"
+        android:textStyle="normal"
+        android:textColor="@color/black"
+        android:textSize="22sp"
+        app:layout_constraintTop_toTopOf="@id/rit_layout"
+        app:layout_constraintStart_toStartOf="@id/rit_layout"
+        android:layout_margin="30dp"/>
+
+    <TextView
+        android:id="@+id/rit_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="리포트 제목"
+        android:textSize="30sp"
+        android:textColor="@color/black"
+        android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@id/rit_name"
+        app:layout_constraintStart_toStartOf="@id/rit_name"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="10dp"/>
+
+    <TextView
+        android:id="@+id/rit_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="HH:MM"
+        android:textSize="13sp"
+        app:layout_constraintEnd_toEndOf="@id/rit_layout"
+        app:layout_constraintBottom_toBottomOf="@id/rit_name"
+        android:layout_marginRight="15dp"/>
+
+    <TextView
+        android:id="@+id/rit_script"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="script"
+        android:textSize="18dp"
+        android:textStyle="normal"
+        android:textColor="@color/black"
+        app:layout_constraintBottom_toBottomOf="@id/rit_layout"
+        app:layout_constraintStart_toStartOf="@id/rit_layout"
+        app:layout_constraintEnd_toEndOf="@id/rit_layout"
+        android:layout_margin="30dp"/>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

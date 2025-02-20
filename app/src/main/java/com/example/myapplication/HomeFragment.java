@@ -189,12 +189,9 @@ public class HomeFragment extends Fragment {
     // 서버에서 데이터 가져오기
     private void fetchDataFromServer() {
         OkHttpClient client = new OkHttpClient();
-        String url = "https://40.82.148.190:8000/textload/home";
+        String url = "https://40.82.148.190:8000/textload/home"; //이 부분 수정해야함. 그래야 통신될 듯.
 
-        Request request = new Request.Builder()
-                .url(url)
-                .get()
-                .build();
+        Request request = new Request.Builder().url(url).get().build();
 
         client.newCall(request).enqueue(new Callback() {
             @Override
