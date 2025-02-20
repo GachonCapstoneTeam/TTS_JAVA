@@ -263,7 +263,7 @@ public class HomeFragment extends Fragment {
     };
 
 
-    //시간 변환 함수
+    //시간 변환 함수, 이 부분도 필요에 따라 수정
     private String formatTime(int milliseconds) {
         int minutes = (milliseconds / 1000) / 60;
         int seconds = (milliseconds / 1000) % 60;

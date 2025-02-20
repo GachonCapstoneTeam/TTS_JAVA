@@ -44,7 +44,7 @@
         android:id="@+id/rit_script"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="script"
+        android:text="로딩중 . . ."
         android:textSize="18dp"
         android:textStyle="normal"
         android:textColor="@color/black"
