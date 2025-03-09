@@ -167,7 +167,7 @@ public class MainFragment extends Fragment {
                     Integer.parseInt(itemObject.getString("Views")),
                     itemObject.getString("작성일"),
                     itemObject.getString("PDF URL"),
-                    itemObject.getString("PDF Content")
+                    itemObject.optString("PDF Content","")
             );
 
             allItems.add(item);
@@ -204,23 +204,44 @@ public class MainFragment extends Fragment {
             case 0: // "전체"
                 filteredItems.addAll(allItems);
                 break;
-            case 1: // "기업"
+            case 1: // "종목"
                 for (Item item : allItems) {
-                    if (item.getCategory().equals("기업")) {
+                    if (item.getCategory().equals("종목분석 리포트")) {
                         filteredItems.add(item);
                     }
                 }
                 break;
             case 2: // "산업"
                 for (Item item : allItems) {
-                    if (item.getCategory().equals("산업")) {
+                    if (item.getCategory().equals("산업분석 리포트")) {
                         filteredItems.add(item);
                     }
                 }
                 break;
-            case 3: // "정기"
+            case 3: // "시황"
                 for (Item item : allItems) {
-                    if (item.getCategory().equals("정기")) {
+                    if (item.getCategory().equals("시황정보 리포트")) {
+                        filteredItems.add(item);
+                    }
+                }
+
+            case 4: // "투자"
+                for (Item item : allItems) {
+                    if (item.getCategory().equals("투자정보 리포트")) {
+                        filteredItems.add(item);
+                    }
+                }
+
+            case 5: // "경제"
+                for (Item item : allItems) {
+                    if (item.getCategory().equals("경제분석 리포트")) {
+                        filteredItems.add(item);
+                    }
+                }
+
+            case 6: // "채권"
+                for (Item item : allItems) {
+                    if (item.getCategory().equals("채권분석 리포트")) {
                         filteredItems.add(item);
                     }
                 }

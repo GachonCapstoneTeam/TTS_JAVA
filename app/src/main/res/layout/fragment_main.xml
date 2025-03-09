@@ -62,10 +62,10 @@
                 android:text="전체"/>
 
             <com.google.android.material.tabs.TabItem
-                android:id="@+id/main_tab_company"
+                android:id="@+id/main_tab_stock"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="기업"/>
+                android:text="종목"/>
 
             <com.google.android.material.tabs.TabItem
                 android:id="@+id/main_tab_industry"
@@ -74,10 +74,28 @@
                 android:text="산업"/>
 
             <com.google.android.material.tabs.TabItem
-                android:id="@+id/main_tab_regular"
+                android:id="@+id/main_tab_market"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="정기"/>
+                android:text="시황"/>
+
+            <com.google.android.material.tabs.TabItem
+                android:id="@+id/main_tab_investment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="투자"/>
+
+            <com.google.android.material.tabs.TabItem
+                android:id="@+id/main_tab_economic"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="경제"/>
+
+            <com.google.android.material.tabs.TabItem
+                android:id="@+id/main_tab_bond"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="채권"/>
 
         </com.google.android.material.tabs.TabLayout>
 
