@@ -1,14 +1,27 @@
-// MainFragment.java
 package com.example.myapplication;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
+import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.transition.TransitionManager;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
+import android.view.inputmethod.EditorInfo;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -37,13 +50,19 @@ public class MainFragment extends Fragment {
     private RecyclerView recyclerView;
     private ReportAdapter reportAdapter;
     private SwipeRefreshLayout swipeRefreshLayout;
-    private List<Item> allItems = new ArrayList<>(); // 전체 데이터를 저장
-    private List<Item> filteredItems = new ArrayList<>(); // 필터링된 데이터를 저장
-    private boolean isLoading = false; // 로딩 상태를 추적
-    private int currentPage = 1; // 현재 페이지 번호
-    private final int pageSize = 7; // 한 페이지에 표시할 데이터 개수
+    private List<Item> allItems = new ArrayList<>();
+    private List<Item> filteredItems = new ArrayList<>();
+    private boolean isLoading = false;
+    private int currentPage = 1;
+    private final int pageSize = 7;
     private TabLayout tabLayout;
+    private EditText searchInput;
+    private ImageButton searchButton;
+    private boolean isSearchExpanded = false;
+    private LinearLayout mainLayout;
+    private String currentQuery = null; // 현재 검색어 저장
 
+    @SuppressLint("ClickableViewAccessibility")
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -56,12 +75,17 @@ public class MainFragment extends Fragment {
         reportAdapter = new ReportAdapter(getContext());
         recyclerView.setAdapter(reportAdapter);
 
+        searchInput = view.findViewById(R.id.search_input);
+        searchButton = view.findViewById(R.id.search_button);
+        mainLayout = view.findViewById(R.id.main_layout);
+
         swipeRefreshLayout = view.findViewById(R.id.swiper);
         swipeRefreshLayout.setOnRefreshListener(() -> {
-            currentPage = 1; // 페이지를 초기화
-            allItems.clear(); // 기존 데이터 초기화
-            fetchItemsFromServer(); // 서버에서 새 데이터 가져오기
-            swipeRefreshLayout.setRefreshing(false); // 리프레시 종료
+            currentPage = 1;
+            allItems.clear();
+            currentQuery = null; // 검색어 초기화
+            fetchItemsFromServer();
+            swipeRefreshLayout.setRefreshing(false);
         });
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -70,8 +94,7 @@ public class MainFragment extends Fragment {
                 super.onScrolled(recyclerView, dx, dy);
                 LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
 
-                // 스크롤의 끝에 가까워졌을 때만 로드 (현재 위치 + 여유 항목 >= 총 항목)
-                int visibleThreshold = 1; // 트리거를 위한 남은 항목 수
+                int visibleThreshold = 1;
                 int lastVisibleItem = layoutManager.findLastVisibleItemPosition();
                 int totalItemCount = layoutManager.getItemCount();
 
@@ -81,33 +104,72 @@ public class MainFragment extends Fragment {
             }
         });
 
-        tabLayout = view.findViewById(R.id.tab_layout); // TabLayout 초기화
-        setupTabListener(); // Tab 클릭 리스너 설정
+        tabLayout = view.findViewById(R.id.tab_layout);
+        setupTabListener();
 
-        // 데이터 가져오기
+
+
+        searchButton.setOnClickListener(v -> {
+            if (!isSearchExpanded) {
+                // 🔹 검색창 확장 (오른쪽 → 왼쪽 슬라이드)
+                searchInput.setVisibility(View.VISIBLE);
+                ObjectAnimator animator = ObjectAnimator.ofFloat(searchInput, "translationX", 300f, 0f);
+                animator.setDuration(300); // 애니메이션 속도
+                animator.setInterpolator(new DecelerateInterpolator());
+                animator.start();
+                isSearchExpanded = true;
+            } else {
+                // 🔹 검색 실행 (검색어가 있을 때)
+                String query = searchInput.getText().toString().trim();
+                if (!query.isEmpty()) {
+                    performSearch(query);
+                }
+            }
+        });
+
+        searchInput.setOnEditorActionListener((v, actionId, event) -> {
+            String query = searchInput.getText().toString().trim();
+            if (!query.isEmpty()) {
+                performSearch(query);
+                return true;
+            }
+            return false;
+        });
+
+        mainLayout.setOnTouchListener((v, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                if (isSearchExpanded && searchInput.getText().toString().trim().isEmpty()) {
+                    closeSearchBar();
+                }
+            }
+            return false;
+        });
+
+
         fetchItemsFromServer();
-
         return view;
     }
-
-    // 서버에서 데이터 가져오기
+    // ! 검색 관련 필독 사항 !
+    //현재 검색어를 서버로 쿼리로 보내서 필터링하게끔 되어있음. 이 점은 서버에서 처리할지 논의해보아야 함.
+    // 서버에서 처리하는게 아니라 프론트 딴에서 처리할 수도 있지만 실시간 데이터 반영이 불가능하고 속도가 매우 느려지는 큰 단점 존재.
     private void fetchItemsFromServer() {
-        isLoading = true; // 로딩 중 상태로 설정
-
+        isLoading = true;
         OkHttpClient client = new OkHttpClient();
-        String url = "https://40.82.148.190:8000/textload/content/?page=" + currentPage + "&size=" + pageSize; // 페이지 번호와 크기 전달
+        String url = "https://40.82.148.190:8000/textload/content/?page=" + currentPage + "&size=" + pageSize;
+        if (currentQuery != null) {
+            url += "&search=" + currentQuery;
+        }
 
         Request request = new Request.Builder().url(url).build();
 
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                isLoading = false; // 로딩 상태 해제
+                isLoading = false;
                 e.printStackTrace();
-                getActivity().runOnUiThread(() -> {
-                    Toast.makeText(getContext(), "Failed to fetch data, loading dummy data", Toast.LENGTH_SHORT).show();
-                    loadDummyData(); // 더미 데이터 로드
-                });
+                getActivity().runOnUiThread(() ->
+                        Toast.makeText(getContext(), "데이터 불러오기 실패", Toast.LENGTH_SHORT).show()
+                );
             }
 
             @Override
@@ -118,41 +180,28 @@ public class MainFragment extends Fragment {
                         parseJsonAndAddItems(jsonResponse);
 
                         getActivity().runOnUiThread(() -> {
-                            reportAdapter.setItems(allItems); // 어댑터에 전체 데이터 갱신
-                            isLoading = false; // 로딩 상태 해제
+                            reportAdapter.setItems(allItems);
+                            isLoading = false;
                         });
                     } catch (JSONException e) {
                         e.printStackTrace();
-                        isLoading = false; // 로딩 상태 해제
-                        getActivity().runOnUiThread(() -> {
-                            Toast.makeText(getContext(), "Error parsing data", Toast.LENGTH_SHORT).show();
-                            loadDummyData(); // 파싱 오류 시 더미 데이터 로드
-                        });
+                        isLoading = false;
+                        getActivity().runOnUiThread(() ->
+                                Toast.makeText(getContext(), "데이터 파싱 오류", Toast.LENGTH_SHORT).show()
+                        );
                     }
                 } else {
-                    isLoading = false; // 로딩 상태 해제
-                    getActivity().runOnUiThread(() -> {
-                        Toast.makeText(getContext(), "Error fetching data, loading dummy data", Toast.LENGTH_SHORT).show();
-                        loadDummyData(); // 오류 시 더미 데이터 로드
-                    });
+                    isLoading = false;
+                    getActivity().runOnUiThread(() ->
+                            Toast.makeText(getContext(), "API 요청 실패", Toast.LENGTH_SHORT).show()
+                    );
                 }
             }
         });
     }
 
-    // 더미 데이터를 추가하는 메서드
-    private void loadDummyData() {
-        allItems.clear(); // 기존 데이터 초기화
-
-        allItems.add(new Item("기업", "더미 데이터 1", "삼성증권", "내용1", 100, "2025-02-01", "http://dummy.pdf", "PDF 내용 1"));
-        allItems.add(new Item("산업", "더미 데이터 2", "LG증권", "내용2", 200, "2025-02-02", "http://dummy.pdf", "PDF 내용 2"));
-        allItems.add(new Item("정기", "더미 데이터 3", "한화증권", "내용3", 300, "2025-02-03", "http://dummy.pdf", "PDF 내용 3"));
-
-        getActivity().runOnUiThread(() -> reportAdapter.setItems(allItems)); // 더미 데이터 어댑터에 설정
-    }
-
-    // JSON 데이터를 파싱하고 allItems 리스트에 추가
-    private void parseJsonAndAddItems(String jsonResponse) throws JSONException {
+    private List<Item> parseJsonAndAddItems(String jsonResponse) throws JSONException {
+        List<Item> items = new ArrayList<>();
         JSONObject jsonObject = new JSONObject(jsonResponse);
         JSONArray contentsArray = jsonObject.getJSONArray("contents");
 
@@ -170,17 +219,17 @@ public class MainFragment extends Fragment {
                     itemObject.getString("PDF Content")
             );
 
-            allItems.add(item);
+            items.add(item);
         }
+
+        return items;
     }
 
-    // 다음 페이지 로드
     private void loadNextPage() {
-        currentPage++; // 다음 페이지 번호 증가
-        fetchItemsFromServer(); // 서버에서 데이터 가져오기
+        currentPage++;
+        fetchItemsFromServer();
     }
 
-    // Tab 클릭 리스너 설정
     private void setupTabListener() {
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -195,8 +244,50 @@ public class MainFragment extends Fragment {
             public void onTabReselected(TabLayout.Tab tab) {}
         });
     }
+    //검색창 닫기
+    private void closeSearchBar() {
+        ObjectAnimator animator = ObjectAnimator.ofFloat(searchInput, "translationX", 0f, 300f);
+        animator.setDuration(300);
+        animator.setInterpolator(new DecelerateInterpolator());
+        animator.start();
+        searchInput.setVisibility(View.GONE);
+        isSearchExpanded = false;
+    }
 
-    // 탭에 따라 아이템 필터링
+    //검색 요청을 서버에 보내는 부분
+    private void performSearch(String query) {
+        OkHttpClient client = new OkHttpClient();
+        String url = "https://40.82.148.190:8000/textload/content/?search=" + query;
+
+        Request request = new Request.Builder().url(url).build();
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                requireActivity().runOnUiThread(() -> {
+                    Toast.makeText(getContext(), "검색 실패", Toast.LENGTH_SHORT).show();
+                });
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful() && response.body() != null) {
+                    try {
+                        String jsonResponse = response.body().string();
+                        List<Item> searchResults = parseJsonAndAddItems(jsonResponse);
+
+                        requireActivity().runOnUiThread(() -> {
+                            reportAdapter.setItems(searchResults);
+                        });
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+    }
+
+
     private void filterItemsByTab(int tabPosition) {
         filteredItems.clear();
 
@@ -227,6 +318,6 @@ public class MainFragment extends Fragment {
                 break;
         }
 
-        reportAdapter.setItems(filteredItems); // 필터링된 데이터를 어댑터에 설정
+        reportAdapter.setItems(filteredItems);
     }
 }
