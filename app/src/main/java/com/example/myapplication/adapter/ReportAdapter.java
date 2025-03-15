@@ -44,25 +44,23 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ReportView
 
         holder.boxName.setText(item.getCategory());
         holder.boxTitle.setText(item.getTitle());
-        holder.boxTitle.setSelected(true); // 마키 효과를 위한 선택 상태 설정
+        holder.boxTitle.setSelected(true);
         holder.boxBank.setText(item.getBank());
         holder.boxDate.setText(item.getDate());
         holder.boxScript.setText(item.getContent());
 
-        // Original Button Click Listener
         holder.boxOriButton.setOnClickListener(v -> {
             Intent intent = new Intent(context, OriginalActivity.class);
             intent.putExtra("Category", item.getCategory());
             intent.putExtra("Title", item.getTitle());
             intent.putExtra("Bank", item.getBank());
-            intent.putExtra("PDF Content", item.getPdfcontent());
+            intent.putExtra("Content", item.getContent());
             intent.putExtra("Views", item.getViews());
             intent.putExtra("Date", item.getDate());
             intent.putExtra("PDF_URL", item.getPdfUrl());
             context.startActivity(intent);
         });
 
-        // Summary Button Click Listener
         holder.boxSumButton.setOnClickListener(v -> {
             Intent intent = new Intent(context, OriginalActivity.class);
             intent.putExtra("Category", item.getCategory());

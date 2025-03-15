@@ -161,7 +161,16 @@ public class HomeFragment extends Fragment {
                 playButton.setImageResource(R.drawable.pause);
             });
 
-            ttsHelper.performTextToSpeech(track.getContent(), track.getTitle() + ".mp3", playButton);
+            ttsHelper.performTextToSpeech(track.getContent(), track.getTitle() + ".mp3", playButton, new TTSHelper.OnPlaybackReadyListener() {
+                @Override
+                public void onReady() {
+                    if (ttsHelper.getMediaPlayer() != null) {
+                        ttsHelper.getMediaPlayer().start();
+                        progressHandler.post(updateProgressRunnable);
+                    }
+                }
+            });
+
         }
     }
 
@@ -180,12 +189,9 @@ public class HomeFragment extends Fragment {
     // 서버에서 데이터 가져오기
     private void fetchDataFromServer() {
         OkHttpClient client = new OkHttpClient();
-        String url = "https://40.82.148.190:8000"; // 서버 API URL
+        String url = "https://40.82.148.190:8000/textload/content/"; //이 부분 수정해야함. 그래야 통신될 듯.
 
-        Request request = new Request.Builder()
-                .url(url)
-                .get()
-                .build();
+        Request request = new Request.Builder().url(url).get().build();
 
         client.newCall(request).enqueue(new Callback() {
             @Override
@@ -257,7 +263,7 @@ public class HomeFragment extends Fragment {
     };
 
 
-    //시간 변환 함수
+    //시간 변환 함수, 이 부분도 필요에 따라 수정
     private String formatTime(int milliseconds) {
         int minutes = (milliseconds / 1000) / 60;
         int seconds = (milliseconds / 1000) % 60;
