@@ -1,9 +1,14 @@
 package com.example.myapplication;
 
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,11 +25,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.myapplication.adapter.ItemAdapter;
 import com.example.myapplication.entity.Item;
+import com.example.myapplication.view.HomeAudioService;
+import com.example.myapplication.view.OriginalAudioService;
 import com.example.myapplication.view.TTSHelper;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,12 +49,24 @@ public class HomeFragment extends Fragment {
     private RecyclerView recyclerView;
     private ItemAdapter adapter;
     private TTSHelper ttsHelper;
-    private ImageButton playButton, fullScreenButton;
-    private int currentTrackIndex = 0; // 현재 재생 중인 트랙 인덱스
-    private List<Item> itemList;
+    private ImageButton playButton, prevButton, nextButton, restartButton, fullScreenButton;
     private ProgressBar progressBar;
     private TextView currentTimeText, fullTimeText;
+    private List<Item> itemList;
+    private int currentTrackIndex = 0;
+    private MediaPlayer mediaPlayer;
+    private HomeAudioService homeAudioService;
+    private OriginalAudioService originalAudioService;
+    private boolean isHomeServiceBound = false;
+    private boolean isOriginalServiceBound = false;
     private Handler progressHandler = new Handler();
+    private Context mContext;
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        mContext = context;
+    }
 
     @Nullable
     @Override
@@ -53,61 +74,51 @@ public class HomeFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
-        // 버튼 초기화
-        ImageButton restartButton = view.findViewById(R.id.restart);
-        ImageButton prevButton = view.findViewById(R.id.prev);
+        // UI 요소 초기화
         playButton = view.findViewById(R.id.button_play);
-        ImageButton nextButton = view.findViewById(R.id.next);
-        ImageButton fullScreenButton = view.findViewById(R.id.full_screen);
-
-        //재생바 초기화
+        prevButton = view.findViewById(R.id.prev);
+        nextButton = view.findViewById(R.id.next);
+        restartButton = view.findViewById(R.id.restart);
+        fullScreenButton = view.findViewById(R.id.full_screen);
         progressBar = view.findViewById(R.id.progress_bar);
         currentTimeText = view.findViewById(R.id.current_time);
         fullTimeText = view.findViewById(R.id.full_time);
 
-        // RecyclerView 초기화
         recyclerView = view.findViewById(R.id.home_recycler);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // 어댑터 초기화
         itemList = new ArrayList<>();
         adapter = new ItemAdapter(requireContext(), itemList);
         recyclerView.setAdapter(adapter);
 
-        // TTSHelper 초기화 및 PlaybackCallback 설정
         ttsHelper = new TTSHelper(requireContext());
-        ttsHelper.setPlaybackCallback(() -> requireActivity().runOnUiThread(this::playNextTrack));
 
-        // 서버에서 데이터 가져오기
+        // 데이터 가져오기
         fetchDataFromServer();
 
-        // RecyclerView 아이템 클릭 이벤트
+        // 아이템 클릭 시 오디오 재생
         adapter.setOnItemClickListener(item -> {
-            currentTrackIndex = itemList.indexOf(item); // 클릭된 트랙의 인덱스 저장
-            playTrackAtIndex(currentTrackIndex);
+            currentTrackIndex = itemList.indexOf(item);
+            playTrackAtIndex(currentTrackIndex, true);
         });
 
-        // Play 버튼 이벤트
-        playButton.setOnClickListener(v -> ttsHelper.togglePlayPause(playButton));
+        playButton.setOnClickListener(v -> togglePlayPause());
 
-        // 이전 트랙 버튼 이벤트
         prevButton.setOnClickListener(v -> {
             if (currentTrackIndex > 0) {
                 currentTrackIndex--;
-                playTrackAtIndex(currentTrackIndex);
+                playTrackAtIndex(currentTrackIndex, true);
             } else {
                 Toast.makeText(requireContext(), "이전 트랙이 없습니다.", Toast.LENGTH_SHORT).show();
             }
         });
 
-        // 다시 듣기 버튼 이벤트
-        restartButton.setOnClickListener(v -> playTrackAtIndex(currentTrackIndex));
+        restartButton.setOnClickListener(v -> playTrackAtIndex(currentTrackIndex, true));
 
-        // 다음 트랙 버튼 이벤트
         nextButton.setOnClickListener(v -> {
             if (currentTrackIndex < itemList.size() - 1) {
                 currentTrackIndex++;
-                playTrackAtIndex(currentTrackIndex);
+                playTrackAtIndex(currentTrackIndex, true);
             } else {
                 Toast.makeText(requireContext(), "다음 트랙이 없습니다.", Toast.LENGTH_SHORT).show();
             }
@@ -116,8 +127,18 @@ public class HomeFragment extends Fragment {
         fullScreenButton.setOnClickListener(v -> {
             if (currentTrackIndex >= 0 && currentTrackIndex < itemList.size()) {
                 Item currentItem = itemList.get(currentTrackIndex);
-
                 Intent intent = new Intent(getContext(), OriginalActivity.class);
+                intent.putExtra("track_index", currentTrackIndex);
+                intent.putExtra("AudioFilePath", getAudioFilePath(currentItem.getTitle()));
+
+                if (originalAudioService != null) {
+                    intent.putExtra("AudioPosition", originalAudioService.getCurrentPosition());
+                    intent.putExtra("IsPlaying", originalAudioService.isPlaying());
+                } else {
+                    intent.putExtra("AudioPosition", 0);
+                    intent.putExtra("IsPlaying", false);
+                }
+
                 intent.putExtra("Title", currentItem.getTitle());
                 intent.putExtra("Content", currentItem.getContent());
                 intent.putExtra("Category", currentItem.getCategory());
@@ -133,65 +154,164 @@ public class HomeFragment extends Fragment {
         return view;
     }
 
-    private void playTrackAtIndex(int index) {
+    private String getAudioFilePath(String fileName) {
+        File audioFile = new File(requireContext().getCacheDir(), fileName + ".mp3");
+        return audioFile.getAbsolutePath();
+    }
+
+    private void playTrackAtIndex(int index, boolean useHomeService) {
         if (index >= 0 && index < itemList.size()) {
             Item track = itemList.get(index);
+            Log.d("HomeFragment", "재생할 트랙: " + track.getTitle());
 
             requireActivity().runOnUiThread(() -> {
+                // UI 업데이트
                 TextView titleView = requireView().findViewById(R.id.home_display_title);
                 TextView scriptView = requireView().findViewById(R.id.home_display_script);
-
                 if (titleView != null && scriptView != null) {
                     titleView.setText(track.getTitle());
                     scriptView.setText(track.getContent());
                 }
 
-                // ProgressBar 초기화
                 progressBar.setProgress(0);
                 currentTimeText.setText("00:00");
                 fullTimeText.setText("00:00");
 
-                // 🔹 오디오가 준비된 후 ProgressBar 업데이트 실행
-                ttsHelper.setPlaybackCallback(() -> {
-                    requireActivity().runOnUiThread(() -> {
-                        progressHandler.post(updateProgressRunnable);
-                    });
+                ttsHelper.performTextToSpeech(track.getContent(), track.getTitle() + ".mp3", audioFile -> {
+                    Log.d("HomeFragment", "TTS 변환 완료 → 오디오 파일 저장됨: " + audioFile.getAbsolutePath());
+
+                    if (useHomeService && homeAudioService != null) {
+                        homeAudioService.prepareAudio(audioFile.getAbsolutePath(), 0, true);
+                    } else if (!useHomeService && originalAudioService != null) {
+                        originalAudioService.prepareAudio(audioFile.getAbsolutePath(), 0, true);
+                    } else {
+                        Log.e("HomeFragment", "서비스가 바인딩되지 않음!");
+                    }
                 });
 
-                playButton.setImageResource(R.drawable.pause);
+                playButton.setImageResource(R.drawable.button_pause);
             });
-
-            ttsHelper.performTextToSpeech(track.getContent(), track.getTitle() + ".mp3", playButton, new TTSHelper.OnPlaybackReadyListener() {
-                @Override
-                public void onReady() {
-                    if (ttsHelper.getMediaPlayer() != null) {
-                        ttsHelper.getMediaPlayer().start();
-                        progressHandler.post(updateProgressRunnable);
-                    }
-                }
-            });
-
+        } else {
+            Log.e("HomeFragment", "잘못된 인덱스! index: " + index);
         }
     }
 
+    private void togglePlayPause() {
+        if (homeAudioService != null && homeAudioService.isPlaying()) {
+            homeAudioService.pauseAudio();
+            playButton.setImageResource(R.drawable.button_play);
+        } else if (originalAudioService != null && originalAudioService.isPlaying()) {
+            originalAudioService.pauseAudio();
+            playButton.setImageResource(R.drawable.button_play);
+        } else {
+            homeAudioService.resumeAudio();
+            playButton.setImageResource(R.drawable.button_pause);
+        }
+    }
+
+    private final ServiceConnection homeServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            HomeAudioService.AudioBinder binder = (HomeAudioService.AudioBinder) service;
+            homeAudioService = binder.getService();
+            isHomeServiceBound = true;
+
+            homeAudioService.setProgressUpdateListener((currentPosition, duration) ->
+                    requireActivity().runOnUiThread(() -> updateProgressBar(currentPosition, duration))
+            );
+
+            homeAudioService.setNextTrackListener(() ->
+                    requireActivity().runOnUiThread(() -> playNextTrack())
+            );
+
+            homeAudioService.startProgressUpdates();
+        }
+
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            isHomeServiceBound = false;
+        }
+    };
+
+    private final ServiceConnection originalServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            OriginalAudioService.AudioBinder binder = (OriginalAudioService.AudioBinder) service;
+            originalAudioService = binder.getService();
+            isOriginalServiceBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            isOriginalServiceBound = false;
+        }
+    };
 
     private void playNextTrack() {
         if (currentTrackIndex < itemList.size() - 1) {
             currentTrackIndex++;
-            playTrackAtIndex(currentTrackIndex);
+            playTrackAtIndex(currentTrackIndex, true);
         } else {
-            requireActivity().runOnUiThread(() ->
-                    Toast.makeText(requireContext(), "마지막 트랙입니다.", Toast.LENGTH_SHORT).show()
-            );
+            Toast.makeText(requireContext(), "마지막 트랙입니다.", Toast.LENGTH_SHORT).show();
         }
     }
 
-    // 서버에서 데이터 가져오기
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        if (mContext != null) {
+            Intent serviceIntent = new Intent(mContext, HomeAudioService.class);
+
+            // 서비스가 실행되지 않았다면 먼저 실행
+            mContext.startService(serviceIntent);
+
+            // 실행 후 바인딩
+            boolean result = mContext.bindService(serviceIntent, homeServiceConnection, Context.BIND_AUTO_CREATE);
+            Log.d("HomeFragment", "HomeAudioService 바인딩 시도 결과: " + result);
+            if (result) {
+                Log.d("HomeFragment", "HomeAudioService 바인딩 성공");
+            } else {
+                Log.e("HomeFragment", "HomeAudioService 바인딩 실패");
+            }
+        } else {
+            Log.e("HomeFragment", "onStart()에서 mContext가 null임");
+        }
+    }
+
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (isHomeServiceBound) mContext.unbindService(homeServiceConnection);
+        if (isOriginalServiceBound) mContext.unbindService(originalServiceConnection);
+    }
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+            mediaPlayer.pause(); // 프래그먼트가 백그라운드로 가면 재생 중지
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (mediaPlayer != null) {
+            mediaPlayer.release(); // 메모리 해제
+            mediaPlayer = null;
+        }
+    }
+
     private void fetchDataFromServer() {
         OkHttpClient client = new OkHttpClient();
-        String url = "https://40.82.148.190:8000/textload/content/"; //이 부분 수정해야함. 그래야 통신될 듯.
+        String url = "https://40.82.148.190:8000/textload/home";
 
-        Request request = new Request.Builder().url(url).get().build();
+        Request request = new Request.Builder()
+                .url(url)
+                .get()
+                .build();
 
         client.newCall(request).enqueue(new Callback() {
             @Override
@@ -222,9 +342,19 @@ public class HomeFragment extends Fragment {
         });
     }
 
+    private void updateProgressBar(int currentPosition, int duration) {
+        if (duration > 0) {
+            int progress = (int) ((currentPosition / (float) duration) * 100);
+            progressBar.setProgress(progress);
+        }
+
+        currentTimeText.setText(formatTime(currentPosition));
+        fullTimeText.setText(formatTime(duration));
+    }
+
     private void loadDummyData() {
         List<Item> dummyItems = new ArrayList<>();
-        dummyItems.add(new Item("경제", "더미 리포트 1", "삼성증권", "https://example.com/dummy1.pdf", "2025-02-01", "123", "더미 데이터 내용 1입니다."));
+        dummyItems.add(new Item("IT", "삼성전자5", "삼성증권", "https://example.com/sample1.pdf", "2024-02-15", "120", "반도체 시장의 향후 전망을 분석한 리포트입니다."));
         dummyItems.add(new Item("기술", "더미 리포트 2", "LG증권", "https://example.com/dummy2.pdf", "2025-02-02", "234", "더미 데이터 내용 2입니다."));
         dummyItems.add(new Item("산업", "더미 리포트 3", "한화증권", "https://example.com/dummy3.pdf", "2025-02-03", "345", "더미 데이터 내용 3입니다."));
 
@@ -236,34 +366,7 @@ public class HomeFragment extends Fragment {
     }
 
 
-    private Runnable updateProgressRunnable = new Runnable() {
-        @Override
-        public void run() {
-            if (ttsHelper.getMediaPlayer() != null) {
-                MediaPlayer mediaPlayer = ttsHelper.getMediaPlayer();
-
-                if (mediaPlayer.isPlaying()) {
-                    int currentPosition = mediaPlayer.getCurrentPosition();
-                    int totalDuration = mediaPlayer.getDuration();
-
-                    if (totalDuration > 0) {
-                        int progress = (int) ((currentPosition / (float) totalDuration) * 100);
-                        progressBar.setProgress(progress);
-                    }
-
-                    // 시간 표시 업데이트
-                    currentTimeText.setText(formatTime(currentPosition));
-                    fullTimeText.setText(formatTime(totalDuration));
-
-                    // 1초마다 갱신
-                    progressHandler.postDelayed(this, 1000);
-                }
-            }
-        }
-    };
-
-
-    //시간 변환 함수, 이 부분도 필요에 따라 수정
+    //시간 변환 함수
     private String formatTime(int milliseconds) {
         int minutes = (milliseconds / 1000) / 60;
         int seconds = (milliseconds / 1000) % 60;
@@ -294,6 +397,4 @@ public class HomeFragment extends Fragment {
             adapter.notifyDataSetChanged();
         });
     }
-
 }
-

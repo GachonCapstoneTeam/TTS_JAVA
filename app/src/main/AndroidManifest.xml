@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
 
     <application
         android:networkSecurityConfig="@xml/network_security_config"
@@ -23,8 +25,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
+        <service android:name=".view.OriginalAudioService"
+                 android:foregroundServiceType="mediaPlayback"
+                 android:exported="false"/>
+        <service android:name=".view.HomeAudioService"
+            android:foregroundServiceType="mediaPlayback"
+            android:exported="false"/>
         <activity android:name=".OriginalActivity" />
     </application>
+
 
 </manifest>
