@@ -97,13 +97,26 @@ public class HomeAudioService extends Service {
             });
 
             mediaPlayer.setOnCompletionListener(mp -> {
+                Log.d("HomeAudioService", " MediaPlayer 완료 감지! 현재 위치: " + mp.getCurrentPosition() + " / 전체 길이: " + mp.getDuration());
+
                 stopProgressUpdates();
                 if (nextTrackListener != null) {
                     nextTrackListener.onTrackCompleted();
-                    Log.d("HomeAudioService", "현재 트랙 완료 → 다음 트랙으로 이동");
+                    Log.d("HomeAudioService", "현재 트랙 완료 -> 다음 트랙으로 이동");
+                }else {
+                    Log.e("HomeAudioService", "nextTrackListener가 설정되지 않음!");
                 }
-
             });
+
+            // 강제 트랙 변경 (백업용)
+            new Handler().postDelayed(() -> {
+                if (mediaPlayer != null && !mediaPlayer.isPlaying() && mediaPlayer.getCurrentPosition() >= mediaPlayer.getDuration() - 1000) {
+                    Log.d("HomeAudioService", "onCompletionListener 강제 실행!");
+                    if (nextTrackListener != null) {
+                        nextTrackListener.onTrackCompleted();
+                    }
+                }
+            }, 1000);
 
         } catch (IOException e) {
             Log.e("HomeAudioService", "오디오 재생 실패: " + e.getMessage());
@@ -122,7 +135,7 @@ public class HomeAudioService extends Service {
             mediaPlayer.prepareAsync();
             mediaPlayer.setOnPreparedListener(mp -> {
                 isPrepared = true;
-                Log.d("HomeAudioService", "MediaPlayer 준비 완료");
+                Log.d("HomeAudioService", "MediaPlayer 준비 완료: "+ audioFilePath);
 
                 // 기존 위치로 이동
                 if (position > 0) {
@@ -133,8 +146,21 @@ public class HomeAudioService extends Service {
                 // Home에서 미리 prepare해놓고, Original에서 start()만 실행
                 if (play) {
                     mp.start();
+                    Log.d("HomeAudioService", " MediaPlayer 재생 시작! isPlaying: " + mp.isPlaying());
                     startForeground(1, getNotification("오디오 재생 중..."));
                     startProgressUpdates();
+                }
+            });
+
+            mediaPlayer.setOnCompletionListener(mp -> {
+                Log.d("HomeAudioService", " onCompletionListener 실행됨!"); // 이 로그 확인 필수
+
+                stopProgressUpdates();
+                if (nextTrackListener != null) {
+                    nextTrackListener.onTrackCompleted();
+                    Log.d("HomeAudioService", "현재 트랙 완료 → 다음 트랙으로 이동");
+                } else {
+                    Log.e("HomeAudioService", "nextTrackListener가 설정되지 않음!");
                 }
             });
         } catch (IOException e) {

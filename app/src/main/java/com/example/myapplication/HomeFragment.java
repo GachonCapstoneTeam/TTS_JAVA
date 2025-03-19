@@ -178,14 +178,19 @@ public class HomeFragment extends Fragment {
                 fullTimeText.setText("00:00");
 
                 ttsHelper.performTextToSpeech(track.getContent(), track.getTitle() + ".mp3", audioFile -> {
-                    Log.d("HomeFragment", "TTS 변환 완료 → 오디오 파일 저장됨: " + audioFile.getAbsolutePath());
+                    if (audioFile.exists()) {
+                        Log.d("HomeFragment", "TTS 변환 완료 → 오디오 파일 저장됨: " + audioFile.getAbsolutePath());
 
-                    if (useHomeService && homeAudioService != null) {
-                        homeAudioService.prepareAudio(audioFile.getAbsolutePath(), 0, true);
-                    } else if (!useHomeService && originalAudioService != null) {
-                        originalAudioService.prepareAudio(audioFile.getAbsolutePath(), 0, true);
+                        requireActivity().runOnUiThread(() -> {
+                            if (useHomeService && homeAudioService != null) {
+                                Log.d("HomeFragment", "HomeAudioService에서 오디오 준비");
+                                homeAudioService.prepareAudio(audioFile.getAbsolutePath(), 0, true);
+                            } else {
+                                Log.e("HomeFragment", "서비스가 바인딩되지 않음! 재생 불가");
+                            }
+                        });
                     } else {
-                        Log.e("HomeFragment", "서비스가 바인딩되지 않음!");
+                        Log.e("HomeFragment", "TTS 변환 후 오디오 파일이 존재하지 않음!");
                     }
                 });
 
