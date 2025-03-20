@@ -26,7 +26,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.myapplication.adapter.ItemAdapter;
 import com.example.myapplication.entity.Item;
 import com.example.myapplication.view.HomeAudioService;
-import com.example.myapplication.view.OriginalAudioService;
 import com.example.myapplication.view.TTSHelper;
 
 import org.json.JSONArray;
@@ -56,9 +55,8 @@ public class HomeFragment extends Fragment {
     private int currentTrackIndex = 0;
     private MediaPlayer mediaPlayer;
     private HomeAudioService homeAudioService;
-    private OriginalAudioService originalAudioService;
+
     private boolean isHomeServiceBound = false;
-    private boolean isOriginalServiceBound = false;
     private Handler progressHandler = new Handler();
     private Context mContext;
 
@@ -131,9 +129,9 @@ public class HomeFragment extends Fragment {
                 intent.putExtra("track_index", currentTrackIndex);
                 intent.putExtra("AudioFilePath", getAudioFilePath(currentItem.getTitle()));
 
-                if (originalAudioService != null) {
-                    intent.putExtra("AudioPosition", originalAudioService.getCurrentPosition());
-                    intent.putExtra("IsPlaying", originalAudioService.isPlaying());
+                if (homeAudioService != null) {
+                    intent.putExtra("AudioPosition", homeAudioService.getCurrentPosition());
+                    intent.putExtra("IsPlaying", homeAudioService.isPlaying());
                 } else {
                     intent.putExtra("AudioPosition", 0);
                     intent.putExtra("IsPlaying", false);
@@ -205,9 +203,6 @@ public class HomeFragment extends Fragment {
         if (homeAudioService != null && homeAudioService.isPlaying()) {
             homeAudioService.pauseAudio();
             playButton.setImageResource(R.drawable.button_play);
-        } else if (originalAudioService != null && originalAudioService.isPlaying()) {
-            originalAudioService.pauseAudio();
-            playButton.setImageResource(R.drawable.button_play);
         } else {
             homeAudioService.resumeAudio();
             playButton.setImageResource(R.drawable.button_pause);
@@ -239,19 +234,6 @@ public class HomeFragment extends Fragment {
         }
     };
 
-    private final ServiceConnection originalServiceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            OriginalAudioService.AudioBinder binder = (OriginalAudioService.AudioBinder) service;
-            originalAudioService = binder.getService();
-            isOriginalServiceBound = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            isOriginalServiceBound = false;
-        }
-    };
 
     private void playNextTrack() {
         if (currentTrackIndex < itemList.size() - 1) {
@@ -290,7 +272,6 @@ public class HomeFragment extends Fragment {
     public void onStop() {
         super.onStop();
         if (isHomeServiceBound) mContext.unbindService(homeServiceConnection);
-        if (isOriginalServiceBound) mContext.unbindService(originalServiceConnection);
     }
     @Override
     public void onPause() {

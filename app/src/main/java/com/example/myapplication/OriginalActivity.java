@@ -17,7 +17,6 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.myapplication.view.HomeAudioService;
-import com.example.myapplication.view.OriginalAudioService;
 
 public class OriginalActivity extends AppCompatActivity {
 
@@ -30,42 +29,28 @@ public class OriginalActivity extends AppCompatActivity {
     private int audioPosition = 0;
     private int trackIndex;
     private String title, content, category, date, pdfUrl;
-    private OriginalAudioService originalAudioService;
+    private HomeAudioService homeAudioService;
     private String audioFilePath;
     private boolean isServiceBound = false;
 
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            OriginalAudioService.AudioBinder binder = (OriginalAudioService.AudioBinder) service;
-            originalAudioService = binder.getService();
+            HomeAudioService.AudioBinder binder = (HomeAudioService.AudioBinder) service;
+            homeAudioService = binder.getService();
             isServiceBound = true;
 
-            originalAudioService.setProgressUpdateListener((currentPosition, duration) -> {
-                Log.d("OriginalActivity", "Progress 업데이트 수신: " + currentPosition + " / " + duration);
+            homeAudioService.setProgressUpdateListener((currentPosition, duration) -> {
                 runOnUiThread(() -> updateProgressBar(currentPosition, duration));
             });
 
-            Log.d("OriginalActivity", "OriginalAudioService 바인딩 완료.");
-
-            // Home에서 전달된 상태 유지
-            if (audioFilePath != null && !audioFilePath.isEmpty()) {
-                new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                    if (originalAudioService != null) {
-                        Log.d("OriginalActivity", "기존 파일 재생: " + audioFilePath);
-                        originalAudioService.playAudio(audioFilePath, trackIndex, audioPosition); // 준비 상태로 유지
-                        originalAudioService.seekTo(audioPosition); // 기존 진행 위치로 이동
-
-                        if (isPlaying) {
-                            originalAudioService.resumeAudio();
-                            progressHandler.post(updateProgressRunnable);
-                        }
-                    } else {
-                        Log.e("OriginalActivity", "OriginalAudioService 초기화되지 않음");
-                    }
-                }, 500);
-            } else {
-                Log.e("OriginalActivity", "오디오 파일 경로 없음.");
+            // 기존 재생 상태 유지
+            if (homeAudioService.isPrepared()) {
+                homeAudioService.seekTo(audioPosition);
+                if (isPlaying) {
+                    homeAudioService.resumeAudio();
+                    progressHandler.post(updateProgressRunnable);
+                }
             }
         }
 
@@ -78,23 +63,22 @@ public class OriginalActivity extends AppCompatActivity {
     private final Runnable updateProgressRunnable = new Runnable() {
         @Override
         public void run() {
-            if (originalAudioService != null && originalAudioService.isPlaying()) {
-                int currentPosition = originalAudioService.getCurrentPosition();
-                int totalDuration = originalAudioService.getDuration();
+            if (homeAudioService != null && homeAudioService.isPlaying()) {
+                int currentPosition = homeAudioService.getCurrentPosition();
+                int totalDuration = homeAudioService.getDuration();
 
-                Log.d("OriginalAudioService", "Progress 업데이트: " + currentPosition + " / " + totalDuration);
+                Log.d("HomeAudioService", "Progress 업데이트: " + currentPosition + " / " + totalDuration);
 
                 if (totalDuration > 0) {
                     int progress = (int) ((currentPosition / (float) totalDuration) * 100);
                     progressBar.setProgress(progress);
                 } else {
-                    Log.e("OriginalAudioService", "progressUpdateListener가 null입니다!");
+                    Log.e("HomeAudioService", "progressUpdateListener가 null입니다!");
                 }
 
                 oriCurrentTime.setText(formatTime(currentPosition));
                 oriFullTime.setText(formatTime(totalDuration));
 
-                progressHandler.postDelayed(this, 1000);
             }
         }
     };
@@ -104,7 +88,6 @@ public class OriginalActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.original);
 
-        stopService(new Intent(this, HomeAudioService.class));
         this.audioFilePath = getIntent().getStringExtra("AudioFilePath");
 
         if (audioFilePath == null || audioFilePath.isEmpty()) {
@@ -128,7 +111,7 @@ public class OriginalActivity extends AppCompatActivity {
         oriFullTime = findViewById(R.id.ori_full_time);
 
         // ForegroundService 바인딩
-        Intent serviceIntent = new Intent(this, OriginalAudioService.class);
+        Intent serviceIntent = new Intent(this, HomeAudioService.class);
         bindService(serviceIntent, serviceConnection, BIND_AUTO_CREATE);
 
         // Intent 데이터 받기
@@ -157,14 +140,14 @@ public class OriginalActivity extends AppCompatActivity {
     }
 
     private void togglePlayPause() {
-        if (originalAudioService == null) return;
+        if (homeAudioService == null) return;
 
-        if (originalAudioService.isPlaying()) {
-            originalAudioService.pauseAudio();
+        if (homeAudioService.isPlaying()) {
+            homeAudioService.pauseAudio();
             isPlaying = false;
             playButton.setImageResource(R.drawable.button_play);
         } else {
-            originalAudioService.resumeAudio();
+            homeAudioService.resumeAudio();
             isPlaying = true;
             playButton.setImageResource(R.drawable.button_pause);
             progressHandler.post(updateProgressRunnable);
@@ -172,9 +155,9 @@ public class OriginalActivity extends AppCompatActivity {
     }
 
     private void restartTrack() {
-        if (originalAudioService != null) {
-            originalAudioService.seekTo(0);
-            originalAudioService.resumeAudio();
+        if (homeAudioService != null) {
+            homeAudioService.seekTo(0);
+            homeAudioService.resumeAudio();
             progressHandler.post(updateProgressRunnable);
             isPlaying = true;
             playButton.setImageResource(R.drawable.button_pause);
@@ -182,16 +165,16 @@ public class OriginalActivity extends AppCompatActivity {
     }
 
     private void skipBack() {
-        if (originalAudioService != null) {
-            int currentPosition = originalAudioService.getCurrentPosition();
-            originalAudioService.seekTo(Math.max(currentPosition - 5000, 0));
+        if (homeAudioService != null) {
+            int currentPosition = homeAudioService.getCurrentPosition();
+            homeAudioService.seekTo(Math.max(currentPosition - 5000, 0));
         }
     }
 
     private void skipForward() {
-        if (originalAudioService != null) {
-            int currentPosition = originalAudioService.getCurrentPosition();
-            originalAudioService.seekTo(Math.min(currentPosition + 5000, originalAudioService.getDuration()));
+        if (homeAudioService != null) {
+            int currentPosition = homeAudioService.getCurrentPosition();
+            homeAudioService.seekTo(Math.min(currentPosition + 5000, homeAudioService.getDuration()));
         }
     }
 
@@ -210,8 +193,8 @@ public class OriginalActivity extends AppCompatActivity {
     private void finishWithResult() {
         Intent resultIntent = new Intent();
         resultIntent.putExtra("track_index", trackIndex);
-        resultIntent.putExtra("AudioPosition", originalAudioService.getCurrentPosition());
-        resultIntent.putExtra("IsPlaying", originalAudioService.isPlaying());
+        resultIntent.putExtra("AudioPosition", homeAudioService.getCurrentPosition());
+        resultIntent.putExtra("IsPlaying", homeAudioService.isPlaying());
 
         setResult(RESULT_OK, resultIntent);
         finish();

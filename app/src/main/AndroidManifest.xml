@@ -25,9 +25,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name=".view.OriginalAudioService"
-                 android:foregroundServiceType="mediaPlayback"
-                 android:exported="false"/>
+
         <service android:name=".view.HomeAudioService"
             android:foregroundServiceType="mediaPlayback"
             android:exported="false"/>
