@@ -25,7 +25,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.myapplication.adapter.ItemAdapter;
 import com.example.myapplication.entity.Item;
-import com.example.myapplication.view.HomeAudioService;
+import com.example.myapplication.view.AudioService;
 import com.example.myapplication.view.TTSHelper;
 
 import org.json.JSONArray;
@@ -54,7 +54,7 @@ public class HomeFragment extends Fragment {
     private List<Item> itemList;
     private int currentTrackIndex = 0;
     private MediaPlayer mediaPlayer;
-    private HomeAudioService homeAudioService;
+    private AudioService audioService;
 
     private boolean isHomeServiceBound = false;
     private Handler progressHandler = new Handler();
@@ -129,9 +129,9 @@ public class HomeFragment extends Fragment {
                 intent.putExtra("track_index", currentTrackIndex);
                 intent.putExtra("AudioFilePath", getAudioFilePath(currentItem.getTitle()));
 
-                if (homeAudioService != null) {
-                    intent.putExtra("AudioPosition", homeAudioService.getCurrentPosition());
-                    intent.putExtra("IsPlaying", homeAudioService.isPlaying());
+                if (audioService != null) {
+                    intent.putExtra("AudioPosition", audioService.getCurrentPosition());
+                    intent.putExtra("IsPlaying", audioService.isPlaying());
                 } else {
                     intent.putExtra("AudioPosition", 0);
                     intent.putExtra("IsPlaying", false);
@@ -180,9 +180,9 @@ public class HomeFragment extends Fragment {
                         Log.d("HomeFragment", "TTS 변환 완료 → 오디오 파일 저장됨: " + audioFile.getAbsolutePath());
 
                         requireActivity().runOnUiThread(() -> {
-                            if (useHomeService && homeAudioService != null) {
+                            if (useHomeService && audioService != null) {
                                 Log.d("HomeFragment", "HomeAudioService에서 오디오 준비");
-                                homeAudioService.prepareAudio(audioFile.getAbsolutePath(), 0, true);
+                                audioService.prepareAudio(audioFile.getAbsolutePath(), 0, true);
                             } else {
                                 Log.e("HomeFragment", "서비스가 바인딩되지 않음! 재생 불가");
                             }
@@ -200,11 +200,11 @@ public class HomeFragment extends Fragment {
     }
 
     private void togglePlayPause() {
-        if (homeAudioService != null && homeAudioService.isPlaying()) {
-            homeAudioService.pauseAudio();
+        if (audioService != null && audioService.isPlaying()) {
+            audioService.pauseAudio();
             playButton.setImageResource(R.drawable.button_play);
         } else {
-            homeAudioService.resumeAudio();
+            audioService.resumeAudio();
             playButton.setImageResource(R.drawable.button_pause);
         }
     }
@@ -212,19 +212,19 @@ public class HomeFragment extends Fragment {
     private final ServiceConnection homeServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            HomeAudioService.AudioBinder binder = (HomeAudioService.AudioBinder) service;
-            homeAudioService = binder.getService();
+            AudioService.AudioBinder binder = (AudioService.AudioBinder) service;
+            audioService = binder.getService();
             isHomeServiceBound = true;
 
-            homeAudioService.setProgressUpdateListener((currentPosition, duration) ->
+            audioService.setProgressUpdateListener((currentPosition, duration) ->
                     requireActivity().runOnUiThread(() -> updateProgressBar(currentPosition, duration))
             );
 
-            homeAudioService.setNextTrackListener(() ->
+            audioService.setNextTrackListener(() ->
                     requireActivity().runOnUiThread(() -> playNextTrack())
             );
 
-            homeAudioService.startProgressUpdates();
+            audioService.startProgressUpdates();
         }
 
 
@@ -249,7 +249,7 @@ public class HomeFragment extends Fragment {
         super.onStart();
 
         if (mContext != null) {
-            Intent serviceIntent = new Intent(mContext, HomeAudioService.class);
+            Intent serviceIntent = new Intent(mContext, AudioService.class);
 
             // 서비스가 실행되지 않았다면 먼저 실행
             mContext.startService(serviceIntent);
@@ -264,6 +264,13 @@ public class HomeFragment extends Fragment {
             }
         } else {
             Log.e("HomeFragment", "onStart()에서 mContext가 null임");
+        }
+
+        if (audioService != null) {
+            int currentPosition = audioService.getCurrentPosition();
+            int totalDuration = audioService.getDuration();
+
+            updateProgressBar(currentPosition, totalDuration);
         }
     }
 
@@ -331,6 +338,11 @@ public class HomeFragment extends Fragment {
     private void updateProgressBar(int currentPosition, int duration) {
         if (duration > 0) {
             int progress = (int) ((currentPosition / (float) duration) * 100);
+
+            if (currentPosition >= duration - 1000) {  // 1초 이내 남았을 때 100%로 설정
+                progress = 100;
+            }
+
             progressBar.setProgress(progress);
         }
 
@@ -340,7 +352,7 @@ public class HomeFragment extends Fragment {
 
     private void loadDummyData() {
         List<Item> dummyItems = new ArrayList<>();
-        dummyItems.add(new Item("IT", "삼성전자5", "삼성증권", "https://example.com/sample1.pdf", "2024-02-15", "120", "반도체 시장의 향후 전망을 분석한 리포트입니다."));
+        dummyItems.add(new Item("IT", "삼성전자6", "삼성증권", "https://example.com/sample1.pdf", "2024-02-15", "120", "반도체 시장의 향후 전망을 분석한 리포트입니다.반도체 시장의 향후 전망을 분석한 리포트입니다.반도체 시장의 향후 전망을 분석한 리포트입니다.반도체 시장의 향후 전망을 분석한 리포트입니다."));
         dummyItems.add(new Item("기술", "더미 리포트 2", "LG증권", "https://example.com/dummy2.pdf", "2025-02-02", "234", "더미 데이터 내용 2입니다."));
         dummyItems.add(new Item("산업", "더미 리포트 3", "한화증권", "https://example.com/dummy3.pdf", "2025-02-03", "345", "더미 데이터 내용 3입니다."));
 

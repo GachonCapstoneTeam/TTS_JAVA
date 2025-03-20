@@ -7,7 +7,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.util.Log;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
@@ -16,7 +15,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.myapplication.view.HomeAudioService;
+import com.example.myapplication.view.AudioService;
 
 public class OriginalActivity extends AppCompatActivity {
 
@@ -29,29 +28,25 @@ public class OriginalActivity extends AppCompatActivity {
     private int audioPosition = 0;
     private int trackIndex;
     private String title, content, category, date, pdfUrl;
-    private HomeAudioService homeAudioService;
+    private AudioService audioService;
     private String audioFilePath;
     private boolean isServiceBound = false;
 
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            HomeAudioService.AudioBinder binder = (HomeAudioService.AudioBinder) service;
-            homeAudioService = binder.getService();
+            AudioService.AudioBinder binder = (AudioService.AudioBinder) service;
+            audioService = binder.getService();
             isServiceBound = true;
 
-            homeAudioService.setProgressUpdateListener((currentPosition, duration) -> {
-                runOnUiThread(() -> updateProgressBar(currentPosition, duration));
-            });
+            int currentPosition = audioService.getCurrentPosition();
+            int totalDuration = audioService.getDuration();
 
-            // 기존 재생 상태 유지
-            if (homeAudioService.isPrepared()) {
-                homeAudioService.seekTo(audioPosition);
-                if (isPlaying) {
-                    homeAudioService.resumeAudio();
-                    progressHandler.post(updateProgressRunnable);
-                }
-            }
+            runOnUiThread(() -> updateProgressBar(currentPosition, totalDuration));
+
+            audioService.setProgressUpdateListener((currentPosition2, duration) -> {
+                runOnUiThread(() -> updateProgressBar(currentPosition2, duration));
+            });
         }
 
         @Override
@@ -63,9 +58,9 @@ public class OriginalActivity extends AppCompatActivity {
     private final Runnable updateProgressRunnable = new Runnable() {
         @Override
         public void run() {
-            if (homeAudioService != null && homeAudioService.isPlaying()) {
-                int currentPosition = homeAudioService.getCurrentPosition();
-                int totalDuration = homeAudioService.getDuration();
+            if (audioService != null) {
+                int currentPosition = audioService.getCurrentPosition();
+                int totalDuration = audioService.getDuration();
 
                 Log.d("HomeAudioService", "Progress 업데이트: " + currentPosition + " / " + totalDuration);
 
@@ -82,6 +77,8 @@ public class OriginalActivity extends AppCompatActivity {
             }
         }
     };
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,7 +108,7 @@ public class OriginalActivity extends AppCompatActivity {
         oriFullTime = findViewById(R.id.ori_full_time);
 
         // ForegroundService 바인딩
-        Intent serviceIntent = new Intent(this, HomeAudioService.class);
+        Intent serviceIntent = new Intent(this, AudioService.class);
         bindService(serviceIntent, serviceConnection, BIND_AUTO_CREATE);
 
         // Intent 데이터 받기
@@ -137,17 +134,36 @@ public class OriginalActivity extends AppCompatActivity {
         skipBackButton.setOnClickListener(v -> skipBack());
         skipForwardButton.setOnClickListener(v -> skipForward());
         pdfButton.setOnClickListener(v -> openPdf(pdfUrl));
+
+        if (isPlaying) {
+            playButton.setImageResource(R.drawable.button_pause);
+        } else {
+            playButton.setImageResource(R.drawable.button_play);
+        }
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        if (audioService != null) {
+            int currentPosition = audioService.getCurrentPosition();
+            int totalDuration = audioService.getDuration();
+
+            updateProgressBar(currentPosition, totalDuration);
+        }
     }
 
     private void togglePlayPause() {
-        if (homeAudioService == null) return;
+        if (audioService == null) return;
 
-        if (homeAudioService.isPlaying()) {
-            homeAudioService.pauseAudio();
+        if (audioService.isPlaying()) {
+            audioService.pauseAudio();
             isPlaying = false;
             playButton.setImageResource(R.drawable.button_play);
         } else {
-            homeAudioService.resumeAudio();
+            audioService.resumeAudio();
             isPlaying = true;
             playButton.setImageResource(R.drawable.button_pause);
             progressHandler.post(updateProgressRunnable);
@@ -155,9 +171,9 @@ public class OriginalActivity extends AppCompatActivity {
     }
 
     private void restartTrack() {
-        if (homeAudioService != null) {
-            homeAudioService.seekTo(0);
-            homeAudioService.resumeAudio();
+        if (audioService != null) {
+            audioService.seekTo(0);
+            audioService.resumeAudio();
             progressHandler.post(updateProgressRunnable);
             isPlaying = true;
             playButton.setImageResource(R.drawable.button_pause);
@@ -165,16 +181,16 @@ public class OriginalActivity extends AppCompatActivity {
     }
 
     private void skipBack() {
-        if (homeAudioService != null) {
-            int currentPosition = homeAudioService.getCurrentPosition();
-            homeAudioService.seekTo(Math.max(currentPosition - 5000, 0));
+        if (audioService != null) {
+            int currentPosition = audioService.getCurrentPosition();
+            audioService.seekTo(Math.max(currentPosition - 5000, 0));
         }
     }
 
     private void skipForward() {
-        if (homeAudioService != null) {
-            int currentPosition = homeAudioService.getCurrentPosition();
-            homeAudioService.seekTo(Math.min(currentPosition + 5000, homeAudioService.getDuration()));
+        if (audioService != null) {
+            int currentPosition = audioService.getCurrentPosition();
+            audioService.seekTo(Math.min(currentPosition + 5000, audioService.getDuration()));
         }
     }
 
@@ -193,8 +209,8 @@ public class OriginalActivity extends AppCompatActivity {
     private void finishWithResult() {
         Intent resultIntent = new Intent();
         resultIntent.putExtra("track_index", trackIndex);
-        resultIntent.putExtra("AudioPosition", homeAudioService.getCurrentPosition());
-        resultIntent.putExtra("IsPlaying", homeAudioService.isPlaying());
+        resultIntent.putExtra("AudioPosition", audioService.getCurrentPosition());
+        resultIntent.putExtra("IsPlaying", audioService.isPlaying());
 
         setResult(RESULT_OK, resultIntent);
         finish();

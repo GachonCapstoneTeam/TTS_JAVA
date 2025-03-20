@@ -2,11 +2,11 @@ package com.example.myapplication.view;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Base64;
 import android.util.Log;
 import android.widget.Toast;
-
-import com.example.myapplication.BuildConfig;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -25,7 +25,7 @@ import okhttp3.Response;
 
 public class TTSHelper {
     private final Context context;
-    private final String API_KEY = BuildConfig.MY_KEY;
+    private final String API_KEY = "AIzaSyDIeqKKGDnDMqe2ykQt0fmYpUhUJNkmuZ4"; // BuildConfig 사용 권장
 
     public TTSHelper(Context context) {
         this.context = context;
@@ -108,7 +108,7 @@ public class TTSHelper {
 
 
     private void playAudio(File audioFile) {
-        Intent intent = new Intent(context, HomeAudioService.class);
+        Intent intent = new Intent(context, AudioService.class);
         intent.putExtra("audioFilePath", audioFile.getAbsolutePath());
         context.startService(intent);
         Log.d("TTSHelper", "AudioService에서 재생 요청: " + audioFile.getAbsolutePath());
@@ -126,6 +126,8 @@ public class TTSHelper {
     }
 
     private void showToast(String message) {
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+        new Handler(Looper.getMainLooper()).post(() ->
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        );
     }
 }

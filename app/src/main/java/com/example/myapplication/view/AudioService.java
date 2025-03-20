@@ -18,7 +18,7 @@ import com.example.myapplication.R;
 
 import java.io.IOException;
 
-public class HomeAudioService extends Service {
+public class AudioService extends Service {
     private static final String CHANNEL_ID = "HomeAudioServiceChannel";
     private MediaPlayer mediaPlayer;
     private final IBinder binder = new AudioBinder();
@@ -39,8 +39,8 @@ public class HomeAudioService extends Service {
     }
 
     public class AudioBinder extends Binder {
-        public HomeAudioService getService() {
-            return HomeAudioService.this;
+        public AudioService getService() {
+            return AudioService.this;
         }
     }
 

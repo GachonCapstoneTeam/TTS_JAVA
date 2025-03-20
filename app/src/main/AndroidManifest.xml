@@ -26,7 +26,7 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".view.HomeAudioService"
+        <service android:name=".view.AudioService"
             android:foregroundServiceType="mediaPlayback"
             android:exported="false"/>
         <activity android:name=".OriginalActivity" />
