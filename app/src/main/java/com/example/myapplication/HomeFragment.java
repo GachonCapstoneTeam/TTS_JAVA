@@ -13,7 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.ProgressBar;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -49,7 +49,7 @@ public class HomeFragment extends Fragment {
     private ItemAdapter adapter;
     private TTSHelper ttsHelper;
     private ImageButton playButton, prevButton, nextButton, restartButton, fullScreenButton;
-    private ProgressBar progressBar;
+    private SeekBar seekBar;
     private TextView currentTimeText, fullTimeText;
     private List<Item> itemList;
     private int currentTrackIndex = 0;
@@ -78,7 +78,7 @@ public class HomeFragment extends Fragment {
         nextButton = view.findViewById(R.id.next);
         restartButton = view.findViewById(R.id.restart);
         fullScreenButton = view.findViewById(R.id.full_screen);
-        progressBar = view.findViewById(R.id.progress_bar);
+        seekBar = view.findViewById(R.id.progress_bar);
         currentTimeText = view.findViewById(R.id.current_time);
         fullTimeText = view.findViewById(R.id.full_time);
 
@@ -93,6 +93,31 @@ public class HomeFragment extends Fragment {
 
         // 데이터 가져오기
         fetchDataFromServer();
+
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser && audioService != null) {
+                    int newPosition = (int) ((progress / 100.0) * audioService.getDuration());
+                    currentTimeText.setText(formatTime(newPosition)); // 현재 시간 표시
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                // 사용자가 ProgressBar를 조작하기 시작할 때 (재생 중이라면 일시정지 가능)
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                if (audioService != null) {
+                    int newPosition = (int) ((seekBar.getProgress() / 100.0) * audioService.getDuration());
+                    audioService.seekTo(newPosition); // ✅ 선택한 위치로 이동
+                    updateProgressBar(newPosition, audioService.getDuration()); // UI 업데이트
+                }
+            }
+        });
+
 
         // 아이템 클릭 시 오디오 재생
         adapter.setOnItemClickListener(item -> {
@@ -121,6 +146,7 @@ public class HomeFragment extends Fragment {
                 Toast.makeText(requireContext(), "다음 트랙이 없습니다.", Toast.LENGTH_SHORT).show();
             }
         });
+
 
         fullScreenButton.setOnClickListener(v -> {
             if (currentTrackIndex >= 0 && currentTrackIndex < itemList.size()) {
@@ -171,7 +197,7 @@ public class HomeFragment extends Fragment {
                     scriptView.setText(track.getContent());
                 }
 
-                progressBar.setProgress(0);
+                seekBar.setProgress(0);
                 currentTimeText.setText("00:00");
                 fullTimeText.setText("00:00");
 
@@ -343,7 +369,7 @@ public class HomeFragment extends Fragment {
                 progress = 100;
             }
 
-            progressBar.setProgress(progress);
+            seekBar.setProgress(progress);
         }
 
         currentTimeText.setText(formatTime(currentPosition));

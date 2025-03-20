@@ -9,7 +9,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 import android.widget.ImageButton;
-import android.widget.ProgressBar;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,7 +22,7 @@ public class OriginalActivity extends AppCompatActivity {
     private TextView oriScript, oriTitle, oriDate, oriName;
     private TextView oriCurrentTime, oriFullTime;
     private ImageButton playButton, skipBackButton, skipForwardButton, restartButton, pdfButton, backButton;
-    private ProgressBar progressBar;
+    private SeekBar seekBar;
     private Handler progressHandler = new Handler();
     private boolean isPlaying = false;
     private int audioPosition = 0;
@@ -66,7 +66,7 @@ public class OriginalActivity extends AppCompatActivity {
 
                 if (totalDuration > 0) {
                     int progress = (int) ((currentPosition / (float) totalDuration) * 100);
-                    progressBar.setProgress(progress);
+                    seekBar.setProgress(progress);
                 } else {
                     Log.e("HomeAudioService", "progressUpdateListener가 null입니다!");
                 }
@@ -103,7 +103,7 @@ public class OriginalActivity extends AppCompatActivity {
         skipForwardButton = findViewById(R.id.ori_next);
         restartButton = findViewById(R.id.ori_restart);
         pdfButton = findViewById(R.id.ori_pdf);
-        progressBar = findViewById(R.id.ori_progress_bar);
+        seekBar = findViewById(R.id.ori_progress_bar);
         oriCurrentTime = findViewById(R.id.ori_current_time);
         oriFullTime = findViewById(R.id.ori_full_time);
 
@@ -141,7 +141,32 @@ public class OriginalActivity extends AppCompatActivity {
             playButton.setImageResource(R.drawable.button_play);
         }
 
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser && audioService != null) {
+                    int newPosition = (int) ((progress / 100.0) * audioService.getDuration());
+                    oriCurrentTime.setText(formatTime(newPosition));
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                // 사용자가 SeekBar 조작 디버깅 가능
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                if (audioService != null) {
+                    int newPosition = (int) ((seekBar.getProgress() / 100.0) * audioService.getDuration());
+                    audioService.seekTo(newPosition);
+                    updateProgressBar(newPosition, audioService.getDuration());
+                }
+            }
+        });
+
     }
+
 
     @Override
     protected void onStart() {
@@ -219,7 +244,7 @@ public class OriginalActivity extends AppCompatActivity {
     private void updateProgressBar(int currentPosition, int duration) {
         if (duration > 0) {
             int progress = (int) ((currentPosition / (float) duration) * 100);
-            progressBar.setProgress(progress);
+            seekBar.setProgress(progress);
         }
 
         oriCurrentTime.setText(formatTime(currentPosition));
