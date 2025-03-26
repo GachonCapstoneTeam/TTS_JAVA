@@ -224,13 +224,13 @@
 
             <Button
                 android:id="@+id/myWish"
-                android:layout_width="60dp"
+                android:layout_width="100dp"
                 android:layout_height="25dp"
                 android:layout_margin="5dp"
                 android:background="@drawable/list_button_black"
-                android:text="내 관심"
+                android:text="내 목록"
                 android:textColor="@color/white"
-                android:textSize="10sp"
+                android:textSize="15sp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -238,43 +238,28 @@
 
             <Button
                 android:id="@+id/top10"
-                android:layout_width="60dp"
+                android:layout_width="100dp"
                 android:layout_height="25dp"
                 android:layout_margin="5dp"
                 android:background="@drawable/list_button"
-                android:text="TOP 30"
+                android:text="TOP 10"
                 android:textColor="@color/black"
-                android:textSize="10sp"
+                android:textSize="15sp"
                 app:layout_constraintStart_toEndOf="@id/myWish"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/mysave"/>
-
-            <Button
-                android:id="@+id/mysave"
-                android:layout_width="60dp"
-                android:layout_height="25dp"
-                android:layout_margin="5dp"
-                android:background="@drawable/list_button"
-                android:text="저장 목록"
-                android:textColor="@color/black"
-                android:textSize="10sp"
-                app:layout_constraintStart_toEndOf="@id/top10"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/current_list"
-                />
-
+                app:layout_constraintEnd_toStartOf="@id/current_list"/>
+            
             <Button
                 android:id="@+id/current_list"
-                android:layout_width="60dp"
+                android:layout_width="100dp"
                 android:layout_height="25dp"
                 android:layout_margin="5dp"
                 android:background="@drawable/list_button"
                 android:text="최신 목록"
                 android:textColor="@color/black"
-                android:textSize="10sp"
-                app:layout_constraintStart_toEndOf="@id/mysave"
+                android:textSize="15sp"
+                app:layout_constraintStart_toEndOf="@id/top10"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />

@@ -9,6 +9,7 @@ public class Item {
     private String date;        // 작성일
     private String pdfUrl;      // PDF URL
     private String pdfcontent;  // PDF content
+    private boolean liked;      // 관심 버튼
 
     public Item(String category, String title, String bank, String content, int views, String date, String pdfUrl, String pdfcontent) {
         this.category = category;
@@ -52,4 +53,8 @@ public class Item {
     public String getPdfcontent() {
         return pdfcontent;
     }
+
+    public boolean isLiked() { return liked; }
+
+    public void setLiked(boolean liked) { this.liked = liked; }
 }

@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -19,6 +20,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -49,6 +51,7 @@ public class HomeFragment extends Fragment {
     private ItemAdapter adapter;
     private TTSHelper ttsHelper;
     private ImageButton playButton, prevButton, nextButton, restartButton, fullScreenButton;
+    private Button myWishButton, top10Button, currentListButton;
     private SeekBar seekBar;
     private TextView currentTimeText, fullTimeText;
     private List<Item> itemList;
@@ -81,6 +84,9 @@ public class HomeFragment extends Fragment {
         seekBar = view.findViewById(R.id.progress_bar);
         currentTimeText = view.findViewById(R.id.current_time);
         fullTimeText = view.findViewById(R.id.full_time);
+        myWishButton = view.findViewById(R.id.myWish);
+        top10Button = view.findViewById(R.id.top10);
+        currentListButton = view.findViewById(R.id.current_list);
 
         recyclerView = view.findViewById(R.id.home_recycler);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -174,6 +180,22 @@ public class HomeFragment extends Fragment {
                 Toast.makeText(getContext(), "선택된 트랙이 없습니다.", Toast.LENGTH_SHORT).show();
             }
         });
+
+        myWishButton.setOnClickListener(v -> {
+            updateButtonStyles(myWishButton);
+            // 내 목록 데이터 필터링 로직 추가 예정
+        });
+
+        top10Button.setOnClickListener(v -> {
+            updateButtonStyles(top10Button);
+            // TOP 10 필터링 로직 추가 예정
+        });
+
+        currentListButton.setOnClickListener(v -> {
+            updateButtonStyles(currentListButton);
+            // 최신 목록 전체 보기 로직 추가 예정
+        });
+
 
         return view;
     }
@@ -374,6 +396,19 @@ public class HomeFragment extends Fragment {
 
         currentTimeText.setText(formatTime(currentPosition));
         fullTimeText.setText(formatTime(duration));
+    }
+
+    private void updateButtonStyles(Button selectedButton) {
+        Button[] buttons = {myWishButton, top10Button, currentListButton};
+        for (Button button : buttons) {
+            if (button == selectedButton) {
+                button.setBackgroundResource(R.drawable.list_button_black); // 선택된 버튼
+                button.setTextColor(ContextCompat.getColor(requireContext(), R.color.white));
+            } else {
+                button.setBackgroundResource(R.drawable.list_button); // 기본 버튼
+                button.setTextColor(ContextCompat.getColor(requireContext(), R.color.black));
+            }
+        }
     }
 
     private void loadDummyData() {
