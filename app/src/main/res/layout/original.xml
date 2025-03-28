@@ -159,14 +159,13 @@
                         android:textColor="@color/black"
                         android:textSize="13dp" />
 
-                    <ProgressBar
+                    <SeekBar
                         android:id="@+id/ori_progress_bar"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         app:layout_constraintStart_toEndOf="@id/ori_current_time"
                         app:layout_constraintEnd_toStartOf="@id/ori_full_time"
                         app:layout_constraintTop_toTopOf="parent"
-                        style="?android:attr/progressBarStyleHorizontal"
                         android:layout_marginLeft="8dp"
                         android:layout_marginRight="8dp"/>
 

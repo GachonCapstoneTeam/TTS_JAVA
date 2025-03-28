@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -117,14 +118,13 @@
                         android:textColor="@color/black"
                         android:textSize="13dp" />
 
-                    <ProgressBar
+                    <SeekBar
                         android:id="@+id/progress_bar"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         app:layout_constraintStart_toEndOf="@id/current_time"
                         app:layout_constraintEnd_toStartOf="@id/full_time"
                         app:layout_constraintTop_toTopOf="parent"
-                        style="?android:attr/progressBarStyleHorizontal"
                         android:max="100"
                         android:progress="0"
                         android:layout_marginLeft="8dp"
@@ -220,17 +220,17 @@
             android:layout_margin="5dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/home_guide_line">
+            app:layout_constraintTop_toBottomOf="@id/home_guide_line" >
 
             <Button
                 android:id="@+id/myWish"
-                android:layout_width="60dp"
+                android:layout_width="100dp"
                 android:layout_height="25dp"
                 android:layout_margin="5dp"
                 android:background="@drawable/list_button_black"
-                android:text="내 관심"
+                android:text="내 목록"
                 android:textColor="@color/white"
-                android:textSize="10sp"
+                android:textSize="15sp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -238,43 +238,28 @@
 
             <Button
                 android:id="@+id/top10"
-                android:layout_width="60dp"
+                android:layout_width="100dp"
                 android:layout_height="25dp"
                 android:layout_margin="5dp"
                 android:background="@drawable/list_button"
-                android:text="TOP 30"
+                android:text="TOP 10"
                 android:textColor="@color/black"
-                android:textSize="10sp"
+                android:textSize="15sp"
                 app:layout_constraintStart_toEndOf="@id/myWish"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/mysave"/>
-
-            <Button
-                android:id="@+id/mysave"
-                android:layout_width="60dp"
-                android:layout_height="25dp"
-                android:layout_margin="5dp"
-                android:background="@drawable/list_button"
-                android:text="저장 목록"
-                android:textColor="@color/black"
-                android:textSize="10sp"
-                app:layout_constraintStart_toEndOf="@id/top10"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/current_list"
-                />
-
+                app:layout_constraintEnd_toStartOf="@id/current_list"/>
+            
             <Button
                 android:id="@+id/current_list"
-                android:layout_width="60dp"
+                android:layout_width="100dp"
                 android:layout_height="25dp"
                 android:layout_margin="5dp"
                 android:background="@drawable/list_button"
                 android:text="최신 목록"
                 android:textColor="@color/black"
-                android:textSize="10sp"
-                app:layout_constraintStart_toEndOf="@id/mysave"
+                android:textSize="15sp"
+                app:layout_constraintStart_toEndOf="@id/top10"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
@@ -286,15 +271,17 @@
             android:id="@+id/home_swiper"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="@id/home_playlist"
             app:layout_constraintTop_toBottomOf="@id/home_button_part"
-            app:layout_constraintBottom_toBottomOf="@id/home_playlist">
+            app:layout_constraintVertical_bias="0.0"
+            tools:layout_editor_absoluteX="10dp">
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/home_recycler"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_margin="5dp"
-                android:orientation="vertical"/>
+                android:orientation="vertical" />
 
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>

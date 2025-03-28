@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -72,6 +73,25 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ReportView
             intent.putExtra("PDF_URL", item.getPdfUrl());
             context.startActivity(intent);
         });
+
+        // 아이템이 좋아요 되어 있는지에 따라 버튼 이미지 변경
+        holder.boxStarButton.setImageResource(
+                item.isLiked() ? R.drawable.star_not : R.drawable.star
+        );
+
+// 버튼 클릭 시 좋아요 토글
+        holder.boxStarButton.setOnClickListener(v -> {
+            boolean newLikeState = !item.isLiked();
+            item.setLiked(newLikeState);
+
+            // UI 반영
+            holder.boxStarButton.setImageResource(
+                    newLikeState ? R.drawable.star_not : R.drawable.star
+            );
+
+            // 여기에 서버 전송 로직 넣어야 함.
+        });
+
     }
 
     @Override
@@ -81,6 +101,7 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ReportView
 
     public static class ReportViewHolder extends RecyclerView.ViewHolder {
         TextView boxName, boxTitle, boxBank, boxDate, boxScript;
+        ImageButton boxStarButton;
         Button boxOriButton, boxSumButton;
 
         public ReportViewHolder(@NonNull View itemView) {
@@ -92,6 +113,9 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ReportView
             boxScript = itemView.findViewById(R.id.box_script);
             boxOriButton = itemView.findViewById(R.id.box_ori_button);
             boxSumButton = itemView.findViewById(R.id.box_sum_button);
+            boxStarButton = itemView.findViewById(R.id.box_star_button);
+
+
         }
     }
 }

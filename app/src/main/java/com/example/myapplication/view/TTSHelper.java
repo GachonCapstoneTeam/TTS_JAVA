@@ -1,13 +1,14 @@
 package com.example.myapplication.view;
 
 import android.content.Context;
-import android.media.MediaPlayer;
+import android.content.Intent;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Base64;
-import android.widget.ImageButton;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.example.myapplication.BuildConfig;
-import com.example.myapplication.R;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -26,31 +27,23 @@ import okhttp3.Response;
 
 public class TTSHelper {
     private final Context context;
-    private MediaPlayer mediaPlayer;
-    private boolean isPlaying = false;
-    private PlaybackCallback playbackCallback;
-    private final String API_KEY = BuildConfig.MY_KEY;
-
-    public interface PlaybackCallback {
-        void onTrackCompleted();
-    }
-
-    public interface OnPlaybackReadyListener {
-        void onReady();
-    }
-
-    public void setPlaybackCallback(PlaybackCallback callback) {
-        this.playbackCallback = callback;
-    }
+    private final String API_KEY =  BuildConfig.MY_KEY;
 
     public TTSHelper(Context context) {
         this.context = context;
     }
 
-    public void performTextToSpeech(String text, String fileName, ImageButton playButton, OnPlaybackReadyListener listener) {
+    public interface OnAudioFileReadyListener {
+        void onAudioFileReady(File audioFile);
+    }
+
+    public void performTextToSpeech(String text, String fileName, OnAudioFileReadyListener listener) {
         File audioFile = new File(context.getCacheDir(), fileName);
+
+        // 파일이 이미 존재하면 변환 없이 바로 실행
         if (audioFile.exists()) {
-            playAudio(audioFile, playButton, listener);
+            Log.d("TTSHelper", "이미 저장된 오디오 파일 사용: " + audioFile.getAbsolutePath());
+            listener.onAudioFileReady(audioFile);
             return;
         }
 
@@ -84,7 +77,11 @@ public class TTSHelper {
                         String json = response.body().string();
                         JSONObject jsonObject = new JSONObject(json);
                         String audioContentEncoded = jsonObject.getString("audioContent");
-                        saveAudioFile(audioContentEncoded, fileName, playButton, listener);
+
+                        // 파일을 저장한 후 getAbsolutePath() 적용
+                        saveAudioFile(audioContentEncoded, audioFile, listener);
+                        Log.d("TTSHelper", "오디오 파일 저장됨: " + audioFile.getAbsolutePath());
+
                     } catch (JSONException e) {
                         e.printStackTrace();
                         showToast("TTS 응답 파싱 실패");
@@ -96,60 +93,43 @@ public class TTSHelper {
         });
     }
 
-    private void saveAudioFile(String base64Audio, String fileName, ImageButton playButton, OnPlaybackReadyListener listener) {
-        byte[] decodedAudio = Base64.decode(base64Audio, Base64.DEFAULT);
-        File audioFile = new File(context.getCacheDir(), fileName);
 
+    private void saveAudioFile(String base64Audio, File audioFile, OnAudioFileReadyListener listener) {
+        byte[] decodedAudio = Base64.decode(base64Audio, Base64.DEFAULT);
         try (FileOutputStream fos = new FileOutputStream(audioFile)) {
             fos.write(decodedAudio);
-            runOnUiThread(() -> playAudio(audioFile, playButton, listener));
+            Log.d("TTSHelper", "오디오 파일 저장 완료: " + audioFile.getAbsolutePath());
+
+            // 변환 완료 후 listener 호출
+            listener.onAudioFileReady(audioFile);
         } catch (IOException e) {
             e.printStackTrace();
             showToast("오디오 파일 저장 실패");
         }
     }
 
-    private void playAudio(File audioFile, ImageButton playButton, OnPlaybackReadyListener listener) {
-        if (mediaPlayer != null) {
-            mediaPlayer.release();
-        }
 
-        mediaPlayer = new MediaPlayer();
-        try {
-            mediaPlayer.setDataSource(audioFile.getAbsolutePath());
-            mediaPlayer.prepare();
-            listener.onReady();
-        } catch (IOException e) {
-            e.printStackTrace();
-            showToast("오디오 재생 실패");
-        }
+    private void playAudio(File audioFile) {
+        Intent intent = new Intent(context, AudioService.class);
+        intent.putExtra("audioFilePath", audioFile.getAbsolutePath());
+        context.startService(intent);
+        Log.d("TTSHelper", "AudioService에서 재생 요청: " + audioFile.getAbsolutePath());
     }
 
-    public void togglePlayPause(ImageButton playButton) {
-        if (mediaPlayer == null) return;
+    private void playDefaultAudio() {
+        File defaultAudio = new File(context.getCacheDir(), "default.mp3");
 
-        if (mediaPlayer.isPlaying()) {
-            mediaPlayer.pause();
-            isPlaying = false;
-            runOnUiThread(() -> playButton.setImageResource(R.drawable.button_play));
+        // 기본 오디오 파일이 있으면 재생
+        if (defaultAudio.exists()) {
+            playAudio(defaultAudio);
         } else {
-            mediaPlayer.start();
-            isPlaying = true;
-            runOnUiThread(() -> playButton.setImageResource(R.drawable.pause));
+            showToast("기본 오디오 파일이 없습니다.");
         }
-    }
-
-    public MediaPlayer getMediaPlayer() {
-        return mediaPlayer;
     }
 
     private void showToast(String message) {
-        runOnUiThread(() -> Toast.makeText(context, message, Toast.LENGTH_SHORT).show());
-    }
-
-    private void runOnUiThread(Runnable action) {
-        if (context instanceof android.app.Activity) {
-            ((android.app.Activity) context).runOnUiThread(action);
-        }
+        new Handler(Looper.getMainLooper()).post(() ->
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        );
     }
 }
