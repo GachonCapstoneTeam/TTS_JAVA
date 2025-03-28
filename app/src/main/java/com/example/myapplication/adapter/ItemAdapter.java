@@ -55,7 +55,6 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
         // 데이터 바인딩
         holder.title.setText(item.getTitle()); // 제목
         holder.category.setText(item.getCategory()); // 분류
-        holder.stockName.setText(item.getStockName()); // 종목명
         holder.uploadTime.setText(item.getDate()); // 업로드 시간
 
         // 아이템 클릭 이벤트 처리
@@ -80,7 +79,6 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
             // XML 레이아웃의 뷰 연결
             title = itemView.findViewById(R.id.item_title);
             category = itemView.findViewById(R.id.item_category);
-            stockName = itemView.findViewById(R.id.stockName);
             uploadTime = itemView.findViewById(R.id.item_date);
         }
     }

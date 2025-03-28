@@ -36,7 +36,7 @@ public class RecommendPagerAdapter extends RecyclerView.Adapter<RecommendPagerAd
     @Override
     public void onBindViewHolder(@NonNull RecommendPagerAdapter.ViewHolder holder, int position) {
         Item item = items.get(position);
-        holder.ritName.setText(item.getCategory());
+        holder.ritName.setText(item.getStockName());
         holder.ritTitle.setText(item.getTitle());
         holder.ritDate.setText(item.getDate());
         holder.ritScript.setText(item.getContent());

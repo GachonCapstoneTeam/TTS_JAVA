@@ -50,19 +50,7 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ReportView
         holder.boxDate.setText(item.getDate());
         holder.boxScript.setText(item.getContent());
 
-        holder.boxOriButton.setOnClickListener(v -> {
-            Intent intent = new Intent(context, OriginalActivity.class);
-            intent.putExtra("Category", item.getCategory());
-            intent.putExtra("Title", item.getTitle());
-            intent.putExtra("Bank", item.getBank());
-            intent.putExtra("Content", item.getContent());
-            intent.putExtra("Views", item.getViews());
-            intent.putExtra("Date", item.getDate());
-            intent.putExtra("PDF_URL", item.getPdfUrl());
-            context.startActivity(intent);
-        });
-
-        holder.boxSumButton.setOnClickListener(v -> {
+        holder.boxButton.setOnClickListener(v -> {
             Intent intent = new Intent(context, OriginalActivity.class);
             intent.putExtra("Category", item.getCategory());
             intent.putExtra("Title", item.getTitle());
@@ -102,17 +90,15 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ReportView
     public static class ReportViewHolder extends RecyclerView.ViewHolder {
         TextView boxName, boxTitle, boxBank, boxDate, boxScript;
         ImageButton boxStarButton;
-        Button boxOriButton, boxSumButton;
+        Button boxButton;
 
         public ReportViewHolder(@NonNull View itemView) {
             super(itemView);
             boxName = itemView.findViewById(R.id.box_name);
             boxTitle = itemView.findViewById(R.id.box_title);
-            boxBank = itemView.findViewById(R.id.box_bank);
             boxDate = itemView.findViewById(R.id.box_date);
             boxScript = itemView.findViewById(R.id.box_script);
-            boxOriButton = itemView.findViewById(R.id.box_ori_button);
-            boxSumButton = itemView.findViewById(R.id.box_sum_button);
+            boxButton = itemView.findViewById(R.id.box_button);
             boxStarButton = itemView.findViewById(R.id.box_star_button);
 
 

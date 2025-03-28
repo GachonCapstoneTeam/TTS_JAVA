@@ -1,43 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/rcm_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background_round">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/background_color">
+
     <TextView
         android:id="@+id/rcm_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="추천 리포트"
-        android:textSize="25sp"
+        android:textSize="22sp"
         android:textColor="@color/black"
         android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="@+id/rcm_layout"
-        app:layout_constraintTop_toTopOf="@id/rcm_layout"
-        android:layout_marginTop="15dp"
-        android:layout_marginStart="15dp"
-        android:layout_marginLeft="10dp"/>
+        android:layout_margin="16dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/rcm_recommend_page"
         android:layout_width="match_parent"
-        android:layout_height="450dp"
-        android:layout_margin="5dp"
-        android:layout_marginTop="60dp"
-        android:background="@color/white"
-        app:layout_constraintEnd_toEndOf="@id/rcm_layout"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/rcm_text"
-        app:layout_constraintTop_toBottomOf="@id/rcm_text" />
+        android:layout_height="324dp"
+        app:layout_constraintTop_toBottomOf="@id/rcm_text"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="16dp"
+        android:padding="19dp"/>
 
     <com.tbuonomo.viewpagerdotsindicator.SpringDotsIndicator
         android:id="@+id/rcm_recommend_indicator"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:dampingRatio="0.5"
-        app:dotsColor="@color/white"
-        app:dotsStrokeColor="@color/white"
+        app:dotsColor="@color/green"
+        app:dotsStrokeColor="@color/green"
         app:dotsCornerRadius="2dp"
         app:dotsSize="10dp"
         app:dotsSpacing="6dp"
@@ -49,26 +44,26 @@
         android:layout_margin="5dp"/>
 
     <TextView
-        android:id="@+id/rcm_hot"
+        android:id="@+id/rcm_text2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="인기 리포트"
-        android:textSize="25sp"
-        android:textStyle="bold"
+        android:text="현재 뜨고 있는 리포트"
+        android:textSize="22sp"
         android:textColor="@color/black"
-        app:layout_constraintStart_toStartOf="@id/rcm_text"
+        android:textStyle="bold"
+        android:layout_marginTop="50dp"
         app:layout_constraintTop_toBottomOf="@id/rcm_recommend_indicator"
-        android:layout_marginTop="15dp" />
+        app:layout_constraintStart_toStartOf="@id/rcm_text"/>
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/rcm_swiper"
         android:layout_width="match_parent"
-        android:layout_height="99dp"
-        android:layout_margin="5dp"
-        app:layout_constraintStart_toStartOf="@id/rcm_layout"
-        app:layout_constraintEnd_toEndOf="@id/rcm_layout"
-        app:layout_constraintTop_toBottomOf="@id/rcm_hot"
-        android:background="@color/white" />
+        android:layout_height="120dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/rcm_text2"
+        android:background="@color/background_color"
+        android:orientation="vertical"/>
 
     <com.tbuonomo.viewpagerdotsindicator.SpringDotsIndicator
         android:id="@+id/rcm_dots_indicator"
@@ -81,6 +76,7 @@
         app:layout_constraintStart_toStartOf="@id/rcm_swiper"
         app:layout_constraintEnd_toEndOf="@id/rcm_swiper"
         android:layout_marginBottom="5dp"/>
-    <!--thema -> tabstyle.xml 수정 필요-->
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

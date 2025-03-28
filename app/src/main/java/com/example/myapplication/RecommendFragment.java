@@ -32,7 +32,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class RecentFragment extends Fragment {
+public class RecommendFragment extends Fragment {
 
     private ViewPager2 recommendViewPager, rankViewPager;
     private SpringDotsIndicator recommendDots, rankDots;
@@ -51,7 +51,7 @@ public class RecentFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_recent, container, false);
+        View view = inflater.inflate(R.layout.fragment_recommand, container, false);
 
         // View 초기화
         recommendViewPager = view.findViewById(R.id.rcm_recommend_page);
@@ -65,7 +65,7 @@ public class RecentFragment extends Fragment {
         recommendViewPager.setAdapter(recommendAdapter);
         recommendDots.setViewPager2(recommendViewPager);
 
-        rankAdapter = new RankPagerAdapter(rankItems);
+        rankAdapter = new RankPagerAdapter(getContext(), rankItems);
         rankViewPager.setAdapter(rankAdapter);
         rankDots.setViewPager2(rankViewPager);
 

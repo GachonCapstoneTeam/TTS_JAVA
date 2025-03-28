@@ -16,9 +16,9 @@ public class basic_layout extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.basic_layout);
+        setContentView(R.layout.base_layout);
 
-        viewPager = findViewById(R.id.view_pager);
+        viewPager = findViewById(R.id.frame);
 
         ViewPagerAdapter adapter = new ViewPagerAdapter(this);
         viewPager.setAdapter(adapter);
@@ -29,14 +29,12 @@ public class basic_layout extends AppCompatActivity {
         navigationMenu.setSelectedItemId(R.id.home);
 
         navigationMenu.setOnItemSelectedListener(item -> {
-            if (item.getItemId() == R.id.recent) {
+            if (item.getItemId() == R.id.search) {
                 viewPager.setCurrentItem(0); // SearchFragment
             } else if (item.getItemId() == R.id.home) {
                 viewPager.setCurrentItem(1); // HomeFragment
-            } else if (item.getItemId() == R.id.thema) {
+            } else if (item.getItemId() == R.id.rcm) {
                 viewPager.setCurrentItem(2); // MainFragment
-            } else if (item.getItemId() == R.id.setting) {
-                viewPager.setCurrentItem(3); // SettingFragment
             }
             return true;
         });
@@ -47,13 +45,11 @@ public class basic_layout extends AppCompatActivity {
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
                 if (position == 0) {
-                    navigationMenu.setSelectedItemId(R.id.recent);
+                    navigationMenu.setSelectedItemId(R.id.search);
                 } else if (position == 1) {
                     navigationMenu.setSelectedItemId(R.id.home);
                 } else if (position == 2) {
-                    navigationMenu.setSelectedItemId(R.id.thema);
-                } else if (position == 3) {
-                    navigationMenu.setSelectedItemId(R.id.setting);
+                    navigationMenu.setSelectedItemId(R.id.rcm);
                 }
             }
         });

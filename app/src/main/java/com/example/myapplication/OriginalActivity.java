@@ -32,6 +32,7 @@ public class OriginalActivity extends AppCompatActivity {
     private String audioFilePath;
     private boolean isServiceBound = false;
 
+
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -43,6 +44,8 @@ public class OriginalActivity extends AppCompatActivity {
             int totalDuration = audioService.getDuration();
 
             runOnUiThread(() -> updateProgressBar(currentPosition, totalDuration));
+
+            audioService.playAudio(audioFilePath, trackIndex, audioPosition);
 
             audioService.setProgressUpdateListener((currentPosition2, duration) -> {
                 runOnUiThread(() -> updateProgressBar(currentPosition2, duration));

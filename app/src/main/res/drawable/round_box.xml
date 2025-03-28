@@ -3,8 +3,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     tools:ignore="ExtraText">
 
-    <solid android:color="@color/green" /> <!--배경색-->
-    <size android:height="32dp"
-          android:width="117dp"/>
+    <solid android:color="@color/white" /> <!--배경색-->
+    <size android:height="200dp"
+        android:width="380dp"/>
     <corners android:radius="12dp"/>
 </shape>
