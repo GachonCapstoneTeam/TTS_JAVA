@@ -347,7 +347,7 @@ public class HomeFragment extends Fragment {
 
     private void fetchDataFromServer() {
         OkHttpClient client = new OkHttpClient();
-        String url = "https://40.82.148.190:8000/textload/home";
+        String url = "https://40.82.148.190:8000/textload/content";
 
         Request request = new Request.Builder()
                 .url(url)

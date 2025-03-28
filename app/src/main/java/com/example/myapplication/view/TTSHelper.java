@@ -8,6 +8,8 @@ import android.util.Base64;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.example.myapplication.BuildConfig;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -25,7 +27,7 @@ import okhttp3.Response;
 
 public class TTSHelper {
     private final Context context;
-    private final String API_KEY = "AIzaSyDIeqKKGDnDMqe2ykQt0fmYpUhUJNkmuZ4"; // BuildConfig.MY_KEY;
+    private final String API_KEY =  BuildConfig.MY_KEY;
 
     public TTSHelper(Context context) {
         this.context = context;
