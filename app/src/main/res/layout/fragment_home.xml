@@ -12,174 +12,148 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/home_media_container"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="4"
-        android:background="@drawable/background_round">
+        android:layout_height="230dp"
+        android:background="@drawable/round_box"
+        android:backgroundTint="#E8EDF5"
+        android:layout_margin="16dp">
 
-        <!--로고 부분 임시-->
         <TextView
-            android:id="@+id/home_logo"
+            android:id="@+id/home_display_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="@+id/home_media_container"
-            app:layout_constraintStart_toStartOf="@id/home_media_container"
-            app:layout_constraintEnd_toEndOf="@id/home_media_container"
-            android:layout_margin="15dp"
-            android:text="TalkStock"
-            android:textStyle="bold"
+            android:text="제목"
             android:textColor="@color/black"
-            android:textSize="15dp"
-            android:shadowColor="@color/gray_dark"
-            android:shadowDx="5"
-            android:shadowDy="5"
-            android:shadowRadius="2"/>
+            android:textStyle="bold"
+            android:textSize="20sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="5dp" />
 
-        <!--현재 재생 중인 트랙, 크기, 색상, 위치 조정 필요-->
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/home_display"
-                android:layout_width="300dp"
-                android:layout_height="150dp"
-                android:background="@color/white"
-                app:layout_constraintTop_toBottomOf="@id/home_logo"
-                app:layout_constraintStart_toStartOf="@id/home_media_container"
-                app:layout_constraintEnd_toEndOf="@id/home_media_container"
-                android:layout_marginTop="15dp">
+        <TextView
+            android:id="@+id/home_display_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="종목명"
+            android:textColor="@color/green"
+            android:textStyle="normal"
+            android:textSize="16sp"
+            app:layout_constraintTop_toBottomOf="@id/home_display_title"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
 
-                <TextView
-                    android:id="@+id/home_display_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="title"
-                    android:textColor="@color/black"
-                    android:textStyle="bold"
-                    android:textSize="20dp"
-                    app:layout_constraintStart_toStartOf="@id/home_display"
-                    app:layout_constraintEnd_toEndOf="@id/home_display"
-                    app:layout_constraintTop_toTopOf="@id/home_display"
-                    android:layout_marginTop="5dp" />
-
-                <ScrollView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fillViewport="true"
-                    android:scrollbars="none"
-                    app:layout_constraintTop_toBottomOf="@id/home_display_title"
-                    app:layout_constraintStart_toStartOf="@id/home_display"
-                    app:layout_constraintEnd_toEndOf="@id/home_display"
-                    app:layout_constraintBottom_toBottomOf="@id/home_display">
-                    <TextView
-                        android:id="@+id/home_display_script"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="script"
-                        android:textSize="16sp"/>
-                </ScrollView>
-            </androidx.constraintlayout.widget.ConstraintLayout>
 
         <LinearLayout
             android:id="@+id/home_player"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/home_display"
-            app:layout_constraintStart_toStartOf="@id/home_media_container"
+            android:orientation="vertical"
             app:layout_constraintEnd_toEndOf="@id/home_media_container"
-            app:layout_constraintBottom_toBottomOf="@id/home_media_container"
-            android:layout_marginTop="10dp"
-            android:layout_marginLeft="30dp"
-            android:layout_marginRight="30dp"
-            android:layout_marginBottom="10dp"
-            android:orientation="vertical">
 
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/progressbar"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@id/home_media_container"
+            app:layout_constraintTop_toBottomOf="@+id/home_display_name">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/progressbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="30dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginRight="30dp">
+
+                <TextView
+                    android:id="@+id/current_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0:00"
+                    android:textColor="@color/brown"
+                    android:textSize="13dp"
+                    app:layout_constraintStart_toStartOf="@id/progress_bar"
+                    app:layout_constraintTop_toBottomOf="@id/progress_bar" />
+
+                <TextView
+                    android:id="@+id/full_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0:00"
+                    android:textColor="@color/brown"
+                    android:textSize="13dp"
+                    app:layout_constraintEnd_toEndOf="@id/progress_bar"
+                    app:layout_constraintTop_toBottomOf="@id/progress_bar" />
+
+                <SeekBar
+                    android:id="@+id/progress_bar"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="15dp"
-                    android:layout_marginLeft="30dp"
-                    android:layout_marginRight="30dp">
+                    app:layout_constraintEnd_toStartOf="@id/full_time"
+                    app:layout_constraintStart_toEndOf="@id/current_time"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-                    <TextView
-                        android:id="@+id/current_time"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        android:text="0:00"
-                        android:textColor="@color/black"
-                        android:textSize="13dp" />
-
-                    <TextView
-                        android:id="@+id/full_time"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        android:text="0:00"
-                        android:textColor="@color/black"
-                        android:textSize="13dp" />
-
-                    <SeekBar
-                        android:id="@+id/progress_bar"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        app:layout_constraintStart_toEndOf="@id/current_time"
-                        app:layout_constraintEnd_toStartOf="@id/full_time"
-                        app:layout_constraintTop_toTopOf="parent"
-                        android:max="100"
-                        android:progress="0"
-                        android:layout_marginLeft="8dp"
-                        android:layout_marginRight="8dp"/>
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-                <LinearLayout
-                    android:id="@+id/audio_button"
-                    android:layout_width="match_parent"
+            <LinearLayout
+                android:id="@+id/audio_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <ImageButton
+                    android:id="@+id/last_track"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center">
+                    android:layout_margin="15dp"
+                    android:background="@drawable/last_track" />
 
-                    <ImageButton
-                        android:id="@+id/restart"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/restart"
-                        android:layout_margin="15dp"/>
+                <ImageButton
+                    android:id="@+id/prev"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="15dp"
+                    android:background="@drawable/prev" />
 
-                    <ImageButton
-                        android:id="@+id/prev"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/prev"
-                        android:layout_margin="15dp"/>
+                <ImageButton
+                    android:id="@+id/button_play"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:background="@drawable/button_play" />
 
-                    <ImageButton
-                        android:id="@+id/button_play"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/button_play"
-                        android:layout_margin="5dp"/>
+                <ImageButton
+                    android:id="@+id/next"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="15dp"
+                    android:background="@drawable/next" />
 
-                    <ImageButton
-                        android:id="@+id/next"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/next"
-                        android:layout_margin="15dp"/>
+                <ImageButton
+                    android:id="@+id/next_track"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="15dp"
+                    android:background="@drawable/next_track" />
 
-                    <ImageButton
-                        android:id="@+id/full_screen"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/full_screen"
-                        android:layout_margin="15dp"/>
-
-
-
-                </LinearLayout>
+            </LinearLayout>
 
         </LinearLayout>
+
+        <Button
+            android:id="@+id/full_screen"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"
+            android:layout_width="match_parent"
+            android:layout_height="25dp"
+            android:background="@drawable/round_button"
+            android:text="Read Report"
+            android:textSize="14sp"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            app:layout_constraintTop_toBottomOf="@id/home_player"
+            app:layout_constraintStart_toStartOf="@id/home_player"
+            app:layout_constraintEnd_toEndOf="@id/home_player"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -188,49 +162,27 @@
         android:id="@+id/home_playlist"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="6">
-
-        <TextView
-            android:id="@+id/mylist"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="My List"
-            android:textStyle="normal"
-            android:textColor="@color/black"
-            android:textSize="25dp"
-            app:layout_constraintStart_toStartOf="@id/home_playlist"
-            app:layout_constraintEnd_toEndOf="@id/home_playlist"
-            app:layout_constraintTop_toTopOf="@id/home_playlist"
-            android:layout_margin="8dp"/>
-
-        <View
-            android:id="@+id/home_guide_line"
-            android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:background="@color/black"
-            app:layout_constraintTop_toBottomOf="@id/mylist"
-            app:layout_constraintStart_toStartOf="@id/mylist"
-            app:layout_constraintEnd_toEndOf="@id/mylist"
-            android:layout_margin="10dp"/>
+        android:layout_weight="10">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/home_button_part"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="5dp"
+            android:layout_marginTop="15dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/home_guide_line" >
+            app:layout_constraintTop_toTopOf="parent" >
 
             <Button
                 android:id="@+id/myWish"
                 android:layout_width="100dp"
                 android:layout_height="25dp"
                 android:layout_margin="5dp"
-                android:background="@drawable/list_button_black"
+                android:background="@drawable/list_button_green"
                 android:text="내 목록"
                 android:textColor="@color/white"
                 android:textSize="15sp"
+                android:stateListAnimator="@null"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -245,11 +197,12 @@
                 android:text="TOP 10"
                 android:textColor="@color/black"
                 android:textSize="15sp"
+                android:stateListAnimator="@null"
                 app:layout_constraintStart_toEndOf="@id/myWish"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@id/current_list"/>
-            
+
             <Button
                 android:id="@+id/current_list"
                 android:layout_width="100dp"
@@ -259,6 +212,7 @@
                 android:text="최신 목록"
                 android:textColor="@color/black"
                 android:textSize="15sp"
+                android:stateListAnimator="@null"
                 app:layout_constraintStart_toEndOf="@id/top10"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -271,10 +225,10 @@
             android:id="@+id/home_swiper"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintBottom_toBottomOf="@id/home_playlist"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@id/home_button_part"
             app:layout_constraintVertical_bias="0.0"
-            tools:layout_editor_absoluteX="10dp">
+            tools:layout_editor_absoluteX="16dp">
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/home_recycler"

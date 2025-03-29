@@ -26,6 +26,8 @@ public class AudioService extends Service {
     private Handler progressHandler = new Handler();
     private ProgressUpdateListener progressUpdateListener;
     private NextTrackListener nextTrackListener;
+    private int currentTrackIndex = -1;  // 현재 재생 중인 인덱스 (-1은 초기 상태)
+
 
     private int trackIndex = 0; // 현재 트랙 인덱스 저장
     private String audioFilePath; // 현재 재생 중인 오디오 파일 경로
@@ -75,6 +77,7 @@ public class AudioService extends Service {
     }
 
     public void playAudio(String audioFilePath, int trackIndex, int audioPosition) {
+        currentTrackIndex = trackIndex;
         if (mediaPlayer != null) {
             mediaPlayer.release();
             mediaPlayer = null;
@@ -124,6 +127,7 @@ public class AudioService extends Service {
     }
 
     public void prepareAudio(String audioFilePath, int position, boolean play) {
+        currentTrackIndex = trackIndex;
         if (mediaPlayer != null) {
             mediaPlayer.release();
             mediaPlayer = null;
@@ -255,6 +259,9 @@ public class AudioService extends Service {
         }
     }
 
+    public int getCurrentIndex() {
+        return currentTrackIndex;
+    }
     public boolean isPrepared() {
         return mediaPlayer != null && isPrepared;
     }

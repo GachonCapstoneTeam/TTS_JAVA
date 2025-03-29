@@ -29,6 +29,7 @@ import com.example.myapplication.adapter.ItemAdapter;
 import com.example.myapplication.entity.Item;
 import com.example.myapplication.view.AudioService;
 import com.example.myapplication.view.TTSHelper;
+import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -50,8 +51,8 @@ public class HomeFragment extends Fragment {
     private RecyclerView recyclerView;
     private ItemAdapter adapter;
     private TTSHelper ttsHelper;
-    private ImageButton playButton, prevButton, nextButton, restartButton, fullScreenButton;
-    private Button myWishButton, top10Button, currentListButton;
+    private ImageButton playButton, prevButton, nextButton;
+    private Button myWishButton, top10Button, currentListButton, fullScreenButton;
     private SeekBar seekBar;
     private TextView currentTimeText, fullTimeText;
     private List<Item> itemList;
@@ -62,6 +63,8 @@ public class HomeFragment extends Fragment {
     private boolean isHomeServiceBound = false;
     private Handler progressHandler = new Handler();
     private Context mContext;
+    private int currentPlayingIndex = -1;
+
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -79,7 +82,6 @@ public class HomeFragment extends Fragment {
         playButton = view.findViewById(R.id.button_play);
         prevButton = view.findViewById(R.id.prev);
         nextButton = view.findViewById(R.id.next);
-        restartButton = view.findViewById(R.id.restart);
         fullScreenButton = view.findViewById(R.id.full_screen);
         seekBar = view.findViewById(R.id.progress_bar);
         currentTimeText = view.findViewById(R.id.current_time);
@@ -118,7 +120,7 @@ public class HomeFragment extends Fragment {
             public void onStopTrackingTouch(SeekBar seekBar) {
                 if (audioService != null) {
                     int newPosition = (int) ((seekBar.getProgress() / 100.0) * audioService.getDuration());
-                    audioService.seekTo(newPosition); // ✅ 선택한 위치로 이동
+                    audioService.seekTo(newPosition); // 선택한 위치로 이동
                     updateProgressBar(newPosition, audioService.getDuration()); // UI 업데이트
                 }
             }
@@ -129,6 +131,8 @@ public class HomeFragment extends Fragment {
         adapter.setOnItemClickListener(item -> {
             currentTrackIndex = itemList.indexOf(item);
             playTrackAtIndex(currentTrackIndex, true);
+
+            adapter.setPlayingIndex(currentTrackIndex); // 클릭한 인덱스로 갱신
         });
 
         playButton.setOnClickListener(v -> togglePlayPause());
@@ -141,8 +145,6 @@ public class HomeFragment extends Fragment {
                 Toast.makeText(requireContext(), "이전 트랙이 없습니다.", Toast.LENGTH_SHORT).show();
             }
         });
-
-        restartButton.setOnClickListener(v -> playTrackAtIndex(currentTrackIndex, true));
 
         nextButton.setOnClickListener(v -> {
             if (currentTrackIndex < itemList.size() - 1) {
@@ -158,6 +160,7 @@ public class HomeFragment extends Fragment {
             if (currentTrackIndex >= 0 && currentTrackIndex < itemList.size()) {
                 Item currentItem = itemList.get(currentTrackIndex);
                 Intent intent = new Intent(getContext(), OriginalActivity.class);
+                intent.putExtra("ItemList", new Gson().toJson(itemList));
                 intent.putExtra("track_index", currentTrackIndex);
                 intent.putExtra("AudioFilePath", getAudioFilePath(currentItem.getTitle()));
 
@@ -213,10 +216,12 @@ public class HomeFragment extends Fragment {
             requireActivity().runOnUiThread(() -> {
                 // UI 업데이트
                 TextView titleView = requireView().findViewById(R.id.home_display_title);
-                TextView scriptView = requireView().findViewById(R.id.home_display_script);
-                if (titleView != null && scriptView != null) {
+                TextView nameView = requireView().findViewById(R.id.home_display_name);
+
+
+                if (titleView != null && nameView != null) {
                     titleView.setText(track.getTitle());
-                    scriptView.setText(track.getContent());
+                    nameView.setText(track.getStockName());
                 }
 
                 seekBar.setProgress(0);
@@ -269,7 +274,11 @@ public class HomeFragment extends Fragment {
             );
 
             audioService.setNextTrackListener(() ->
-                    requireActivity().runOnUiThread(() -> playNextTrack())
+                    requireActivity().runOnUiThread(() -> {
+                        playNextTrack();
+                        adapter.setPlayingIndex(currentTrackIndex);
+
+                    })
             );
 
             audioService.startProgressUpdates();
@@ -318,6 +327,8 @@ public class HomeFragment extends Fragment {
             int currentPosition = audioService.getCurrentPosition();
             int totalDuration = audioService.getDuration();
 
+            currentPlayingIndex = audioService.getCurrentIndex();
+            adapter.setPlayingIndex(currentPlayingIndex);
             updateProgressBar(currentPosition, totalDuration);
         }
     }
@@ -402,7 +413,7 @@ public class HomeFragment extends Fragment {
         Button[] buttons = {myWishButton, top10Button, currentListButton};
         for (Button button : buttons) {
             if (button == selectedButton) {
-                button.setBackgroundResource(R.drawable.list_button_black); // 선택된 버튼
+                button.setBackgroundResource(R.drawable.list_button_green); // 선택된 버튼
                 button.setTextColor(ContextCompat.getColor(requireContext(), R.color.white));
             } else {
                 button.setBackgroundResource(R.drawable.list_button); // 기본 버튼

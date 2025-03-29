@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.myapplication.R;
@@ -19,6 +20,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
     private Context context;
     private List<Item> itemList;
     private OnItemClickListener onItemClickListener;
+    private int playingIndex = -1;
 
     // 클릭 리스너 인터페이스
     public interface OnItemClickListener {
@@ -63,11 +65,24 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
                 onItemClickListener.onItemClick(item); // 클릭된 아이템 전달
             }
         });
+
+        if (position == playingIndex) {
+            holder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.background_color));
+        } else {
+            holder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.white));
+        }
+
     }
 
     @Override
     public int getItemCount() {
         return itemList.size();
+    }
+
+
+    public void setPlayingIndex(int index) {
+        this.playingIndex = index;
+        notifyDataSetChanged();
     }
 
     public static class ItemViewHolder extends RecyclerView.ViewHolder {
