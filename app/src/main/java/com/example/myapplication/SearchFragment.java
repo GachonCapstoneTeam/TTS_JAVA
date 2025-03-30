@@ -134,13 +134,12 @@ public class SearchFragment extends Fragment {
         fetchItemsFromServer();
         return view;
     }
-    // ! 검색 관련 필독 사항 !
-    //현재 검색어를 서버로 쿼리로 보내서 필터링하게끔 되어있음. 이 점은 서버에서 처리할지 논의해보아야 함.
-    // 서버에서 처리하는게 아니라 프론트 딴에서 처리할 수도 있지만 실시간 데이터 반영이 불가능하고 속도가 매우 느려지는 큰 단점 존재.
+
+
     private void fetchItemsFromServer() {
         isLoading = true;
         OkHttpClient client = new OkHttpClient();
-        String url = "https://40.82.148.190:8000/textload/content/";
+        String url = "https://40.82.148.190:8000/textload/content/"; // 이렇게 하는게 맞겠죠?
         if (currentQuery != null) {
             url += "?=" + currentQuery;
         }
