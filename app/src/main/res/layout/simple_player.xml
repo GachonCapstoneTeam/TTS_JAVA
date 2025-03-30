@@ -1,0 +1,199 @@
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/sm_container"
+    android:padding="16dp"
+    android:orientation="vertical">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/sm_title_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="@id/sm_container"
+        app:layout_constraintStart_toStartOf="@id/sm_container"
+        app:layout_constraintEnd_toEndOf="@id/sm_container">
+
+        <ImageButton
+            android:id="@+id/sm_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/back_button"
+            app:layout_constraintTop_toTopOf="@id/sm_title_container"
+            app:layout_constraintStart_toStartOf="@id/sm_title_container"
+            android:layout_margin="10dp"/>
+
+        <TextView
+            android:id="@+id/smName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="종목명"
+            android:textColor="@color/mint"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:shadowRadius="1"
+            android:shadowDx="3"
+            android:shadowDy="3"
+            android:shadowColor="@color/gray_dark"
+            app:layout_constraintTop_toBottomOf="@id/sm_back"
+            app:layout_constraintStart_toStartOf="@id/sm_title_container"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"/>
+
+        <TextView
+            android:id="@+id/smTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="리포트 제목"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            app:layout_constraintTop_toBottomOf="@id/smName"
+            app:layout_constraintStart_toStartOf="@id/smName"/>
+
+        <TextView
+            android:id="@+id/sm_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="YYYY/MM/DD"
+            android:textSize="13sp"
+            android:textStyle="normal"
+            android:textColor="@color/brown"
+            app:layout_constraintStart_toStartOf="@id/smTitle"
+            app:layout_constraintTop_toBottomOf="@id/smTitle"/>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+    <ScrollView
+        android:id="@+id/sm_content_container"
+        android:layout_width="match_parent"
+        android:layout_height="420dp"
+        android:background="@color/white"
+        android:fillViewport="true"
+        android:scrollbars="none"
+        app:layout_constraintTop_toBottomOf="@id/sm_title_container"
+        app:layout_constraintStart_toStartOf="@id/sm_title_container"
+        app:layout_constraintEnd_toEndOf="@id/sm_title_container">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/smScript"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/white"
+                android:gravity="center"
+                android:text="로딩중..."
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+    </ScrollView>
+
+
+    <LinearLayout
+        android:id="@+id/sm_player"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/sm_content_container"
+        app:layout_constraintStart_toStartOf="@id/sm_content_container"
+        app:layout_constraintBottom_toBottomOf="@id/sm_pdf"
+        app:layout_constraintEnd_toEndOf="@id/sm_content_container"
+        android:orientation="vertical">
+
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/sm_progressbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/sm_current_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="@id/sm_progress_bar"
+                app:layout_constraintTop_toBottomOf="@id/sm_progress_bar"
+                android:text="0:00"
+                android:textColor="@color/brown"
+                android:textSize="13dp" />
+
+            <TextView
+                android:id="@+id/sm_full_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="@id/sm_progress_bar"
+                app:layout_constraintTop_toBottomOf="@id/sm_progress_bar"
+                android:text="0:00"
+                android:textColor="@color/brown"
+                android:textSize="13dp" />
+
+            <SeekBar
+                android:id="@+id/sm_progress_bar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toEndOf="@id/sm_current_time"
+                app:layout_constraintEnd_toStartOf="@id/sm_full_time"
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+        <LinearLayout
+            android:id="@+id/sm_audio_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+
+
+            <ImageButton
+                android:id="@+id/sm_prev"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/prev"
+                android:layout_margin="15dp"/>
+
+            <ImageButton
+                android:id="@+id/sm_button_play"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/button_play"
+                android:layout_margin="5dp"/>
+
+            <ImageButton
+                android:id="@+id/sm_next"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/next"
+                android:layout_margin="15dp"/>
+
+
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/sm_pdf"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/open_pdf"
+        android:layout_margin="15dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/sm_player"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+

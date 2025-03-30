@@ -1,17 +1,13 @@
 package com.example.myapplication;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
-import android.transition.TransitionManager;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -22,8 +18,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -47,7 +41,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class MainFragment extends Fragment {
+public class SearchFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private ReportAdapter reportAdapter;
@@ -69,7 +63,7 @@ public class MainFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_main, container, false);
+        View view = inflater.inflate(R.layout.fragment_search, container, false);
 
         recyclerView = view.findViewById(R.id.reportRecycler);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -112,41 +106,25 @@ public class MainFragment extends Fragment {
 
 
         searchButton.setOnClickListener(v -> {
-            if (!isSearchExpanded) {
-                // 🔹 검색창 확장 (오른쪽 → 왼쪽 슬라이드)
-                searchInput.setVisibility(View.VISIBLE);
-                ObjectAnimator animator = ObjectAnimator.ofFloat(searchInput, "translationX", 300f, 0f);
-                animator.setDuration(300); // 애니메이션 속도
-                animator.setInterpolator(new DecelerateInterpolator());
-                animator.start();
-                isSearchExpanded = true;
-            } else {
-                // 🔹 검색 실행 (검색어가 있을 때)
-                String query = searchInput.getText().toString().trim();
-                if (!query.isEmpty()) {
-                    performSearch(query);
-                }
-            }
-        });
-
-        searchInput.setOnEditorActionListener((v, actionId, event) -> {
             String query = searchInput.getText().toString().trim();
             if (!query.isEmpty()) {
                 performSearch(query);
-                return true;
             }
-            return false;
         });
 
-        mainLayout.setOnTouchListener((v, event) -> {
-            if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                if (isSearchExpanded && searchInput.getText().toString().trim().isEmpty()) {
-                    searchInput.clearFocus();
+
+        searchInput.setOnEditorActionListener((v, actionId, event) -> {
+            String query = searchInput.getText().toString().trim();
+            if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE) {
+                if (!query.isEmpty()) {
+                    performSearch(query);
+
+                    // 키보드 내리기
                     InputMethodManager imm = (InputMethodManager) requireContext().getSystemService(Context.INPUT_METHOD_SERVICE);
                     if (imm != null) {
                         imm.hideSoftInputFromWindow(searchInput.getWindowToken(), 0);
                     }
-                    closeSearchBar(); // 기존처럼 닫기
+                    return true;
                 }
             }
             return false;
@@ -176,7 +154,10 @@ public class MainFragment extends Fragment {
                 e.printStackTrace();
                 getActivity().runOnUiThread(() ->
                         Toast.makeText(getContext(), "데이터 불러오기 실패", Toast.LENGTH_SHORT).show()
+
                 );
+                loadDummyData();
+
             }
 
             @Override
@@ -272,6 +253,7 @@ public class MainFragment extends Fragment {
             public void onFailure(Call call, IOException e) {
                 requireActivity().runOnUiThread(() -> {
                     Toast.makeText(getContext(), "검색 실패", Toast.LENGTH_SHORT).show();
+                    loadDummyData();
                 });
             }
 
@@ -327,4 +309,17 @@ public class MainFragment extends Fragment {
 
         reportAdapter.setItems(filteredItems);
     }
+
+    private void loadDummyData() {
+        List<Item> dummyItems = new ArrayList<>();
+        dummyItems.add(new Item("산업", "LG에너지솔루션 2차전지", "하나증권", "배터리 산업의 성장과 기술 분석", 123, "2024-03-01", "https://example.com/sample1.pdf", "PDF 내용 예시 1"));
+        dummyItems.add(new Item("기업", "삼성전자 반도체 전략", "삼성증권", "반도체 산업 전망 분석", 234, "2024-03-02", "https://example.com/sample2.pdf", "PDF 내용 예시 2"));
+        dummyItems.add(new Item("정기", "3월 경제 정기 보고서", "미래에셋", "2024년 3월 경제 보고서 개요", 321, "2024-03-03", "https://example.com/sample3.pdf", "PDF 내용 예시 3"));
+
+        allItems.clear();
+        allItems.addAll(dummyItems);
+
+        requireActivity().runOnUiThread(() -> reportAdapter.setItems(allItems));
+    }
+
 }

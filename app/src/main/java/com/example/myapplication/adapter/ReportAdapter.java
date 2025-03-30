@@ -8,13 +8,16 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.myapplication.OriginalActivity;
 import com.example.myapplication.R;
+import com.example.myapplication.SimplePlayerActivity;
 import com.example.myapplication.view.Item;
+import com.example.myapplication.view.TTSHelper;
 
 import java.util.List;
 
@@ -43,23 +46,35 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ReportView
     public void onBindViewHolder(@NonNull ReportViewHolder holder, int position) {
         Item item = itemList.get(position);
 
-        holder.boxName.setText(item.getCategory());
+        holder.boxcategory.setText(item.getCategory());
         holder.boxTitle.setText(item.getTitle());
         holder.boxTitle.setSelected(true);
-        holder.boxBank.setText(item.getBank());
         holder.boxDate.setText(item.getDate());
         holder.boxScript.setText(item.getContent());
+        holder.boxName.setText(item.getBank());
 
         holder.boxButton.setOnClickListener(v -> {
-            Intent intent = new Intent(context, OriginalActivity.class);
-            intent.putExtra("Category", item.getCategory());
-            intent.putExtra("Title", item.getTitle());
-            intent.putExtra("Bank", item.getBank());
-            intent.putExtra("Content", item.getContent());
-            intent.putExtra("Views", item.getViews());
-            intent.putExtra("Date", item.getDate());
-            intent.putExtra("PDF_URL", item.getPdfUrl());
-            context.startActivity(intent);
+
+            TTSHelper ttsHelper = new TTSHelper(context);
+            String fileName = item.getTitle() + ".mp3";
+            ttsHelper.performTextToSpeech(item.getContent(), fileName, audioFile -> {
+                if (audioFile != null && audioFile.exists()) {
+                    Intent intent = new Intent(context, SimplePlayerActivity.class);
+                    intent.putExtra("Category", item.getCategory());
+                    intent.putExtra("Title", item.getTitle());
+                    intent.putExtra("Bank", item.getBank());
+                    intent.putExtra("Content", item.getContent());
+                    intent.putExtra("Views", item.getViews());
+                    intent.putExtra("Date", item.getDate());
+                    intent.putExtra("PDF_URL", item.getPdfUrl());
+                    intent.putExtra("AudioFilePath", audioFile.getAbsolutePath());
+
+                    context.startActivity(intent);
+                } else {
+                    Toast.makeText(context, "오디오 파일 생성 실패", Toast.LENGTH_SHORT).show();
+                }
+            });
+
         });
 
         // 아이템이 좋아요 되어 있는지에 따라 버튼 이미지 변경
@@ -88,7 +103,7 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ReportView
     }
 
     public static class ReportViewHolder extends RecyclerView.ViewHolder {
-        TextView boxName, boxTitle, boxBank, boxDate, boxScript;
+        TextView boxName, boxTitle,  boxDate, boxScript, boxcategory;
         ImageButton boxStarButton;
         Button boxButton;
 
@@ -100,6 +115,7 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ReportView
             boxScript = itemView.findViewById(R.id.box_script);
             boxButton = itemView.findViewById(R.id.box_button);
             boxStarButton = itemView.findViewById(R.id.box_star_button);
+            boxcategory = itemView.findViewById(R.id.box_category);
 
 
         }

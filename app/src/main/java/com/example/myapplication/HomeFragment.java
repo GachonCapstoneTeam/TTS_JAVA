@@ -332,6 +332,24 @@ public class HomeFragment extends Fragment {
             updateProgressBar(currentPosition, totalDuration);
         }
     }
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if (audioService != null) {
+            Log.d("HomeFragment", "onResume에서 리스너 재설정");
+
+            audioService.setProgressUpdateListener((currentPosition, duration) ->
+                    requireActivity().runOnUiThread(() -> updateProgressBar(currentPosition, duration))
+            );
+
+            audioService.setNextTrackListener(() ->
+                    requireActivity().runOnUiThread(this::playNextTrack)
+            );
+
+            audioService.startProgressUpdates();
+        }
+    }
 
 
     @Override
@@ -342,8 +360,8 @@ public class HomeFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
-            mediaPlayer.pause(); // 프래그먼트가 백그라운드로 가면 재생 중지
+        if (audioService != null) {
+            audioService.setProgressUpdateListener(null);
         }
     }
 
