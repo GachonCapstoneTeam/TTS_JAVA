@@ -140,9 +140,9 @@ public class SearchFragment extends Fragment {
     private void fetchItemsFromServer() {
         isLoading = true;
         OkHttpClient client = new OkHttpClient();
-        String url = "https://40.82.148.190:8000/textload/content/?page=" + currentPage + "&size=" + pageSize;
+        String url = "https://40.82.148.190:8000/textload/content/";
         if (currentQuery != null) {
-            url += "&search=" + currentQuery;
+            url += "?=" + currentQuery;
         }
 
         Request request = new Request.Builder().url(url).build();
