@@ -27,7 +27,7 @@ import okhttp3.Response;
 
 public class TTSHelper {
     private final Context context;
-    private final String API_KEY =  BuildConfig.MY_KEY;
+    private final String API_KEY =  "AIzaSyDIeqKKGDnDMqe2ykQt0fmYpUhUJNkmuZ4";
 
     public TTSHelper(Context context) {
         this.context = context;

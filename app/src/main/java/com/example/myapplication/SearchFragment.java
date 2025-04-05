@@ -25,6 +25,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.myapplication.adapter.ReportAdapter;
 import com.example.myapplication.view.Item;
+import com.facebook.shimmer.ShimmerFrameLayout;
 import com.google.android.material.tabs.TabLayout;
 
 import org.json.JSONArray;
@@ -58,6 +59,9 @@ public class SearchFragment extends Fragment {
     private LinearLayout mainLayout;
     private String currentQuery = null; // 현재 검색어 저장
 
+    private ShimmerFrameLayout shimmerFrameLayout;
+
+
     @SuppressLint("ClickableViewAccessibility")
     @Nullable
     @Override
@@ -74,6 +78,15 @@ public class SearchFragment extends Fragment {
         searchInput = view.findViewById(R.id.search_input);
         searchButton = view.findViewById(R.id.search_button);
         mainLayout = view.findViewById(R.id.main_layout);
+        shimmerFrameLayout = view.findViewById(R.id.search_shimmer_container);
+        shimmerFrameLayout.startShimmer();
+
+        LinearLayout shimmerLayout = view.findViewById(R.id.shimmer_linear);
+        LayoutInflater layoutInflater = LayoutInflater.from(getContext());
+        for (int i = 0; i < 5; i++) {
+            View skeletonView = layoutInflater.inflate(R.layout.itembox_skeleton, shimmerLayout, false);
+            shimmerLayout.addView(skeletonView);
+        }
 
         swipeRefreshLayout = view.findViewById(R.id.swiper);
         swipeRefreshLayout.setOnRefreshListener(() -> {
@@ -139,9 +152,11 @@ public class SearchFragment extends Fragment {
     private void fetchItemsFromServer() {
         isLoading = true;
         OkHttpClient client = new OkHttpClient();
-        String url = "https://40.82.148.190:8000/textload/content/"; // 이렇게 하는게 맞겠죠?
-        if (currentQuery != null) {
-            url += "?=" + currentQuery;
+        String url;
+        if (currentQuery != null && !currentQuery.isEmpty()) {
+            url = "http://40.82.148.190:8000/textload/search/?=" + currentQuery;
+        } else {
+            url = "http://40.82.148.190:8000/textload/content";
         }
 
         Request request = new Request.Builder().url(url).build();
@@ -151,10 +166,13 @@ public class SearchFragment extends Fragment {
             public void onFailure(Call call, IOException e) {
                 isLoading = false;
                 e.printStackTrace();
-                getActivity().runOnUiThread(() ->
-                        Toast.makeText(getContext(), "데이터 불러오기 실패", Toast.LENGTH_SHORT).show()
-
-                );
+                requireActivity().runOnUiThread(() -> {
+                    Toast.makeText(getContext(), "데이터 불러오기 실패", Toast.LENGTH_SHORT).show();
+                    loadDummyData();
+                    shimmerFrameLayout.stopShimmer();
+                    shimmerFrameLayout.setVisibility(View.GONE);
+                    recyclerView.setVisibility(View.VISIBLE);
+                });
                 loadDummyData();
 
             }
@@ -164,24 +182,28 @@ public class SearchFragment extends Fragment {
                 if (response.isSuccessful()) {
                     try {
                         String jsonResponse = response.body().string();
-                        parseJsonAndAddItems(jsonResponse);
+                        List<Item> items = parseJsonAndAddItems(jsonResponse);
 
-                        getActivity().runOnUiThread(() -> {
-                            reportAdapter.setItems(allItems);
+                        requireActivity().runOnUiThread(() -> {
+                            reportAdapter.setItems(items);
+
+                            shimmerFrameLayout.stopShimmer();
+                            shimmerFrameLayout.setVisibility(View.GONE);
+                            recyclerView.setVisibility(View.VISIBLE);
                             isLoading = false;
                         });
                     } catch (JSONException e) {
                         e.printStackTrace();
-                        isLoading = false;
-                        getActivity().runOnUiThread(() ->
-                                Toast.makeText(getContext(), "데이터 파싱 오류", Toast.LENGTH_SHORT).show()
-                        );
                     }
                 } else {
                     isLoading = false;
-                    getActivity().runOnUiThread(() ->
-                            Toast.makeText(getContext(), "API 요청 실패", Toast.LENGTH_SHORT).show()
-                    );
+                    requireActivity().runOnUiThread(() -> {
+                        Toast.makeText(getContext(), "API 요청 실패", Toast.LENGTH_SHORT).show();
+                        loadDummyData();
+                        shimmerFrameLayout.stopShimmer();
+                        shimmerFrameLayout.setVisibility(View.GONE);
+                        recyclerView.setVisibility(View.VISIBLE);
+                    });
                 }
             }
         });
@@ -243,37 +265,10 @@ public class SearchFragment extends Fragment {
 
     //검색 요청을 서버에 보내는 부분
     private void performSearch(String query) {
-        OkHttpClient client = new OkHttpClient();
-        String url = "https://40.82.148.190:8000/textload/content/?search=" + query;
-
-        Request request = new Request.Builder().url(url).build();
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                requireActivity().runOnUiThread(() -> {
-                    Toast.makeText(getContext(), "검색 실패", Toast.LENGTH_SHORT).show();
-                    loadDummyData();
-                });
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                if (response.isSuccessful() && response.body() != null) {
-                    try {
-                        String jsonResponse = response.body().string();
-                        List<Item> searchResults = parseJsonAndAddItems(jsonResponse);
-
-                        requireActivity().runOnUiThread(() -> {
-                            reportAdapter.setItems(searchResults);
-                        });
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        });
+        currentQuery = query;
+        fetchItemsFromServer();
     }
+
 
 
     private void filterItemsByTab(int tabPosition) {

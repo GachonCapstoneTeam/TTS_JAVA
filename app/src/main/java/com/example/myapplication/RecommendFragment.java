@@ -16,6 +16,7 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.example.myapplication.adapter.RankPagerAdapter;
 import com.example.myapplication.adapter.RecommendPagerAdapter;
 import com.example.myapplication.entity.Item;
+import com.facebook.shimmer.ShimmerFrameLayout;
 import com.tbuonomo.viewpagerdotsindicator.SpringDotsIndicator;
 
 import org.json.JSONArray;
@@ -35,6 +36,7 @@ import okhttp3.Response;
 public class RecommendFragment extends Fragment {
 
     private ViewPager2 recommendViewPager, rankViewPager;
+    private ShimmerFrameLayout shimmerRecommend, shimmerRank;
     private SpringDotsIndicator recommendDots, rankDots;
     private RecommendPagerAdapter recommendAdapter;
     private RankPagerAdapter rankAdapter;
@@ -69,6 +71,14 @@ public class RecommendFragment extends Fragment {
         rankViewPager.setAdapter(rankAdapter);
         rankDots.setViewPager2(rankViewPager);
 
+        shimmerRecommend = new ShimmerFrameLayout(requireContext());
+        shimmerRecommend = view.findViewById(R.id.shimmer_recommend_container);
+        shimmerRank = new ShimmerFrameLayout(requireContext());
+        shimmerRank = view.findViewById(R.id.shimmer_rank_container);
+
+        shimmerRecommend.startShimmer();
+        shimmerRank.startShimmer();
+
         // 데이터 불러오기 (로드 후 슬라이더 시작)
         fetchDataForRecommend();
         fetchDataForRank();
@@ -99,6 +109,9 @@ public class RecommendFragment extends Fragment {
                         recommendItems = parseItemsFromJson(jsonData);
                         requireActivity().runOnUiThread(() -> {
                             recommendAdapter.updateItems(recommendItems);
+                            shimmerRecommend.stopShimmer();
+                            shimmerRecommend.setVisibility(View.GONE);
+                            recommendViewPager.setVisibility(View.VISIBLE);
                             startAutoSlide();  // 데이터 로드 후 슬라이더 시작
                         });
                     } catch (JSONException e) {
@@ -139,7 +152,11 @@ public class RecommendFragment extends Fragment {
                     try {
                         String jsonData = response.body().string();
                         rankItems = parseItemsFromJson(jsonData);
+                        shimmerRank.stopShimmer();
+                        shimmerRank.setVisibility(View.GONE);
+                        rankViewPager.setVisibility(View.VISIBLE);
                         requireActivity().runOnUiThread(() -> rankAdapter.updateItems(rankItems));
+
                     } catch (JSONException e) {
                         requireActivity().runOnUiThread(() -> {
                             Toast.makeText(getContext(), "인기 리포트 파싱 실패, 더미 데이터 로드", Toast.LENGTH_SHORT).show();
@@ -185,6 +202,9 @@ public class RecommendFragment extends Fragment {
         recommendItems.add(new Item("IT", "삼성전자 반도체 전망", "삼성증권", "https://example.com/sample1.pdf", "2024-02-15", "120", "반도체 시장의 향후 전망을 분석한 리포트입니다."));
         recommendItems.add(new Item("플랫폼", "네이버 AI 전략", "NH투자증권", "https://example.com/sample2.pdf", "2024-02-14", "98", "네이버 AI 서비스 전략에 대한 분석."));
         recommendItems.add(new Item("자동차", "현대차 전기차 전망", "미래에셋", "https://example.com/sample3.pdf", "2024-02-13", "76", "현대차의 전기차 시장 전략과 전망."));
+        shimmerRecommend.stopShimmer();
+        shimmerRecommend.setVisibility(View.GONE);
+        recommendViewPager.setVisibility(View.VISIBLE);
         recommendAdapter.updateItems(recommendItems);
     }
 
@@ -194,6 +214,9 @@ public class RecommendFragment extends Fragment {
         rankItems.add(new Item("화학", "LG화학 배터리 시장", "키움증권", "https://example.com/sample4.pdf", "2024-02-15", "150", "배터리 시장 동향 및 LG화학의 전략."));
         rankItems.add(new Item("IT", "SK하이닉스 메모리 시장", "하나금융투자", "https://example.com/sample5.pdf", "2024-02-14", "110", "메모리 반도체 시장의 향후 전망."));
         rankItems.add(new Item("유통", "쿠팡 성장성 분석", "대신증권", "https://example.com/sample6.pdf", "2024-02-13", "85", "쿠팡의 성장성과 미래 전략."));
+        shimmerRank.stopShimmer();
+        shimmerRank.setVisibility(View.GONE);
+        rankViewPager.setVisibility(View.VISIBLE);
         rankAdapter.updateItems(rankItems);
     }
 
