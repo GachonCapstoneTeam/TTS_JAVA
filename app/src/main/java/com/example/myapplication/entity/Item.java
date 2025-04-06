@@ -25,8 +25,11 @@ public class Item {
     @SerializedName("Content")
     private String content;
 
+    @SerializedName("PDF Content")
+    private String pdfcontent;
+
     // 생성자
-    public Item(String category, String title, String stockName, String pdfUrl, String date, String views, String content) {
+    public Item(String category, String title, String stockName, String pdfUrl, String date, String views, String content, String pdfcontent) {
         this.category = category;
         this.title = title;
         this.stockName = stockName;
@@ -34,6 +37,7 @@ public class Item {
         this.date = date;
         this.views = views;
         this.content = content;
+        this.pdfcontent = pdfcontent;
     }
 
     // Getter 메서드 추가
@@ -44,4 +48,5 @@ public class Item {
     public String getDate() { return date; }
     public String getViews() { return views; }
     public String getContent() { return content; }
+    public String getPdfcontent() { return pdfcontent; }
 }

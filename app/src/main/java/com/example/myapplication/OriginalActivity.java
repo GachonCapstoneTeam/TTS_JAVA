@@ -197,6 +197,23 @@ public class OriginalActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (audioService != null) {
+            audioService.setProgressUpdateListener((currentPosition, duration) -> {
+                runOnUiThread(() -> updateProgressBar(currentPosition, duration));
+            });
+            audioService.startProgressUpdates();
+        }
+    }
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (audioService != null) {
+            audioService.setProgressUpdateListener(null);
+        }
+    }
     private void togglePlayPause() {
         if (audioService == null) return;
 

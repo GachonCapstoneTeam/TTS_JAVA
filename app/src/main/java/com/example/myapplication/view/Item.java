@@ -11,7 +11,7 @@ public class Item {
     private String pdfcontent;  // PDF content
     private boolean liked;      // 관심 버튼
 
-    public Item(String category, String title, String stockName, String pdfUrl, String date, String views,  String content, String pdfcontent) {
+    public Item(String category, String title, String stockName, String content, String views, String date, String pdfUrl, String pdfcontent) {
         this.category = category;
         this.title = title;
         this.stockName = stockName;

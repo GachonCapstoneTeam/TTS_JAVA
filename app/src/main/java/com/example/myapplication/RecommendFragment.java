@@ -172,8 +172,9 @@ public class RecommendFragment extends Fragment {
             String date = obj.getString("작성일");
             String views = obj.getString("Views");
             String content = obj.getString("Content");
+            String pdfcontent = obj.getString("PDF Content");
 
-            items.add(new Item(category, title, stockName, pdfUrl, date, views, content));
+            items.add(new Item(category, title, stockName, pdfUrl, date, views, content, pdfcontent));
         }
 
         return items;
@@ -182,18 +183,18 @@ public class RecommendFragment extends Fragment {
     // 더미 데이터 (추천 리포트)
     private void loadDummyRecommendData() {
         recommendItems.clear();
-        recommendItems.add(new Item("IT", "삼성전자 반도체 전망", "삼성증권", "https://example.com/sample1.pdf", "2024-02-15", "120", "반도체 시장의 향후 전망을 분석한 리포트입니다."));
-        recommendItems.add(new Item("플랫폼", "네이버 AI 전략", "NH투자증권", "https://example.com/sample2.pdf", "2024-02-14", "98", "네이버 AI 서비스 전략에 대한 분석."));
-        recommendItems.add(new Item("자동차", "현대차 전기차 전망", "미래에셋", "https://example.com/sample3.pdf", "2024-02-13", "76", "현대차의 전기차 시장 전략과 전망."));
+        recommendItems.add(new Item("IT", "삼성전자 반도체 전망", "삼성증권", "https://example.com/sample1.pdf", "2024-02-15", "120", "반도체 시장의 향후 전망을 분석한 리포트입니다.",""));
+        recommendItems.add(new Item("플랫폼", "네이버 AI 전략", "NH투자증권", "https://example.com/sample2.pdf", "2024-02-14", "98", "네이버 AI 서비스 전략에 대한 분석.",""));
+        recommendItems.add(new Item("자동차", "현대차 전기차 전망", "미래에셋", "https://example.com/sample3.pdf", "2024-02-13", "76", "현대차의 전기차 시장 전략과 전망.",""));
         recommendAdapter.updateItems(recommendItems);
     }
 
     // 더미 데이터 (인기 리포트)
     private void loadDummyRankData() {
         rankItems.clear();
-        rankItems.add(new Item("화학", "LG화학 배터리 시장", "키움증권", "https://example.com/sample4.pdf", "2024-02-15", "150", "배터리 시장 동향 및 LG화학의 전략."));
-        rankItems.add(new Item("IT", "SK하이닉스 메모리 시장", "하나금융투자", "https://example.com/sample5.pdf", "2024-02-14", "110", "메모리 반도체 시장의 향후 전망."));
-        rankItems.add(new Item("유통", "쿠팡 성장성 분석", "대신증권", "https://example.com/sample6.pdf", "2024-02-13", "85", "쿠팡의 성장성과 미래 전략."));
+        rankItems.add(new Item("화학", "LG화학 배터리 시장", "키움증권", "https://example.com/sample4.pdf", "2024-02-15", "150", "배터리 시장 동향 및 LG화학의 전략.",""));
+        rankItems.add(new Item("IT", "SK하이닉스 메모리 시장", "하나금융투자", "https://example.com/sample5.pdf", "2024-02-14", "110", "메모리 반도체 시장의 향후 전망.",""));
+        rankItems.add(new Item("유통", "쿠팡 성장성 분석", "대신증권", "https://example.com/sample6.pdf", "2024-02-13", "85", "쿠팡의 성장성과 미래 전략.",""));
         rankAdapter.updateItems(rankItems);
     }
 

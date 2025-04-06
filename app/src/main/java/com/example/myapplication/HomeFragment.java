@@ -26,6 +26,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.myapplication.adapter.ItemAdapter;
+import com.example.myapplication.adapter.ShimmerAdapter;
 import com.example.myapplication.entity.Item;
 import com.example.myapplication.view.AudioService;
 import com.example.myapplication.view.TTSHelper;
@@ -46,6 +47,8 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
+import com.facebook.shimmer.ShimmerFrameLayout;
+
 public class HomeFragment extends Fragment {
 
     private RecyclerView recyclerView;
@@ -65,6 +68,8 @@ public class HomeFragment extends Fragment {
     private Context mContext;
     private int currentPlayingIndex = -1;
 
+    private ShimmerFrameLayout shimmerLayout;
+    private boolean isDataLoaded = false;
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -199,6 +204,12 @@ public class HomeFragment extends Fragment {
             // 최신 목록 전체 보기 로직 추가 예정
         });
 
+        shimmerLayout = view.findViewById(R.id.player_shimmer_container); // itembox_skeleton 포함하는 layout
+
+// 데이터 로딩 전 Shimmer 어댑터로 설정
+        ShimmerAdapter shimmerAdapter = new ShimmerAdapter(5); // 5개 정도 보여줄 수 있음
+        recyclerView.setAdapter(shimmerAdapter);
+        shimmerLayout.startShimmer(); // 애니메이션 시작
 
         return view;
     }
@@ -332,6 +343,24 @@ public class HomeFragment extends Fragment {
             updateProgressBar(currentPosition, totalDuration);
         }
     }
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if (audioService != null) {
+            Log.d("HomeFragment", "onResume에서 리스너 재설정");
+
+            audioService.setProgressUpdateListener((currentPosition, duration) ->
+                    requireActivity().runOnUiThread(() -> updateProgressBar(currentPosition, duration))
+            );
+
+            audioService.setNextTrackListener(() ->
+                    requireActivity().runOnUiThread(this::playNextTrack)
+            );
+
+            audioService.startProgressUpdates();
+        }
+    }
 
 
     @Override
@@ -343,8 +372,8 @@ public class HomeFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
-            mediaPlayer.pause(); // 프래그먼트가 백그라운드로 가면 재생 중지
+        if (audioService != null) {
+            audioService.setProgressUpdateListener(null);
         }
     }
 
@@ -381,9 +410,25 @@ public class HomeFragment extends Fragment {
                 if (response.isSuccessful() && response.body() != null) {
                     try {
                         String jsonResponse = response.body().string();
-                        parseAndSetData(jsonResponse);
+                        List<Item> items = parseAndSetData(jsonResponse);
+
+                        requireActivity().runOnUiThread(() -> {
+                            itemList.clear();
+                            itemList.addAll(items);
+                            adapter.setItems(itemList);  // 어댑터에 전달
+                            adapter.notifyDataSetChanged(); // 혹시 모르니 안전하게 호출
+
+                            // Shimmer 중단 및 실제 리스트 보여주기
+                            shimmerLayout.stopShimmer();
+                            shimmerLayout.setVisibility(View.GONE);
+                            recyclerView.setVisibility(View.VISIBLE);
+                        });
                     } catch (JSONException e) {
                         e.printStackTrace();
+                        requireActivity().runOnUiThread(() -> {
+                            Toast.makeText(requireContext(), "데이터 파싱 오류. 더미 데이터를 로드합니다.", Toast.LENGTH_SHORT).show();
+                            loadDummyData();
+                        });
                     }
                 } else {
                     requireActivity().runOnUiThread(() -> {
@@ -394,6 +439,7 @@ public class HomeFragment extends Fragment {
             }
         });
     }
+
 
     private void updateProgressBar(int currentPosition, int duration) {
         if (duration > 0) {
@@ -425,14 +471,21 @@ public class HomeFragment extends Fragment {
 
     private void loadDummyData() {
         List<Item> dummyItems = new ArrayList<>();
-        dummyItems.add(new Item("IT", "삼성전자6", "삼성증권", "https://example.com/sample1.pdf", "2024-02-15", "120", "반도체 시장의 향후 전망을 분석한 리포트입니다.반도체 시장의 향후 전망을 분석한 리포트입니다.반도체 시장의 향후 전망을 분석한 리포트입니다.반도체 시장의 향후 전망을 분석한 리포트입니다."));
-        dummyItems.add(new Item("기술", "더미 리포트 2", "LG증권", "https://example.com/dummy2.pdf", "2025-02-02", "234", "더미 데이터 내용 2입니다."));
-        dummyItems.add(new Item("산업", "더미 리포트 3", "한화증권", "https://example.com/dummy3.pdf", "2025-02-03", "345", "더미 데이터 내용 3입니다."));
+        dummyItems.add(new Item("IT", "삼성전자6", "삼성증권", "https://example.com/sample1.pdf", "2024-02-15", "120", "반도체 시장의 향후 전망을 분석한 리포트입니다.반도체 시장의 향후 전망을 분석한 리포트입니다.반도체 시장의 향후 전망을 분석한 리포트입니다.반도체 시장의 향후 전망을 분석한 리포트입니다.",""));
+        dummyItems.add(new Item("기술", "더미 리포트 2", "LG증권", "https://example.com/dummy2.pdf", "2025-02-02", "234", "더미 데이터 내용 2입니다.",""));
+        dummyItems.add(new Item("산업", "더미 리포트 3", "한화증권", "https://example.com/dummy3.pdf", "2025-02-03", "345", "더미 데이터 내용 3입니다.",""));
 
         requireActivity().runOnUiThread(() -> {
             itemList.clear();
             itemList.addAll(dummyItems);
+
+            recyclerView.setAdapter(adapter); // ⭐ 중요!
+            adapter.setItems(itemList);
             adapter.notifyDataSetChanged();
+
+            shimmerLayout.stopShimmer();
+            shimmerLayout.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.VISIBLE);
         });
     }
 
@@ -444,7 +497,7 @@ public class HomeFragment extends Fragment {
         return String.format("%02d:%02d", minutes, seconds);
     }
 
-    private void parseAndSetData(String jsonResponse) throws JSONException {
+    private List<Item> parseAndSetData(String jsonResponse) throws JSONException {
         List<Item> fetchedItems = new ArrayList<>();
 
         // 먼저 전체 JSON 응답을 JSONObject로 파싱
@@ -464,18 +517,14 @@ public class HomeFragment extends Fragment {
                     jsonObject.getString("PDF URL"),
                     jsonObject.getString("작성일"),
                     jsonObject.getString("Views"),
-                    jsonObject.getString("Content")
+                    jsonObject.getString("Content"),
+                    jsonObject.getString("PDF Content")
                     );
 
             fetchedItems.add(item);
         }
 
-        // UI 업데이트는 메인 스레드에서
-        requireActivity().runOnUiThread(() -> {
-            itemList.clear();
-            itemList.addAll(fetchedItems);
-            adapter.notifyDataSetChanged();
-        });
+        return fetchedItems;
     }
 }
 
