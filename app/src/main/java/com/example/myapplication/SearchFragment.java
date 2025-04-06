@@ -93,7 +93,7 @@ public class SearchFragment extends Fragment {
             currentPage = 1;
             allItems.clear();
             currentQuery = null; // 검색어 초기화
-            fetchItemsFromServer();
+            fetchItemsFromServer("all");
             swipeRefreshLayout.setRefreshing(false);
         });
 
@@ -144,19 +144,26 @@ public class SearchFragment extends Fragment {
         });
 
 
-        fetchItemsFromServer();
+        fetchItemsFromServer("all");
         return view;
     }
 
 
-    private void fetchItemsFromServer() {
+    private void fetchItemsFromServer(String category) {
         isLoading = true;
         OkHttpClient client = new OkHttpClient();
         String url;
+
         if (currentQuery != null && !currentQuery.isEmpty()) {
-            url = "http://10.0.2.2.190:8000/textload/search/?=" + currentQuery;
+            url = "http://10.0.2.2:8000/textload/search/?q=" + currentQuery;
         } else {
-            url = "http://10.0.2.2:8000/textload/content";
+            if ("stock".equals(category)) {
+                url = "http://10.0.2.2:8000/textload/stock/";
+            } else if ("industry".equals(category)) {
+                url = "http://10.0.2.2:8000/textload/industry/";
+            } else {
+                url = "http://10.0.2.2:8000/textload/content";
+            }
         }
 
         Request request = new Request.Builder().url(url).build();
@@ -173,7 +180,6 @@ public class SearchFragment extends Fragment {
                     shimmerFrameLayout.setVisibility(View.GONE);
                     recyclerView.setVisibility(View.VISIBLE);
                 });
-                loadDummyData();
             }
 
             @Override
@@ -185,7 +191,6 @@ public class SearchFragment extends Fragment {
 
                         requireActivity().runOnUiThread(() -> {
                             reportAdapter.setItems(items);
-
                             shimmerFrameLayout.stopShimmer();
                             shimmerFrameLayout.setVisibility(View.GONE);
                             recyclerView.setVisibility(View.VISIBLE);
@@ -207,6 +212,7 @@ public class SearchFragment extends Fragment {
             }
         });
     }
+
 
     private List<Item> parseJsonAndAddItems(String jsonResponse) throws JSONException {
         List<Item> items = new ArrayList<>();
@@ -235,7 +241,7 @@ public class SearchFragment extends Fragment {
 
     private void loadNextPage() {
         currentPage++;
-        fetchItemsFromServer();
+        fetchItemsFromServer("all");
     }
 
     private void setupTabListener() {
@@ -265,35 +271,23 @@ public class SearchFragment extends Fragment {
     //검색 요청을 서버에 보내는 부분
     private void performSearch(String query) {
         currentQuery = query;
-        fetchItemsFromServer();
+        fetchItemsFromServer("all");
     }
 
 
 
     private void filterItemsByTab(int tabPosition) {
-        filteredItems.clear();
-
         switch (tabPosition) {
-            case 0: // "전체"
-                filteredItems.addAll(allItems);
+            case 0: // 전체
+                fetchItemsFromServer("all");
                 break;
-            case 1: // "기업"
-                for (Item item : allItems) {
-                    if (item.getCategory().equals("종목분석 리포트")) {
-                        filteredItems.add(item);
-                    }
-                }
+            case 1: // 종목 (기업)
+                fetchItemsFromServer("stock");
                 break;
-            case 2: // "산업"
-                for (Item item : allItems) {
-                    if (item.getCategory().equals("산업분석 리포트")) {
-                        filteredItems.add(item);
-                    }
-                }
+            case 2: // 산업
+                fetchItemsFromServer("industry");
                 break;
         }
-
-        reportAdapter.setItems(filteredItems);
     }
 
     private void loadDummyData() {
