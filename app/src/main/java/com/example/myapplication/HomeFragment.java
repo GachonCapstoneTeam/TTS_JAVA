@@ -339,6 +339,7 @@ public class HomeFragment extends Fragment {
         super.onStop();
         if (isHomeServiceBound) mContext.unbindService(homeServiceConnection);
     }
+
     @Override
     public void onPause() {
         super.onPause();
@@ -358,7 +359,7 @@ public class HomeFragment extends Fragment {
 
     private void fetchDataFromServer() {
         OkHttpClient client = new OkHttpClient();
-        String url = "https://40.82.148.190:8000/textload/content";
+        String url = "http://10.0.2.2:8000/textload/content";
 
         Request request = new Request.Builder()
                 .url(url)
@@ -445,22 +446,31 @@ public class HomeFragment extends Fragment {
 
     private void parseAndSetData(String jsonResponse) throws JSONException {
         List<Item> fetchedItems = new ArrayList<>();
-        JSONArray jsonArray = new JSONArray(jsonResponse);
 
+        // 먼저 전체 JSON 응답을 JSONObject로 파싱
+        JSONObject rootObject = new JSONObject(jsonResponse);
+
+        // "contents" 키에서 JSONArray 추출
+        JSONArray jsonArray = rootObject.getJSONArray("contents");
+
+        // JSONArray 순회하며 Item 생성
         for (int i = 0; i < jsonArray.length(); i++) {
             JSONObject jsonObject = jsonArray.getJSONObject(i);
+
             Item item = new Item(
-                    jsonObject.getString("category"),
-                    jsonObject.getString("title"),
-                    jsonObject.getString("stockName"),
-                    jsonObject.getString("pdfUrl"),
-                    jsonObject.getString("date"),
-                    jsonObject.getString("views"),
-                    jsonObject.getString("content")
-            );
+                    jsonObject.getString("Category"),  // 대소문자 정확히 일치시켜야 함
+                    jsonObject.getString("Title"),
+                    jsonObject.getString("증권사"),      // "stockName"이 아닌 JSON에는 "증권사"로 들어 있음
+                    jsonObject.getString("PDF URL"),
+                    jsonObject.getString("작성일"),
+                    jsonObject.getString("Views"),
+                    jsonObject.getString("Content")
+                    );
+
             fetchedItems.add(item);
         }
 
+        // UI 업데이트는 메인 스레드에서
         requireActivity().runOnUiThread(() -> {
             itemList.clear();
             itemList.addAll(fetchedItems);
@@ -468,3 +478,4 @@ public class HomeFragment extends Fragment {
         });
     }
 }
+

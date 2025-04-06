@@ -162,7 +162,7 @@ public class MainFragment extends Fragment {
     private void fetchItemsFromServer() {
         isLoading = true;
         OkHttpClient client = new OkHttpClient();
-        String url = "https://40.82.148.190:8000/textload/content/?page=" + currentPage + "&size=" + pageSize;
+        String url = "http://10.0.2.2:8000/textload/content/?page=" + currentPage + "&size=" + pageSize;
         if (currentQuery != null) {
             url += "&search=" + currentQuery;
         }
@@ -216,13 +216,13 @@ public class MainFragment extends Fragment {
             JSONObject itemObject = contentsArray.getJSONObject(i);
 
             Item item = new Item(
-                    itemObject.getString("Category"),
+                    itemObject.getString("Category"),  // 대소문자 정확히 일치시켜야 함
                     itemObject.getString("Title"),
-                    itemObject.getString("증권사"),
-                    itemObject.getString("Content"),
-                    Integer.parseInt(itemObject.getString("Views")),
-                    itemObject.getString("작성일"),
+                    itemObject.getString("증권사"),      // "stockName"이 아닌 JSON에는 "증권사"로 들어 있음
                     itemObject.getString("PDF URL"),
+                    itemObject.getString("작성일"),
+                    itemObject.getString("Views"),
+                    itemObject.getString("Content"),
                     itemObject.getString("PDF Content")
             );
 
@@ -264,7 +264,7 @@ public class MainFragment extends Fragment {
     //검색 요청을 서버에 보내는 부분
     private void performSearch(String query) {
         OkHttpClient client = new OkHttpClient();
-        String url = "https://40.82.148.190:8000/textload/content/?search=" + query;
+        String url = "http://10.0.2.2:8000/textload/content/?search=" + query;
 
         Request request = new Request.Builder().url(url).build();
         client.newCall(request).enqueue(new Callback() {

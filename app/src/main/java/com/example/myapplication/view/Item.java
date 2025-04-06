@@ -3,18 +3,18 @@ package com.example.myapplication.view;
 public class Item {
     private String category;    // 카테고리
     private String title;       // 제목
-    private String bank;        // 증권사
+    private String stockName;        // 증권사
     private String content;     // 본문 내용
-    private int views;          // 조회수
+    private String views;          // 조회수
     private String date;        // 작성일
     private String pdfUrl;      // PDF URL
     private String pdfcontent;  // PDF content
     private boolean liked;      // 관심 버튼
 
-    public Item(String category, String title, String bank, String content, int views, String date, String pdfUrl, String pdfcontent) {
+    public Item(String category, String title, String stockName, String pdfUrl, String date, String views,  String content, String pdfcontent) {
         this.category = category;
         this.title = title;
-        this.bank = bank;
+        this.stockName = stockName;
         this.content = content;
         this.views = views;
         this.date = date;
@@ -31,14 +31,14 @@ public class Item {
     }
 
     public String getBank() {
-        return bank;
+        return stockName;
     }
 
     public String getContent() {
         return content;
     }
 
-    public int getViews() {
+    public String getViews() {
         return views;
     }
 

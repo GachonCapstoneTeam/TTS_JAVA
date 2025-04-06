@@ -43,7 +43,6 @@ public class ViewPagerItemAdapter extends RecyclerView.Adapter<ViewPagerItemAdap
         Item item = items.get(position);
         holder.itemTitle.setText(item.getTitle());
         holder.itemCategory.setText(item.getCategory());
-        holder.stockName.setText(item.getStockName());
         holder.itemDate.setText(item.getDate());
     }
 
@@ -53,7 +52,7 @@ public class ViewPagerItemAdapter extends RecyclerView.Adapter<ViewPagerItemAdap
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView itemTitle, itemCategory, stockName, itemDate;
+        TextView itemTitle, itemCategory, itemDate;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);

@@ -46,7 +46,7 @@ public class RecommendFragment extends Fragment {
     private int recommendCurrentPage = 0;
     private int rankCurrentPage = 0;
 
-    private final String API_URL = "https://40.82.148.190:8000/textload/content/";
+    private final String API_URL = "http://10.0.2.2:8000/textload/content/";
 
     @Nullable
     @Override

@@ -10,7 +10,7 @@ public class RetrofitClient {
     public static Retrofit getRetrofitInstance() {
         if (retrofit == null) {
             retrofit = new Retrofit.Builder()
-                    .baseUrl("https://40.82.148.190:8000") // 로컬 서버 주소
+                    .baseUrl("http://10.0.2.2:8000") // 로컬 서버 주소
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
         }
