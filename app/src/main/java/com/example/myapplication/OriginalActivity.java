@@ -50,7 +50,10 @@ public class OriginalActivity extends AppCompatActivity {
 
             runOnUiThread(() -> updateProgressBar(currentPosition, totalDuration));
 
-            audioService.playAudio(audioFilePath, trackIndex, audioPosition);
+            if (isPlaying) {
+                audioService.playAudio(audioFilePath, trackIndex, audioPosition);
+            }
+
 
             audioService.setProgressUpdateListener((currentPosition2, duration) -> {
                 runOnUiThread(() -> updateProgressBar(currentPosition2, duration));
@@ -242,7 +245,7 @@ public class OriginalActivity extends AppCompatActivity {
         oriDate.setText(item.getDate());
 
         // 기존처럼 audioService.prepareAudio() 호출
-        audioService.prepareAudio(audioPath, 0, true);
+        audioService.prepareAudio(audioPath, 0, false);
     }
 
     private void skipNext() {

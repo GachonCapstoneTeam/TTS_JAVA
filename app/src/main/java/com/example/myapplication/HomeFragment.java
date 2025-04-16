@@ -350,6 +350,12 @@ public class HomeFragment extends Fragment {
         if (audioService != null) {
             Log.d("HomeFragment", "onResume에서 리스너 재설정");
 
+            if (audioService.isPlaying()) {
+                playButton.setImageResource(R.drawable.button_pause);
+            } else {
+                playButton.setImageResource(R.drawable.button_play);
+            }
+
             audioService.setProgressUpdateListener((currentPosition, duration) ->
                     requireActivity().runOnUiThread(() -> updateProgressBar(currentPosition, duration))
             );
