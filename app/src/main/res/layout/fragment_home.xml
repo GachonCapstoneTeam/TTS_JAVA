@@ -174,12 +174,12 @@
             app:layout_constraintTop_toTopOf="parent" >
 
             <Button
-                android:id="@+id/myWish"
+                android:id="@+id/current_list"
                 android:layout_width="100dp"
                 android:layout_height="25dp"
                 android:layout_margin="5dp"
                 android:background="@drawable/list_button_green"
-                android:text="내 목록"
+                android:text="최신 목록"
                 android:textColor="@color/white"
                 android:textSize="15sp"
                 android:stateListAnimator="@null"
@@ -198,18 +198,18 @@
                 android:textColor="@color/black"
                 android:textSize="15sp"
                 android:stateListAnimator="@null"
-                app:layout_constraintStart_toEndOf="@id/myWish"
+                app:layout_constraintStart_toEndOf="@id/current_list"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/current_list"/>
+                app:layout_constraintEnd_toStartOf="@id/myWish"/>
 
             <Button
-                android:id="@+id/current_list"
+                android:id="@+id/myWish"
                 android:layout_width="100dp"
                 android:layout_height="25dp"
                 android:layout_margin="5dp"
                 android:background="@drawable/list_button"
-                android:text="최신 목록"
+                android:text="내 목록"
                 android:textColor="@color/black"
                 android:textSize="15sp"
                 android:stateListAnimator="@null"

@@ -1,9 +1,12 @@
 package com.example.myapplication;
 
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
@@ -22,6 +25,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -40,6 +44,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -47,6 +52,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
+import com.example.myapplication.util.PreferenceUtil;
 import com.facebook.shimmer.ShimmerFrameLayout;
 
 public class HomeFragment extends Fragment {
@@ -191,18 +197,33 @@ public class HomeFragment extends Fragment {
 
         myWishButton.setOnClickListener(v -> {
             updateButtonStyles(myWishButton);
-            // 내 목록 데이터 필터링 로직 추가 예정
+
+            List<Item> likedItems = loadLikedItemsFromPrefs();
+
+            if (likedItems.isEmpty()) {
+                Toast.makeText(requireContext(), "플레이리스트를 추가해주세요.", Toast.LENGTH_SHORT).show();
+            }
+
+            itemList.clear();
+            itemList.addAll(likedItems);
+            adapter.setItems(itemList);
         });
+
+
 
         top10Button.setOnClickListener(v -> {
             updateButtonStyles(top10Button);
             // TOP 10 필터링 로직 추가 예정
+            //fetchDataFromServer(String category) 처럼 분기를 추가하는 방식으로 할지 고민 중.
+            //추천 페이지 api수정하면서 같이 수정 요함.
         });
 
         currentListButton.setOnClickListener(v -> {
             updateButtonStyles(currentListButton);
-            // 최신 목록 전체 보기 로직 추가 예정
+
+            fetchDataFromServer();
         });
+
 
         shimmerLayout = view.findViewById(R.id.player_shimmer_container); // itembox_skeleton 포함하는 layout
 
@@ -301,6 +322,24 @@ public class HomeFragment extends Fragment {
             isHomeServiceBound = false;
         }
     };
+    private List<Item> loadLikedItemsFromPrefs() {
+        SharedPreferences prefs = requireContext().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
+        Map<String, ?> allEntries = prefs.getAll();
+
+        List<Item> likedItems = new ArrayList<>();
+        Gson gson = new Gson();
+
+        for (Map.Entry<String, ?> entry : allEntries.entrySet()) {
+            String key = entry.getKey();
+            if (key.startsWith("liked_")) {
+                String json = (String) entry.getValue();
+                Item item = gson.fromJson(json, Item.class);
+                likedItems.add(item);
+            }
+        }
+
+        return likedItems;
+    }
 
 
     private void playNextTrack() {
@@ -346,7 +385,8 @@ public class HomeFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-
+        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(updateReceiver,
+                new IntentFilter("com.example.myapplication.LIKED_UPDATED"));
         if (audioService != null) {
             Log.d("HomeFragment", "onResume에서 리스너 재설정");
 
@@ -378,6 +418,7 @@ public class HomeFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
+        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(updateReceiver);
         if (audioService != null) {
             audioService.setProgressUpdateListener(null);
         }
@@ -390,6 +431,28 @@ public class HomeFragment extends Fragment {
             mediaPlayer.release(); // 메모리 해제
             mediaPlayer = null;
         }
+    }
+    private final BroadcastReceiver updateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            updateLikedList();
+        }
+    };
+
+    private void updateLikedList() {
+        List<Item> likedItems = new ArrayList<>();
+        Map<String, ?> allPrefs = PreferenceUtil.getAll();
+
+        for (Map.Entry<String, ?> entry : allPrefs.entrySet()) {
+            if (entry.getKey().startsWith("liked_")) {
+                String json = entry.getValue().toString();
+                Item item = new Gson().fromJson(json, Item.class);
+                likedItems.add(item);
+            }
+        }
+
+        adapter.setItems(likedItems);
+        recyclerView.setAdapter(adapter);
     }
 
     private void fetchDataFromServer() {

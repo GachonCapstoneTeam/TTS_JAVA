@@ -27,7 +27,8 @@ public class Item {
 
     @SerializedName("PDF Content")
     private String pdfcontent;
-
+    @SerializedName("Liked")
+    private boolean liked;
     // 생성자
     public Item(String category, String title, String stockName, String pdfUrl, String date, String views, String content, String pdfcontent) {
         this.category = category;
@@ -49,4 +50,8 @@ public class Item {
     public String getViews() { return views; }
     public String getContent() { return content; }
     public String getPdfcontent() { return pdfcontent; }
+
+    public boolean isLiked() { return liked; }
+
+    public void setLiked(boolean liked) { this.liked = liked; }
 }
