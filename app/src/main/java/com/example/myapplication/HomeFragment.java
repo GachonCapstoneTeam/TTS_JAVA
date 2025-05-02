@@ -63,7 +63,7 @@ public class HomeFragment extends Fragment {
     private ImageButton playButton, prevButton, nextButton;
     private Button myWishButton, top10Button, currentListButton, fullScreenButton;
     private SeekBar seekBar;
-    private TextView currentTimeText, fullTimeText;
+    private TextView currentTimeText, fullTimeText, emptyView;
     private List<Item> itemList;
     private int currentTrackIndex = 0;
     private MediaPlayer mediaPlayer;
@@ -100,6 +100,7 @@ public class HomeFragment extends Fragment {
         myWishButton = view.findViewById(R.id.myWish);
         top10Button = view.findViewById(R.id.top10);
         currentListButton = view.findViewById(R.id.current_list);
+        emptyView = view.findViewById(R.id.home_empty_view);
 
         recyclerView = view.findViewById(R.id.home_recycler);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -201,7 +202,13 @@ public class HomeFragment extends Fragment {
             List<Item> likedItems = loadLikedItemsFromPrefs();
 
             if (likedItems.isEmpty()) {
-                Toast.makeText(requireContext(), "플레이리스트를 추가해주세요.", Toast.LENGTH_SHORT).show();
+                emptyView.setVisibility(View.VISIBLE);
+                recyclerView.setVisibility(View.GONE);
+            } else {
+                emptyView.setVisibility(View.GONE);
+                recyclerView.setVisibility(View.VISIBLE);
+                adapter.setItems(likedItems);
+                recyclerView.setAdapter(adapter);
             }
 
             itemList.clear();
@@ -220,7 +227,8 @@ public class HomeFragment extends Fragment {
 
         currentListButton.setOnClickListener(v -> {
             updateButtonStyles(currentListButton);
-
+            emptyView.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.VISIBLE);
             fetchDataFromServer();
         });
 
