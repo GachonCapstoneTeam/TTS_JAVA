@@ -255,6 +255,7 @@
             android:id="@+id/home_empty_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:visibility="gone"
             android:text="플레이리스트를 추가해주세요."
             android:textSize="22sp"
             android:gravity="center"
