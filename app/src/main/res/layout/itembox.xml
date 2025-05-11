@@ -54,7 +54,7 @@
         android:id="@+id/box_star_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/star"
+        android:background="@drawable/star_not"
         android:backgroundTint="@color/white"
         app:layout_constraintEnd_toEndOf="@id/box_layout"
         app:layout_constraintTop_toTopOf="@id/box_layout"/>
