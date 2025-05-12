@@ -3,115 +3,87 @@
     android:id="@+id/box_layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="8dp"
-    android:layout_margin="10dp"
-    android:background="@drawable/graybox"
-    android:elevation="15dp">
-
-    <TextView
-        android:id="@+id/box_name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="15dp"
-        android:text="종목명"
-        android:textColor="#005011"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="@+id/box_layout"
-        app:layout_constraintTop_toTopOf="@id/box_layout" />
-
-    <TextView
-        android:id="@+id/box_bank"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="15dp"
-        android:text="은행"
-        android:textSize="15sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/box_title"
-        app:layout_constraintStart_toEndOf="@id/box_name" />
+    android:padding="24dp"
+    android:background="@color/background_color">
 
     <TextView
         android:id="@+id/box_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="리포트 제목"
-        android:textSize="28sp"
-        android:textStyle="bold"
         android:textColor="@color/black"
-        app:layout_constraintTop_toBottomOf="@id/box_name"
-        app:layout_constraintStart_toStartOf="@id/box_name"/>
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@id/box_script"
+        app:layout_constraintStart_toStartOf="@id/box_script"
+        android:layout_marginTop="15dp"/>
+
+    <TextView
+        android:id="@+id/box_category"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="카테고리"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="@color/mint"
+        app:layout_constraintTop_toTopOf="@id/box_star_button"
+        app:layout_constraintStart_toStartOf="@id/box_title" />
 
     <TextView
         android:id="@+id/box_date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="YYYY/MM/DD"
-        android:textSize="8sp"
-        android:textColor="@color/black"
-        app:layout_constraintEnd_toEndOf="@id/box_layout"
-        app:layout_constraintBottom_toBottomOf="@id/box_title"/>
+        android:text="Date"
+        android:textSize="14sp"
+        android:textColor="@color/brown"
+        app:layout_constraintStart_toStartOf="@id/box_title"
+        app:layout_constraintTop_toBottomOf="@id/box_name"/>
+
+    <TextView
+        android:id="@+id/box_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="종목명"
+        android:textStyle="normal"
+        android:textColor="@color/green"
+        android:textSize="16sp"
+        app:layout_constraintTop_toBottomOf="@id/box_title"
+        app:layout_constraintStart_toStartOf="@id/box_title"/>
 
     <ImageButton
         android:id="@+id/box_star_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/star"
+        android:background="@drawable/star_not"
         android:backgroundTint="@color/white"
         app:layout_constraintEnd_toEndOf="@id/box_layout"
         app:layout_constraintTop_toTopOf="@id/box_layout"/>
 
-    <View
-        android:id="@+id/box_guide_line"
-        android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:background="@color/black"
-        app:layout_constraintTop_toBottomOf="@id/box_title"
-        app:layout_constraintStart_toStartOf="@id/box_layout"
-        app:layout_constraintEnd_toEndOf="@id/box_layout"
-        android:layout_margin="10dp"/>
-
     <TextView
         android:id="@+id/box_script"
         android:layout_width="match_parent"
-        android:layout_height="180dp"
+        android:layout_height="200dp"
         android:text="로딩중 . . ."
         android:textSize="15sp"
         android:textColor="@color/black"
         android:textStyle="normal"
         android:gravity="center"
-        app:layout_constraintTop_toBottomOf="@id/box_guide_line"
-        app:layout_constraintStart_toStartOf="@id/box_guide_line"
+        app:layout_constraintTop_toBottomOf="@id/box_star_button"
+        app:layout_constraintStart_toStartOf="parent"
         android:layout_margin="10dp"
-        android:background="@color/gray_dark"/>
+        android:background="@drawable/round_box"/>
 
     <Button
-        android:id="@+id/box_ori_button"
-        android:layout_width="120dp"
-        android:layout_height="45dp"
+        android:id="@+id/box_button"
+        android:layout_width="117dp"
+        android:layout_height="32dp"
         android:background="@drawable/round_button"
-        android:text="원문보기"
+        android:text="Read Report"
         android:textSize="15sp"
         android:textStyle="bold"
-        android:textColor="@color/black"
-        app:layout_constraintStart_toStartOf="@id/box_script"
-        app:layout_constraintTop_toBottomOf="@id/box_script"
-        app:layout_constraintEnd_toStartOf="@id/box_sum_button"
-        android:layout_margin="15dp" />
-
-    <Button
-        android:id="@+id/box_sum_button"
-        android:layout_width="120dp"
-        android:layout_height="45dp"
-        android:background="@drawable/round_button"
-        android:text="요약문보기"
-        android:textSize="15sp"
-        android:textStyle="bold"
-        android:textColor="@color/black"
-        app:layout_constraintStart_toEndOf="@id/box_ori_button"
-        app:layout_constraintTop_toBottomOf="@id/box_script"
-        app:layout_constraintEnd_toEndOf="@id/box_script"
-        android:layout_margin="15dp"/>
+        android:textColor="@color/white"
+        app:layout_constraintTop_toBottomOf="@id/box_date"
+        app:layout_constraintEnd_toEndOf="@id/box_script"/>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

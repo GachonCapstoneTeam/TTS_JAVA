@@ -26,6 +26,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.myapplication.util.PreferenceUtil;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -50,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        PreferenceUtil.init(getApplicationContext()); //테스트용으로 여기에 넣었지만 나중에 splash 화면 작성시 거기로 옮겨야함. 앱 시작 페이지에서 초기화하는게 좋음.
         setContentView(R.layout.activity_main);
 
         inputText = findViewById(R.id.inputText);

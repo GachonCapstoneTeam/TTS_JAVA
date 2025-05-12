@@ -6,30 +6,15 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainFragment">
+    tools:context=".SearchFragment"
+    android:background="@color/background_color">
 
     <!-- Header Section -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:background="@color/green"
         android:padding="10dp">
-
-        <TextView
-            android:id="@+id/main_logo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:text="TalkStock"
-            android:textStyle="bold"
-            android:textColor="@color/black"
-            android:textSize="15dp"
-            android:shadowColor="@color/gray_dark"
-            android:shadowDx="5"
-            android:shadowDy="5"
-            android:shadowRadius="2"/>
 
         <androidx.constraintlayout.widget.Guideline
             app:layout_constraintEnd_toStartOf="@id/search_button"
@@ -40,16 +25,22 @@
             app:layout_constraintGuide_end="0dp"/>
         <EditText
             android:id="@+id/search_input"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:hint="검색어를 입력하세요"
+            android:textColorHint="@color/gray"
+            android:inputType="text"
+            android:singleLine="true"
+            android:maxLines="1"
             app:layout_constraintEnd_toStartOf="@id/search_guideline"
             app:layout_constraintTop_toTopOf="@id/search_button"
             app:layout_constraintBottom_toBottomOf="@id/search_button"
-            app:layout_constraintStart_toEndOf="@id/main_logo"
+            app:layout_constraintStart_toEndOf="parent"
             android:layout_marginLeft="20dp"
             android:layout_weight="1"
-            android:visibility="gone"
-            android:background="@color/white" />
+            android:paddingStart="5dp"
+            android:paddingEnd="30dp"
+            android:background="@drawable/round_box" />
 
         <ImageButton
             android:id="@+id/search_button"
@@ -63,26 +54,26 @@
     <!-- Tabs Section -->
     <HorizontalScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/green">
+        android:layout_height="wrap_content">
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tab_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="5dp">
+            android:layout_margin="5dp"
+            app:tabTextColor="@color/green">
 
             <com.google.android.material.tabs.TabItem
                 android:id="@+id/main_tab_all"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="전체"/>
+                android:text="전체" />
 
             <com.google.android.material.tabs.TabItem
                 android:id="@+id/main_tab_company"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="기업"/>
+                android:text="종목"/>
 
             <com.google.android.material.tabs.TabItem
                 android:id="@+id/main_tab_industry"
@@ -90,15 +81,14 @@
                 android:layout_height="wrap_content"
                 android:text="산업"/>
 
-            <com.google.android.material.tabs.TabItem
-                android:id="@+id/main_tab_regular"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="정기"/>
 
         </com.google.android.material.tabs.TabLayout>
 
     </HorizontalScrollView>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/gray"/>
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swiper"
@@ -106,12 +96,34 @@
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/reportRecycler"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_margin="10dp"
-            android:orientation="vertical" />
+            android:layout_height="match_parent">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/reportRecycler"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="10dp"
+                android:orientation="vertical" />
+
+            <com.facebook.shimmer.ShimmerFrameLayout
+                android:id="@+id/search_shimmer_container"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:shimmer_auto_start="true"
+                app:shimmer_duration="1000">
+
+                <LinearLayout
+                android:id="@+id/shimmer_linear"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            </com.facebook.shimmer.ShimmerFrameLayout>
+
+        </FrameLayout>
+
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 

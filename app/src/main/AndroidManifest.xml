@@ -30,6 +30,7 @@
             android:foregroundServiceType="mediaPlayback"
             android:exported="false"/>
         <activity android:name=".OriginalActivity" />
+        <activity android:name=".SimplePlayerActivity" />
     </application>
 
 

@@ -1,9 +1,12 @@
 package com.example.myapplication;
 
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
@@ -22,13 +25,16 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.myapplication.adapter.ItemAdapter;
+import com.example.myapplication.adapter.ShimmerAdapter;
 import com.example.myapplication.entity.Item;
 import com.example.myapplication.view.AudioService;
 import com.example.myapplication.view.TTSHelper;
+import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -38,6 +44,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -45,15 +52,18 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
+import com.example.myapplication.util.PreferenceUtil;
+import com.facebook.shimmer.ShimmerFrameLayout;
+
 public class HomeFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private ItemAdapter adapter;
     private TTSHelper ttsHelper;
-    private ImageButton playButton, prevButton, nextButton, restartButton, fullScreenButton;
-    private Button myWishButton, top10Button, currentListButton;
+    private ImageButton playButton, prevButton, nextButton;
+    private Button myWishButton, top10Button, currentListButton, fullScreenButton;
     private SeekBar seekBar;
-    private TextView currentTimeText, fullTimeText;
+    private TextView currentTimeText, fullTimeText, emptyView;
     private List<Item> itemList;
     private int currentTrackIndex = 0;
     private MediaPlayer mediaPlayer;
@@ -62,6 +72,10 @@ public class HomeFragment extends Fragment {
     private boolean isHomeServiceBound = false;
     private Handler progressHandler = new Handler();
     private Context mContext;
+    private int currentPlayingIndex = -1;
+
+    private ShimmerFrameLayout shimmerLayout;
+    private boolean isDataLoaded = false;
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -79,7 +93,6 @@ public class HomeFragment extends Fragment {
         playButton = view.findViewById(R.id.button_play);
         prevButton = view.findViewById(R.id.prev);
         nextButton = view.findViewById(R.id.next);
-        restartButton = view.findViewById(R.id.restart);
         fullScreenButton = view.findViewById(R.id.full_screen);
         seekBar = view.findViewById(R.id.progress_bar);
         currentTimeText = view.findViewById(R.id.current_time);
@@ -87,6 +100,7 @@ public class HomeFragment extends Fragment {
         myWishButton = view.findViewById(R.id.myWish);
         top10Button = view.findViewById(R.id.top10);
         currentListButton = view.findViewById(R.id.current_list);
+        emptyView = view.findViewById(R.id.home_empty_view);
 
         recyclerView = view.findViewById(R.id.home_recycler);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -118,7 +132,7 @@ public class HomeFragment extends Fragment {
             public void onStopTrackingTouch(SeekBar seekBar) {
                 if (audioService != null) {
                     int newPosition = (int) ((seekBar.getProgress() / 100.0) * audioService.getDuration());
-                    audioService.seekTo(newPosition); // ✅ 선택한 위치로 이동
+                    audioService.seekTo(newPosition); // 선택한 위치로 이동
                     updateProgressBar(newPosition, audioService.getDuration()); // UI 업데이트
                 }
             }
@@ -129,6 +143,8 @@ public class HomeFragment extends Fragment {
         adapter.setOnItemClickListener(item -> {
             currentTrackIndex = itemList.indexOf(item);
             playTrackAtIndex(currentTrackIndex, true);
+
+            adapter.setPlayingIndex(currentTrackIndex); // 클릭한 인덱스로 갱신
         });
 
         playButton.setOnClickListener(v -> togglePlayPause());
@@ -141,8 +157,6 @@ public class HomeFragment extends Fragment {
                 Toast.makeText(requireContext(), "이전 트랙이 없습니다.", Toast.LENGTH_SHORT).show();
             }
         });
-
-        restartButton.setOnClickListener(v -> playTrackAtIndex(currentTrackIndex, true));
 
         nextButton.setOnClickListener(v -> {
             if (currentTrackIndex < itemList.size() - 1) {
@@ -158,6 +172,7 @@ public class HomeFragment extends Fragment {
             if (currentTrackIndex >= 0 && currentTrackIndex < itemList.size()) {
                 Item currentItem = itemList.get(currentTrackIndex);
                 Intent intent = new Intent(getContext(), OriginalActivity.class);
+                intent.putExtra("ItemList", new Gson().toJson(itemList));
                 intent.putExtra("track_index", currentTrackIndex);
                 intent.putExtra("AudioFilePath", getAudioFilePath(currentItem.getTitle()));
 
@@ -183,19 +198,47 @@ public class HomeFragment extends Fragment {
 
         myWishButton.setOnClickListener(v -> {
             updateButtonStyles(myWishButton);
-            // 내 목록 데이터 필터링 로직 추가 예정
+
+            List<Item> likedItems = loadLikedItemsFromPrefs();
+
+            if (likedItems.isEmpty()) {
+                emptyView.setVisibility(View.VISIBLE);
+                recyclerView.setVisibility(View.GONE);
+            } else {
+                emptyView.setVisibility(View.GONE);
+                recyclerView.setVisibility(View.VISIBLE);
+                adapter.setItems(likedItems);
+                recyclerView.setAdapter(adapter);
+            }
+
+            itemList.clear();
+            itemList.addAll(likedItems);
+            adapter.setItems(itemList);
         });
+
+
 
         top10Button.setOnClickListener(v -> {
             updateButtonStyles(top10Button);
             // TOP 10 필터링 로직 추가 예정
+            //fetchDataFromServer(String category) 처럼 분기를 추가하는 방식으로 할지 고민 중.
+            //추천 페이지 api수정하면서 같이 수정 요함.
         });
 
         currentListButton.setOnClickListener(v -> {
             updateButtonStyles(currentListButton);
-            // 최신 목록 전체 보기 로직 추가 예정
+            emptyView.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.VISIBLE);
+            fetchDataFromServer();
         });
 
+
+        shimmerLayout = view.findViewById(R.id.player_shimmer_container); // itembox_skeleton 포함하는 layout
+
+// 데이터 로딩 전 Shimmer 어댑터로 설정
+        ShimmerAdapter shimmerAdapter = new ShimmerAdapter(5); // 5개 정도 보여줄 수 있음
+        recyclerView.setAdapter(shimmerAdapter);
+        shimmerLayout.startShimmer(); // 애니메이션 시작
 
         return view;
     }
@@ -213,10 +256,12 @@ public class HomeFragment extends Fragment {
             requireActivity().runOnUiThread(() -> {
                 // UI 업데이트
                 TextView titleView = requireView().findViewById(R.id.home_display_title);
-                TextView scriptView = requireView().findViewById(R.id.home_display_script);
-                if (titleView != null && scriptView != null) {
+                TextView nameView = requireView().findViewById(R.id.home_display_name);
+
+
+                if (titleView != null && nameView != null) {
                     titleView.setText(track.getTitle());
-                    scriptView.setText(track.getContent());
+                    nameView.setText(track.getStockName());
                 }
 
                 seekBar.setProgress(0);
@@ -269,7 +314,11 @@ public class HomeFragment extends Fragment {
             );
 
             audioService.setNextTrackListener(() ->
-                    requireActivity().runOnUiThread(() -> playNextTrack())
+                    requireActivity().runOnUiThread(() -> {
+                        playNextTrack();
+                        adapter.setPlayingIndex(currentTrackIndex);
+
+                    })
             );
 
             audioService.startProgressUpdates();
@@ -281,6 +330,24 @@ public class HomeFragment extends Fragment {
             isHomeServiceBound = false;
         }
     };
+    private List<Item> loadLikedItemsFromPrefs() {
+        SharedPreferences prefs = requireContext().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
+        Map<String, ?> allEntries = prefs.getAll();
+
+        List<Item> likedItems = new ArrayList<>();
+        Gson gson = new Gson();
+
+        for (Map.Entry<String, ?> entry : allEntries.entrySet()) {
+            String key = entry.getKey();
+            if (key.startsWith("liked_")) {
+                String json = (String) entry.getValue();
+                Item item = gson.fromJson(json, Item.class);
+                likedItems.add(item);
+            }
+        }
+
+        return likedItems;
+    }
 
 
     private void playNextTrack() {
@@ -318,7 +385,34 @@ public class HomeFragment extends Fragment {
             int currentPosition = audioService.getCurrentPosition();
             int totalDuration = audioService.getDuration();
 
+            currentPlayingIndex = audioService.getCurrentIndex();
+            adapter.setPlayingIndex(currentPlayingIndex);
             updateProgressBar(currentPosition, totalDuration);
+        }
+    }
+    @Override
+    public void onResume() {
+        super.onResume();
+        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(updateReceiver,
+                new IntentFilter("com.example.myapplication.LIKED_UPDATED"));
+        if (audioService != null) {
+            Log.d("HomeFragment", "onResume에서 리스너 재설정");
+
+            if (audioService.isPlaying()) {
+                playButton.setImageResource(R.drawable.button_pause);
+            } else {
+                playButton.setImageResource(R.drawable.button_play);
+            }
+
+            audioService.setProgressUpdateListener((currentPosition, duration) ->
+                    requireActivity().runOnUiThread(() -> updateProgressBar(currentPosition, duration))
+            );
+
+            audioService.setNextTrackListener(() ->
+                    requireActivity().runOnUiThread(this::playNextTrack)
+            );
+
+            audioService.startProgressUpdates();
         }
     }
 
@@ -328,11 +422,13 @@ public class HomeFragment extends Fragment {
         super.onStop();
         if (isHomeServiceBound) mContext.unbindService(homeServiceConnection);
     }
+
     @Override
     public void onPause() {
         super.onPause();
-        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
-            mediaPlayer.pause(); // 프래그먼트가 백그라운드로 가면 재생 중지
+        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(updateReceiver);
+        if (audioService != null) {
+            audioService.setProgressUpdateListener(null);
         }
     }
 
@@ -344,10 +440,32 @@ public class HomeFragment extends Fragment {
             mediaPlayer = null;
         }
     }
+    private final BroadcastReceiver updateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            updateLikedList();
+        }
+    };
+
+    private void updateLikedList() {
+        List<Item> likedItems = new ArrayList<>();
+        Map<String, ?> allPrefs = PreferenceUtil.getAll();
+
+        for (Map.Entry<String, ?> entry : allPrefs.entrySet()) {
+            if (entry.getKey().startsWith("liked_")) {
+                String json = entry.getValue().toString();
+                Item item = new Gson().fromJson(json, Item.class);
+                likedItems.add(item);
+            }
+        }
+
+        adapter.setItems(likedItems);
+        recyclerView.setAdapter(adapter);
+    }
 
     private void fetchDataFromServer() {
         OkHttpClient client = new OkHttpClient();
-        String url = "https://40.82.148.190:8000/textload/content";
+        String url = "http://10.0.2.2:8000/textload/content";
 
         Request request = new Request.Builder()
                 .url(url)
@@ -369,9 +487,25 @@ public class HomeFragment extends Fragment {
                 if (response.isSuccessful() && response.body() != null) {
                     try {
                         String jsonResponse = response.body().string();
-                        parseAndSetData(jsonResponse);
+                        List<Item> items = parseAndSetData(jsonResponse);
+
+                        requireActivity().runOnUiThread(() -> {
+                            itemList.clear();
+                            itemList.addAll(items);
+                            adapter.setItems(itemList);  // 어댑터에 전달
+                            adapter.notifyDataSetChanged(); // 혹시 모르니 안전하게 호출
+
+                            // Shimmer 중단 및 실제 리스트 보여주기
+                            shimmerLayout.stopShimmer();
+                            shimmerLayout.setVisibility(View.GONE);
+                            recyclerView.setVisibility(View.VISIBLE);
+                        });
                     } catch (JSONException e) {
                         e.printStackTrace();
+                        requireActivity().runOnUiThread(() -> {
+                            Toast.makeText(requireContext(), "데이터 파싱 오류. 더미 데이터를 로드합니다.", Toast.LENGTH_SHORT).show();
+                            loadDummyData();
+                        });
                     }
                 } else {
                     requireActivity().runOnUiThread(() -> {
@@ -382,6 +516,7 @@ public class HomeFragment extends Fragment {
             }
         });
     }
+
 
     private void updateProgressBar(int currentPosition, int duration) {
         if (duration > 0) {
@@ -402,7 +537,7 @@ public class HomeFragment extends Fragment {
         Button[] buttons = {myWishButton, top10Button, currentListButton};
         for (Button button : buttons) {
             if (button == selectedButton) {
-                button.setBackgroundResource(R.drawable.list_button_black); // 선택된 버튼
+                button.setBackgroundResource(R.drawable.list_button_green); // 선택된 버튼
                 button.setTextColor(ContextCompat.getColor(requireContext(), R.color.white));
             } else {
                 button.setBackgroundResource(R.drawable.list_button); // 기본 버튼
@@ -413,14 +548,21 @@ public class HomeFragment extends Fragment {
 
     private void loadDummyData() {
         List<Item> dummyItems = new ArrayList<>();
-        dummyItems.add(new Item("IT", "삼성전자6", "삼성증권", "https://example.com/sample1.pdf", "2024-02-15", "120", "반도체 시장의 향후 전망을 분석한 리포트입니다.반도체 시장의 향후 전망을 분석한 리포트입니다.반도체 시장의 향후 전망을 분석한 리포트입니다.반도체 시장의 향후 전망을 분석한 리포트입니다."));
-        dummyItems.add(new Item("기술", "더미 리포트 2", "LG증권", "https://example.com/dummy2.pdf", "2025-02-02", "234", "더미 데이터 내용 2입니다."));
-        dummyItems.add(new Item("산업", "더미 리포트 3", "한화증권", "https://example.com/dummy3.pdf", "2025-02-03", "345", "더미 데이터 내용 3입니다."));
+        dummyItems.add(new Item("IT", "삼성전자6", "삼성증권", "https://example.com/sample1.pdf", "2024-02-15", "120", "반도체 시장의 향후 전망을 분석한 리포트입니다.반도체 시장의 향후 전망을 분석한 리포트입니다.반도체 시장의 향후 전망을 분석한 리포트입니다.반도체 시장의 향후 전망을 분석한 리포트입니다.",""));
+        dummyItems.add(new Item("기술", "더미 리포트 2", "LG증권", "https://example.com/dummy2.pdf", "2025-02-02", "234", "더미 데이터 내용 2입니다.",""));
+        dummyItems.add(new Item("산업", "더미 리포트 3", "한화증권", "https://example.com/dummy3.pdf", "2025-02-03", "345", "더미 데이터 내용 3입니다.",""));
 
         requireActivity().runOnUiThread(() -> {
             itemList.clear();
             itemList.addAll(dummyItems);
+
+            recyclerView.setAdapter(adapter); // ⭐ 중요!
+            adapter.setItems(itemList);
             adapter.notifyDataSetChanged();
+
+            shimmerLayout.stopShimmer();
+            shimmerLayout.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.VISIBLE);
         });
     }
 
@@ -432,28 +574,34 @@ public class HomeFragment extends Fragment {
         return String.format("%02d:%02d", minutes, seconds);
     }
 
-    private void parseAndSetData(String jsonResponse) throws JSONException {
+    private List<Item> parseAndSetData(String jsonResponse) throws JSONException {
         List<Item> fetchedItems = new ArrayList<>();
-        JSONArray jsonArray = new JSONArray(jsonResponse);
 
+        // 먼저 전체 JSON 응답을 JSONObject로 파싱
+        JSONObject rootObject = new JSONObject(jsonResponse);
+
+        // "contents" 키에서 JSONArray 추출
+        JSONArray jsonArray = rootObject.getJSONArray("contents");
+
+        // JSONArray 순회하며 Item 생성
         for (int i = 0; i < jsonArray.length(); i++) {
             JSONObject jsonObject = jsonArray.getJSONObject(i);
+
             Item item = new Item(
-                    jsonObject.getString("category"),
-                    jsonObject.getString("title"),
-                    jsonObject.getString("stockName"),
-                    jsonObject.getString("pdfUrl"),
-                    jsonObject.getString("date"),
-                    jsonObject.getString("views"),
-                    jsonObject.getString("content")
-            );
+                    jsonObject.getString("Category"),  // 대소문자 정확히 일치시켜야 함
+                    jsonObject.getString("Title"),
+                    jsonObject.getString("증권사"),      // "stockName"이 아닌 JSON에는 "증권사"로 들어 있음
+                    jsonObject.getString("PDF URL"),
+                    jsonObject.getString("작성일"),
+                    jsonObject.getString("Views"),
+                    jsonObject.getString("Content"),
+                    jsonObject.getString("PDF Content")
+                    );
+
             fetchedItems.add(item);
         }
 
-        requireActivity().runOnUiThread(() -> {
-            itemList.clear();
-            itemList.addAll(fetchedItems);
-            adapter.notifyDataSetChanged();
-        });
+        return fetchedItems;
     }
 }
+

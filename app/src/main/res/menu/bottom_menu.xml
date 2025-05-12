@@ -2,33 +2,27 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+
     <item
-        android:id="@+id/recent"
+        android:id="@+id/search"
         android:enabled="true"
-        android:icon="@drawable/recent"
-        android:title="최신"
+        android:icon="@drawable/icon_search"
+        android:title="Search"
         app:showAsAction="always"/>
 
-        <item
-            android:id="@+id/home"
-            android:enabled="true"
-            android:icon="@drawable/home"
-            android:title="홈"
-            app:showAsAction="always"/>
-
-        <item
-            android:id="@+id/thema"
-            android:enabled="true"
-            android:icon="@drawable/star_not"
-            android:title="테마"
-            app:showAsAction="always"/>
+    <item
+        android:id="@+id/home"
+        android:enabled="true"
+        android:icon="@drawable/icon_home"
+        android:title="Home"
+        app:showAsAction="always"/>
 
 
-        <item
-            android:id="@+id/setting"
-            android:enabled="true"
-            android:icon="@drawable/ic_settings"
-            android:title="설정"
-            app:showAsAction="always"/>
+    <item
+        android:id="@+id/rcm"
+        android:enabled="true"
+        android:icon="@drawable/icon_rcm"
+        android:title="Recommand"
+        app:showAsAction="always"/>
 
 </menu>

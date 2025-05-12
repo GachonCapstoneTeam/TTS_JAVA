@@ -32,7 +32,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class RecentFragment extends Fragment {
+public class RecommendFragment extends Fragment {
 
     private ViewPager2 recommendViewPager, rankViewPager;
     private SpringDotsIndicator recommendDots, rankDots;
@@ -46,12 +46,12 @@ public class RecentFragment extends Fragment {
     private int recommendCurrentPage = 0;
     private int rankCurrentPage = 0;
 
-    private final String API_URL = "https://40.82.148.190:8000/textload/content/";
+    private final String API_URL = "http://10.0.2.2:8000/textload/content/";
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_recent, container, false);
+        View view = inflater.inflate(R.layout.fragment_recommand, container, false);
 
         // View 초기화
         recommendViewPager = view.findViewById(R.id.rcm_recommend_page);
@@ -65,7 +65,7 @@ public class RecentFragment extends Fragment {
         recommendViewPager.setAdapter(recommendAdapter);
         recommendDots.setViewPager2(recommendViewPager);
 
-        rankAdapter = new RankPagerAdapter(rankItems);
+        rankAdapter = new RankPagerAdapter(getContext(), rankItems);
         rankViewPager.setAdapter(rankAdapter);
         rankDots.setViewPager2(rankViewPager);
 
@@ -172,8 +172,9 @@ public class RecentFragment extends Fragment {
             String date = obj.getString("작성일");
             String views = obj.getString("Views");
             String content = obj.getString("Content");
+            String pdfcontent = obj.getString("PDF Content");
 
-            items.add(new Item(category, title, stockName, pdfUrl, date, views, content));
+            items.add(new Item(category, title, stockName, pdfUrl, date, views, content, pdfcontent));
         }
 
         return items;
@@ -182,18 +183,18 @@ public class RecentFragment extends Fragment {
     // 더미 데이터 (추천 리포트)
     private void loadDummyRecommendData() {
         recommendItems.clear();
-        recommendItems.add(new Item("IT", "삼성전자 반도체 전망", "삼성증권", "https://example.com/sample1.pdf", "2024-02-15", "120", "반도체 시장의 향후 전망을 분석한 리포트입니다."));
-        recommendItems.add(new Item("플랫폼", "네이버 AI 전략", "NH투자증권", "https://example.com/sample2.pdf", "2024-02-14", "98", "네이버 AI 서비스 전략에 대한 분석."));
-        recommendItems.add(new Item("자동차", "현대차 전기차 전망", "미래에셋", "https://example.com/sample3.pdf", "2024-02-13", "76", "현대차의 전기차 시장 전략과 전망."));
+        recommendItems.add(new Item("IT", "삼성전자 반도체 전망", "삼성증권", "https://example.com/sample1.pdf", "2024-02-15", "120", "반도체 시장의 향후 전망을 분석한 리포트입니다.",""));
+        recommendItems.add(new Item("플랫폼", "네이버 AI 전략", "NH투자증권", "https://example.com/sample2.pdf", "2024-02-14", "98", "네이버 AI 서비스 전략에 대한 분석.",""));
+        recommendItems.add(new Item("자동차", "현대차 전기차 전망", "미래에셋", "https://example.com/sample3.pdf", "2024-02-13", "76", "현대차의 전기차 시장 전략과 전망.",""));
         recommendAdapter.updateItems(recommendItems);
     }
 
     // 더미 데이터 (인기 리포트)
     private void loadDummyRankData() {
         rankItems.clear();
-        rankItems.add(new Item("화학", "LG화학 배터리 시장", "키움증권", "https://example.com/sample4.pdf", "2024-02-15", "150", "배터리 시장 동향 및 LG화학의 전략."));
-        rankItems.add(new Item("IT", "SK하이닉스 메모리 시장", "하나금융투자", "https://example.com/sample5.pdf", "2024-02-14", "110", "메모리 반도체 시장의 향후 전망."));
-        rankItems.add(new Item("유통", "쿠팡 성장성 분석", "대신증권", "https://example.com/sample6.pdf", "2024-02-13", "85", "쿠팡의 성장성과 미래 전략."));
+        rankItems.add(new Item("화학", "LG화학 배터리 시장", "키움증권", "https://example.com/sample4.pdf", "2024-02-15", "150", "배터리 시장 동향 및 LG화학의 전략.",""));
+        rankItems.add(new Item("IT", "SK하이닉스 메모리 시장", "하나금융투자", "https://example.com/sample5.pdf", "2024-02-14", "110", "메모리 반도체 시장의 향후 전망.",""));
+        rankItems.add(new Item("유통", "쿠팡 성장성 분석", "대신증권", "https://example.com/sample6.pdf", "2024-02-13", "85", "쿠팡의 성장성과 미래 전략.",""));
         rankAdapter.updateItems(rankItems);
     }
 

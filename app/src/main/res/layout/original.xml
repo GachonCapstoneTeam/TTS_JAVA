@@ -1,16 +1,10 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/ori_container"
+    android:padding="16dp"
     android:orientation="vertical">
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/ori_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/background_round"
-        android:padding="16dp"
-        android:layout_alignParentTop="true">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/ori_title_container"
@@ -34,8 +28,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="종목명"
+                android:textColor="@color/mint"
                 android:textStyle="bold"
-                android:textSize="20sp"
+                android:textSize="16sp"
                 android:shadowRadius="1"
                 android:shadowDx="3"
                 android:shadowDy="3"
@@ -50,7 +45,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="리포트 제목"
-                android:textSize="25sp"
+                android:textSize="20sp"
                 android:textStyle="bold"
                 android:textColor="@color/black"
                 app:layout_constraintTop_toBottomOf="@id/oriName"
@@ -63,59 +58,45 @@
                 android:text="YYYY/MM/DD"
                 android:textSize="13sp"
                 android:textStyle="normal"
-                android:textColor="#00027B"
-                app:layout_constraintEnd_toEndOf="@id/ori_title_container"
+                android:textColor="@color/brown"
+                app:layout_constraintStart_toStartOf="@id/oriTitle"
                 app:layout_constraintTop_toBottomOf="@id/oriTitle"/>
 
-            <View
-                android:id="@+id/ori_guide_line"
-                android:layout_width="match_parent"
-                android:layout_height="2dp"
-                android:background="@color/black"
-                app:layout_constraintStart_toStartOf="@id/ori_title_container"
-                app:layout_constraintTop_toBottomOf="@id/ori_date"
-                android:layout_margin="10dp"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/ori_content_container"
+
+    <ScrollView
+        android:id="@+id/ori_content_container"
+        android:layout_width="match_parent"
+        android:layout_height="420dp"
+        android:background="@color/white"
+        android:fillViewport="true"
+        android:scrollbars="none"
+        app:layout_constraintTop_toBottomOf="@id/ori_title_container"
+        app:layout_constraintStart_toStartOf="@id/ori_title_container"
+        app:layout_constraintEnd_toEndOf="@id/ori_title_container">
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/ori_title_container"
-            app:layout_constraintStart_toStartOf="@id/ori_title_container"
-            android:layout_margin="15dp">
+            android:orientation="vertical">
 
-            <ScrollView
-                android:id="@+id/scroll_ori"
+            <TextView
+                android:id="@+id/oriScript"
                 android:layout_width="match_parent"
-                android:layout_height="480dp"
+                android:layout_height="match_parent"
                 android:background="@color/white"
-                android:fillViewport="true"
-                android:scrollbars="none"
-                app:layout_constraintStart_toStartOf="@id/ori_content_container"
-                app:layout_constraintTop_toTopOf="@id/ori_content_container">
+                android:gravity="center"
+                android:text="로딩중..."
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:textStyle="bold" />
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
+        </LinearLayout>
+    </ScrollView>
 
-                    <TextView
-                        android:background="@color/white"
-                        android:id="@+id/oriScript"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:text="로딩중..."
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        android:gravity="center" />
-
-                </LinearLayout>
-            </ScrollView>
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <LinearLayout
             android:id="@+id/ori_player"
@@ -123,45 +104,40 @@
             android:layout_height="wrap_content"
             app:layout_constraintTop_toBottomOf="@id/ori_content_container"
             app:layout_constraintStart_toStartOf="@id/ori_content_container"
-            app:layout_constraintBottom_toBottomOf="@id/ori_container"
-            app:layout_constraintEnd_toEndOf="@id/ori_content_container">
+            app:layout_constraintBottom_toBottomOf="@id/ori_pdf"
+            app:layout_constraintEnd_toEndOf="@id/ori_content_container"
+            android:orientation="vertical">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
+
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/ori_progressbar"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="15dp"
-                    android:layout_marginLeft="30dp"
-                    android:layout_marginRight="30dp">
+                    android:layout_height="wrap_content">
 
                     <TextView
                         android:id="@+id/ori_current_time"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="@id/ori_progress_bar"
+                        app:layout_constraintTop_toBottomOf="@id/ori_progress_bar"
                         android:text="0:00"
-                        android:textColor="@color/black"
+                        android:textColor="@color/brown"
                         android:textSize="13dp" />
 
                     <TextView
                         android:id="@+id/ori_full_time"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintEnd_toEndOf="@id/ori_progress_bar"
+                        app:layout_constraintTop_toBottomOf="@id/ori_progress_bar"
                         android:text="0:00"
-                        android:textColor="@color/black"
+                        android:textColor="@color/brown"
                         android:textSize="13dp" />
 
                     <SeekBar
                         android:id="@+id/ori_progress_bar"
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         app:layout_constraintStart_toEndOf="@id/ori_current_time"
                         app:layout_constraintEnd_toStartOf="@id/ori_full_time"
@@ -180,10 +156,10 @@
                     android:gravity="center">
 
                     <ImageButton
-                        android:id="@+id/ori_restart"
+                        android:id="@+id/ori_last_track"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/restart"
+                        android:background="@drawable/last_track"
                         android:layout_margin="15dp"/>
 
                     <ImageButton
@@ -208,18 +184,26 @@
                         android:layout_margin="15dp"/>
 
                     <ImageButton
-                        android:id="@+id/ori_pdf"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:background="@drawable/pdf"
+                        android:id="@+id/ori_next_track"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/next_track"
                         android:layout_margin="15dp"/>
 
-
-
                 </LinearLayout>
-            </LinearLayout>
         </LinearLayout>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        <ImageButton
+            android:id="@+id/ori_pdf"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/open_pdf"
+            android:layout_margin="15dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/ori_player"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
 
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+

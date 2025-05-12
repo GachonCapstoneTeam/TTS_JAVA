@@ -24,27 +24,25 @@ public class ViewPagerItemAdapter extends RecyclerView.Adapter<ViewPagerItemAdap
         this.items = items;
     }
 
+    public void updateItems(List<Item> newItems) {
+        items.clear();
+        items.addAll(newItems);
+        notifyDataSetChanged();
+    }
+
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.item_layout, parent, false);
+    public ViewPagerItemAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.itembox, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 
-        ViewGroup.LayoutParams params = holder.itemView.getLayoutParams();
-        if (params != null) {
-            params.width = ViewGroup.LayoutParams.MATCH_PARENT;
-            params.height = ViewGroup.LayoutParams.MATCH_PARENT;
-            holder.itemView.setLayoutParams(params);
-        }
-
         Item item = items.get(position);
         holder.itemTitle.setText(item.getTitle());
         holder.itemCategory.setText(item.getCategory());
-        holder.stockName.setText(item.getStockName());
         holder.itemDate.setText(item.getDate());
     }
 
@@ -54,14 +52,13 @@ public class ViewPagerItemAdapter extends RecyclerView.Adapter<ViewPagerItemAdap
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView itemTitle, itemCategory, stockName, itemDate;
+        TextView itemTitle, itemCategory, itemDate;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            itemTitle = itemView.findViewById(R.id.item_title);
-            itemCategory = itemView.findViewById(R.id.item_category);
-            stockName = itemView.findViewById(R.id.stockName);
-            itemDate = itemView.findViewById(R.id.item_date);
+            itemTitle = itemView.findViewById(R.id.box_title);
+            itemCategory = itemView.findViewById(R.id.box_name);
+            itemDate = itemView.findViewById(R.id.box_date);
         }
     }
 }
