@@ -30,15 +30,15 @@ public class Item {
     @SerializedName("Liked")
     private boolean liked;
     // 생성자
-    public Item(String category, String title, String stockName, String pdfUrl, String date, String views, String content, String pdfcontent) {
+    public Item(String category, String title, String stockName, String content, String views, String date, String pdfUrl, String pdfContent) {
         this.category = category;
         this.title = title;
         this.stockName = stockName;
-        this.pdfUrl = pdfUrl;  // pdfUrl 할당
+        this.pdfUrl = pdfUrl;
         this.date = date;
         this.views = views;
         this.content = content;
-        this.pdfcontent = pdfcontent;
+        this.pdfcontent = pdfContent;
     }
 
     // Getter 메서드 추가
