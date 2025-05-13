@@ -46,10 +46,12 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core);
-    implementation("com.squareup.okhttp3:okhttp:4.9.2")
+    implementation ("com.squareup.okhttp3:okhttp:4.9.2")
     implementation ("com.google.android.material:material:1.9.0")
     implementation ("com.squareup.retrofit2:retrofit:2.6.4")
     implementation ("com.squareup.retrofit2:converter-gson:2.6.4")
+    implementation ("androidx.viewpager2:viewpager2:1.0.0")
+    implementation ("com.tbuonomo:dotsindicator:5.0")
     implementation ("com.facebook.shimmer:shimmer:0.5.0")
 }
 

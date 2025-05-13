@@ -96,7 +96,14 @@ public class RecommendFragment extends Fragment {
                 if (response.isSuccessful() && response.body() != null) {
                     try {
                         String jsonData = response.body().string();
-                        recommendItems = parseItemsFromJson(jsonData);
+                        List<Item> fetchedRecommandItems = parseItemsFromJson(jsonData);
+
+                        if (fetchedRecommandItems.size() > 5) {
+                            recommendItems = fetchedRecommandItems.subList(0, 5);
+                        } else {
+                            recommendItems = fetchedRecommandItems;
+                        }
+
                         requireActivity().runOnUiThread(() -> {
                             recommendAdapter.updateItems(recommendItems);
                             startAutoSlide();  // 데이터 로드 후 슬라이더 시작
@@ -138,7 +145,13 @@ public class RecommendFragment extends Fragment {
                 if (response.isSuccessful() && response.body() != null) {
                     try {
                         String jsonData = response.body().string();
-                        rankItems = parseItemsFromJson(jsonData);
+                        List<Item> fetchedRankItems = parseItemsFromJson(jsonData);
+
+                        if (fetchedRankItems.size() > 5) {
+                            recommendItems = fetchedRankItems.subList(0, 5);
+                        } else {
+                            recommendItems = fetchedRankItems;
+                        }
                         requireActivity().runOnUiThread(() -> rankAdapter.updateItems(rankItems));
                     } catch (JSONException e) {
                         requireActivity().runOnUiThread(() -> {

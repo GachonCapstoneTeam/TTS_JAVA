@@ -93,6 +93,9 @@ public class SearchFragment extends Fragment {
             currentPage = 1;
             allItems.clear();
             currentQuery = null; // 검색어 초기화
+
+            showShimmer();
+
             fetchItemsFromServer("all");
             swipeRefreshLayout.setRefreshing(false);
         });
@@ -176,9 +179,8 @@ public class SearchFragment extends Fragment {
                 requireActivity().runOnUiThread(() -> {
                     Toast.makeText(getContext(), "데이터 불러오기 실패", Toast.LENGTH_SHORT).show();
                     loadDummyData();
-                    shimmerFrameLayout.stopShimmer();
-                    shimmerFrameLayout.setVisibility(View.GONE);
-                    recyclerView.setVisibility(View.VISIBLE);
+
+                    hideShimmer();
                 });
             }
 
@@ -191,9 +193,7 @@ public class SearchFragment extends Fragment {
 
                         requireActivity().runOnUiThread(() -> {
                             reportAdapter.setItems(items);
-                            shimmerFrameLayout.stopShimmer();
-                            shimmerFrameLayout.setVisibility(View.GONE);
-                            recyclerView.setVisibility(View.VISIBLE);
+                            hideShimmer();
                             isLoading = false;
                         });
                     } catch (JSONException e) {
@@ -204,9 +204,7 @@ public class SearchFragment extends Fragment {
                     requireActivity().runOnUiThread(() -> {
                         Toast.makeText(getContext(), "API 요청 실패", Toast.LENGTH_SHORT).show();
                         loadDummyData();
-                        shimmerFrameLayout.stopShimmer();
-                        shimmerFrameLayout.setVisibility(View.GONE);
-                        recyclerView.setVisibility(View.VISIBLE);
+                        hideShimmer();
                     });
                 }
             }
@@ -289,6 +287,20 @@ public class SearchFragment extends Fragment {
                 break;
         }
     }
+
+    private void showShimmer() {
+        shimmerFrameLayout.setVisibility(View.VISIBLE);
+        shimmerFrameLayout.startShimmer();
+
+        recyclerView.setVisibility(View.GONE);
+    }
+    private void hideShimmer() {
+        shimmerFrameLayout.stopShimmer();
+        shimmerFrameLayout.setVisibility(View.GONE);
+
+        recyclerView.setVisibility(View.VISIBLE);
+    }
+
 
     private void loadDummyData() {
         List<Item> dummyItems = new ArrayList<>();

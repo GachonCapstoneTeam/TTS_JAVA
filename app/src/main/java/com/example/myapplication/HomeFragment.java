@@ -77,6 +77,14 @@ public class HomeFragment extends Fragment {
     private ShimmerFrameLayout shimmerLayout;
     private boolean isDataLoaded = false;
 
+    private enum ViewMode {
+        CURRENT_LIST,  // 최신목록
+        MY_WISH_LIST,  // 내 목록
+        TOP10_LIST     // Top10
+    }
+
+    private ViewMode currentViewMode = ViewMode.CURRENT_LIST;
+
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
@@ -198,6 +206,7 @@ public class HomeFragment extends Fragment {
 
         myWishButton.setOnClickListener(v -> {
             updateButtonStyles(myWishButton);
+            currentViewMode = ViewMode.MY_WISH_LIST;
 
             List<Item> likedItems = loadLikedItemsFromPrefs();
 
@@ -208,18 +217,20 @@ public class HomeFragment extends Fragment {
                 emptyView.setVisibility(View.GONE);
                 recyclerView.setVisibility(View.VISIBLE);
                 adapter.setItems(likedItems);
-                recyclerView.setAdapter(adapter);
             }
-
-            itemList.clear();
-            itemList.addAll(likedItems);
-            adapter.setItems(itemList);
         });
 
 
 
         top10Button.setOnClickListener(v -> {
             updateButtonStyles(top10Button);
+
+            shimmerLayout.setVisibility(View.VISIBLE);
+            shimmerLayout.startShimmer();
+
+            emptyView.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.VISIBLE);
+
             // TOP 10 필터링 로직 추가 예정
             //fetchDataFromServer(String category) 처럼 분기를 추가하는 방식으로 할지 고민 중.
             //추천 페이지 api수정하면서 같이 수정 요함.
@@ -227,8 +238,14 @@ public class HomeFragment extends Fragment {
 
         currentListButton.setOnClickListener(v -> {
             updateButtonStyles(currentListButton);
+            currentViewMode = ViewMode.CURRENT_LIST;
+
+            shimmerLayout.setVisibility(View.VISIBLE);
+            shimmerLayout.startShimmer();
+
+            recyclerView.setVisibility(View.GONE);
             emptyView.setVisibility(View.GONE);
-            recyclerView.setVisibility(View.VISIBLE);
+
             fetchDataFromServer();
         });
 
@@ -490,6 +507,14 @@ public class HomeFragment extends Fragment {
                         List<Item> items = parseAndSetData(jsonResponse);
 
                         requireActivity().runOnUiThread(() -> {
+
+                            if (currentViewMode != ViewMode.CURRENT_LIST) {
+                                // ✅ 현재 최신목록이 아닌 경우 → RecyclerView를 덮어씌우지 않음
+                                return;
+                            }
+
+                            syncLikedStateWithPrefs(items);
+
                             itemList.clear();
                             itemList.addAll(items);
                             adapter.setItems(itemList);  // 어댑터에 전달
@@ -515,6 +540,19 @@ public class HomeFragment extends Fragment {
                 }
             }
         });
+    }
+
+    private void syncLikedStateWithPrefs(List<Item> items) {
+        SharedPreferences prefs = requireContext().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
+
+        for (Item item : items) {
+            String key = "liked_" + item.getTitle();
+            if (prefs.contains(key)) {
+                item.setLiked(true);
+            } else {
+                item.setLiked(false);
+            }
+        }
     }
 
 
