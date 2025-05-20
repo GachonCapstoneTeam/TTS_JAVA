@@ -20,47 +20,49 @@
         android:id="@+id/loginPart"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/logo"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="@id/noAccount"
+        android:gravity="center"
         android:orientation="vertical"
-        android:gravity="center">
+        app:layout_constraintBottom_toTopOf="@id/google_sign_in_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/logo">
 
         <EditText
             android:id="@+id/Email"
             android:layout_width="wrap_content"
             android:layout_height="50dp"
-            android:background="@drawable/round_box"
             android:layout_marginStart="50dp"
             android:layout_marginEnd="50dp"
+            android:background="@drawable/round_box"
             android:hint="아이디"
-            android:padding="12dp"/>
+            android:padding="12dp" />
 
         <EditText
             android:id="@+id/password"
             android:layout_width="wrap_content"
             android:layout_height="50dp"
-            android:background="@drawable/round_box"
             android:layout_marginStart="50dp"
-            android:layout_marginEnd="50dp"
             android:layout_marginTop="15dp"
+            android:layout_marginEnd="50dp"
+            android:background="@drawable/round_box"
             android:hint="비밀번호"
-            android:padding="12dp"/>
+            android:padding="12dp" />
+
         <Button
             android:id="@+id/loginButton"
             android:layout_width="wrap_content"
             android:layout_height="50dp"
+            android:layout_marginStart="50dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="50dp"
             android:background="@drawable/round_box"
             android:backgroundTint="@color/green"
-            android:layout_marginStart="50dp"
-            android:layout_marginEnd="50dp"
-            android:layout_marginTop="20dp"
             android:text="LOG IN"
-            android:textStyle="bold"
+            android:textColor="@color/white"
             android:textSize="18sp"
-            android:textColor="@color/white"/>
-<!--
+            android:textStyle="bold" />
+        <!--        비밀번호 찾기 기능 추가해야함.
         <TextView
             android:id="@+id/forgot"
             android:layout_width="wrap_content"
@@ -72,11 +74,20 @@
             -->
     </LinearLayout>
 
+    <com.google.android.gms.common.SignInButton
+        android:id="@+id/google_sign_in_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/loginPart"
+        app:layout_constraintBottom_toTopOf="@id/noAccount"/>
+
     <LinearLayout
         android:id="@+id/noAccount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/loginPart"
+        app:layout_constraintTop_toBottomOf="@id/google_sign_in_button"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"

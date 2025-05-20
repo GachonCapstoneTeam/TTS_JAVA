@@ -6,20 +6,35 @@ import android.os.Handler;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.myapplication.util.PreferenceUtil;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
 public class SplashActivity extends AppCompatActivity {
 
-    private static final int SPLASH_DELAY = 2000; // 2초
+    private static final int SPLASH_DELAY = 1000; // 1초
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.splash_layout);
+        PreferenceUtil.init(getApplicationContext());
 
         new Handler().postDelayed(() -> {
-            // LoginActivity로 전환
-            Intent intent = new Intent(SplashActivity.this, LoginActivity.class);
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            Intent intent;
+
+            if (user != null) {
+                // 이미 로그인됨 -> basic으로 이동
+                intent = new Intent(SplashActivity.this, basic_layout.class);
+            } else {
+                // 로그인 안됨 -> Login으로 이동
+                intent = new Intent(SplashActivity.this, LoginActivity.class);
+            }
+
             startActivity(intent);
-            finish(); // SplashActivity를 종료해 뒤로가기 시 돌아오지 않도록
+            finish();
         }, SPLASH_DELAY);
     }
+
 }
