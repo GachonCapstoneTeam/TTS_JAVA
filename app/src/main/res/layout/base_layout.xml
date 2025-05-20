@@ -20,6 +20,16 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_gravity="center"/>
 
+    <Button
+        android:id="@+id/logout"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:background="@drawable/logout_icon"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/base_text"
+        app:layout_constraintTop_toTopOf="@id/base_text"
+        android:layout_margin="5dp"/>
+
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/frame"
         android:layout_width="match_parent"

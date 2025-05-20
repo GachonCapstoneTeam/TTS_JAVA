@@ -10,6 +10,9 @@ public class PreferenceUtil {
     private static final String PREF_NAME = "talkstock_prefs";
     private static SharedPreferences prefs;
 
+    public static final String KEY_AUTO_LOGIN = "auto_login";
+    public static final String KEY_LAST_USER = "last_user_email";
+
     // 초기화 (앱 시작 시 1회만 호출)
     public static void init(Context context) {
         if (prefs == null) {
@@ -43,7 +46,7 @@ public class PreferenceUtil {
     }
 
     // 전체 삭제
-    public static void clearAll() {
+    public static void clear() {
         prefs.edit().clear().apply();
     }
 

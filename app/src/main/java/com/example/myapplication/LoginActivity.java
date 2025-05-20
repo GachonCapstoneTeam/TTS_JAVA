@@ -69,7 +69,7 @@ public class LoginActivity extends AppCompatActivity {
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
         loginButton.setOnClickListener(v -> loginUserWithEmail());
-        //googleSignInButton.setOnClickListener(v -> signInWithGoogle()); // 구글 로그인 버튼 클릭 리스너 (주석 처리됨)
+        googleSignInButton.setOnClickListener(v -> signInWithGoogle()); // 구글 로그인 버튼 클릭 리스너 (주석 처리됨)
 
         signUpText.setOnClickListener(v -> {
             Intent intent = new Intent(LoginActivity.this, SignUpActivity.class);
@@ -195,7 +195,7 @@ public class LoginActivity extends AppCompatActivity {
     private void updateUI(FirebaseUser user) {
         if (user != null) {
             Toast.makeText(this, "로그인됨: " + user.getEmail(), Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            Intent intent = new Intent(LoginActivity.this, basic_layout.class);
             // 사용자 정보를 다음 화면(TestActivity)으로 전달할 수 있습니다.
             // intent.putExtra("USER_EMAIL", user.getEmail()); // 사용자 이메일 전달 예시
             // intent.putExtra("USER_UID", user.getUid()); // 사용자 UID 전달 예시

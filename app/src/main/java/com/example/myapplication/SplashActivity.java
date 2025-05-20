@@ -18,17 +18,19 @@ public class SplashActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.splash_layout);
+
         PreferenceUtil.init(getApplicationContext());
 
         new Handler().postDelayed(() -> {
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-            Intent intent;
+            boolean autoLoginEnabled = PreferenceUtil.getBoolean(PreferenceUtil.KEY_AUTO_LOGIN, false);
 
-            if (user != null) {
-                // 이미 로그인됨 -> basic으로 이동
+            Intent intent;
+            if (user != null && autoLoginEnabled) {
+                // 자동 로그인 조건 충족 -> basic으로 이동
                 intent = new Intent(SplashActivity.this, basic_layout.class);
             } else {
-                // 로그인 안됨 -> Login으로 이동
+                // 로그인 필요 -> 로그인 화면으로
                 intent = new Intent(SplashActivity.this, LoginActivity.class);
             }
 
