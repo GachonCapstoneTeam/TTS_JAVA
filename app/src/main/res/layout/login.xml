@@ -36,7 +36,9 @@
             android:layout_marginEnd="50dp"
             android:background="@drawable/round_box"
             android:hint="아이디"
-            android:padding="12dp" />
+            android:padding="12dp"
+            android:singleLine="true"
+            android:maxLines="1" />
 
         <EditText
             android:id="@+id/password"
@@ -47,7 +49,9 @@
             android:layout_marginEnd="50dp"
             android:background="@drawable/round_box"
             android:hint="비밀번호"
-            android:padding="12dp" />
+            android:padding="12dp"
+            android:singleLine="true"
+            android:maxLines="1" />
 
         <Button
             android:id="@+id/loginButton"
