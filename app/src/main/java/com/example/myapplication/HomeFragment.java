@@ -85,6 +85,9 @@ public class HomeFragment extends Fragment {
 
     private ViewMode currentViewMode = ViewMode.CURRENT_LIST;
 
+    final ViewMode requestViewMode = currentViewMode;
+
+
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
@@ -217,6 +220,10 @@ public class HomeFragment extends Fragment {
                 emptyView.setVisibility(View.GONE);
                 recyclerView.setVisibility(View.VISIBLE);
                 adapter.setItems(likedItems);
+
+                itemList.clear();
+                itemList.addAll(likedItems);
+                adapter.setItems(itemList);
             }
         });
 
@@ -494,8 +501,14 @@ public class HomeFragment extends Fragment {
             public void onFailure(Call call, IOException e) {
                 e.printStackTrace();
                 requireActivity().runOnUiThread(() -> {
-                    Toast.makeText(requireContext(), "서버 연결 실패. 더미 데이터를 로드합니다.", Toast.LENGTH_SHORT).show();
-                    loadDummyData(); // 실패 시 더미 데이터 로드
+
+                    requireActivity().runOnUiThread(() -> {
+                        if (currentViewMode != requestViewMode) return;
+                        shimmerLayout.stopShimmer();
+                        shimmerLayout.setVisibility(View.GONE);
+                        Toast.makeText(requireContext(), "서버 연결 실패", Toast.LENGTH_SHORT).show();
+                        loadDummyData();
+                    });
                 });
             }
 
@@ -509,7 +522,8 @@ public class HomeFragment extends Fragment {
                         requireActivity().runOnUiThread(() -> {
 
                             if (currentViewMode != ViewMode.CURRENT_LIST) {
-                                // ✅ 현재 최신목록이 아닌 경우 → RecyclerView를 덮어씌우지 않음
+                                shimmerLayout.stopShimmer();
+                                shimmerLayout.setVisibility(View.GONE);
                                 return;
                             }
 
@@ -528,13 +542,13 @@ public class HomeFragment extends Fragment {
                     } catch (JSONException e) {
                         e.printStackTrace();
                         requireActivity().runOnUiThread(() -> {
-                            Toast.makeText(requireContext(), "데이터 파싱 오류. 더미 데이터를 로드합니다.", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(requireContext(), "데이터 파싱 오류", Toast.LENGTH_SHORT).show();
                             loadDummyData();
                         });
                     }
                 } else {
                     requireActivity().runOnUiThread(() -> {
-                        Toast.makeText(requireContext(), "서버 응답 오류. 더미 데이터를 로드합니다.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(), "서버 응답 오류", Toast.LENGTH_SHORT).show();
                         loadDummyData(); // 응답 오류 시 더미 데이터 로드
                     });
                 }
