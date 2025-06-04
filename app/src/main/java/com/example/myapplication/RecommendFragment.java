@@ -137,6 +137,8 @@ public class RecommendFragment extends Fragment {
                 requireActivity().runOnUiThread(() -> {
                     Toast.makeText(getContext(), "인기 리포트 로딩 실패, 더미 데이터 로드", Toast.LENGTH_SHORT).show();
                     loadDummyRankData();
+                    rankViewPager.setVisibility(View.VISIBLE);
+                    startAutoSlide();
                 });
             }
 
@@ -148,11 +150,15 @@ public class RecommendFragment extends Fragment {
                         List<Item> fetchedRankItems = parseItemsFromJson(jsonData);
 
                         if (fetchedRankItems.size() > 5) {
-                            recommendItems = fetchedRankItems.subList(0, 5);
+                            rankItems = fetchedRankItems.subList(0, 5);
                         } else {
-                            recommendItems = fetchedRankItems;
+                            rankItems = fetchedRankItems;
                         }
-                        requireActivity().runOnUiThread(() -> rankAdapter.updateItems(rankItems));
+                        requireActivity().runOnUiThread(() -> {
+                            rankAdapter.updateItems(rankItems);
+                            rankViewPager.setAdapter(rankAdapter);
+                        });
+
                     } catch (JSONException e) {
                         requireActivity().runOnUiThread(() -> {
                             Toast.makeText(getContext(), "인기 리포트 파싱 실패, 더미 데이터 로드", Toast.LENGTH_SHORT).show();
@@ -196,7 +202,7 @@ public class RecommendFragment extends Fragment {
     // 더미 데이터 (추천 리포트)
     private void loadDummyRecommendData() {
         recommendItems.clear();
-        recommendItems.add(new Item("IT", "삼성전자 반도체 전망", "삼성증권", "https://example.com/sample1.pdf", "2024-02-15", "120", "반도체 시장의 향후 전망을 분석한 리포트입니다.",""));
+        recommendItems.add(new Item("기업", "FLNG야 부탁해 - pure value pick", "삼성중공업", "동사는 FY25F 매출 W10.7tr, 영업이익 W738bn 기록하며 기존 가이던스를 각각 2%, 17% 상회할 것이라 전망함. 환헷지 100% 정책에 따라 계약환-매출환 괴리에 따른 추가적인 외형성장을 기대할 수는 없으나, 보수적 예정원가 설정에 기인한 영업이익 상회 예상.", "5958", "2025-05-30", "반도체 시장의 향후 전망을 분석한 리포트입니다.",""));
         recommendItems.add(new Item("플랫폼", "네이버 AI 전략", "NH투자증권", "https://example.com/sample2.pdf", "2024-02-14", "98", "네이버 AI 서비스 전략에 대한 분석.",""));
         recommendItems.add(new Item("자동차", "현대차 전기차 전망", "미래에셋", "https://example.com/sample3.pdf", "2024-02-13", "76", "현대차의 전기차 시장 전략과 전망.",""));
         recommendAdapter.updateItems(recommendItems);
@@ -205,7 +211,7 @@ public class RecommendFragment extends Fragment {
     // 더미 데이터 (인기 리포트)
     private void loadDummyRankData() {
         rankItems.clear();
-        rankItems.add(new Item("화학", "LG화학 배터리 시장", "키움증권", "https://example.com/sample4.pdf", "2024-02-15", "150", "배터리 시장 동향 및 LG화학의 전략.",""));
+        rankItems.add(new Item("기업", "6월 전략 - 이젠 매수해도 됩니다", "SK텔레콤", "SKT에 대한 투자의견 매수, 12개월 목표가 7만원을 유지한다. 더불어 LGU+와 함께 6월 통신서비스 업종 내 최선호주로 삼는다. 추천 사유는 1) 투자가들의 우려가 크지만 2분기 및 2025년 SKT 실적 쇼크 가능성이 낮고, 2) 배당 성향의 일시적 상향 조정 가능성이 높음을 감안하면 올해 배당 감소 가능성이 희박하며, 3) 통신 요금 공약이 발표되지 않는 대신 AI/DX 육성론이 대선 공약에 등장하고 있어 규제 환경이 예상보다 양호한 상황이고, 4) 단기 주가 급락으로 인해 SKT 기대배당수익률이 7%에 달하기 때문이다. 역사적 배당 수익률 밴드 최하단에 위치한 상황이라 매수 강도를 높일 필요가 있겠다는 판단이다.", "5857", "2025-05-28", "반도체 시장의 향후 전망을 분석한 리포트입니다.",""));
         rankItems.add(new Item("IT", "SK하이닉스 메모리 시장", "하나금융투자", "https://example.com/sample5.pdf", "2024-02-14", "110", "메모리 반도체 시장의 향후 전망.",""));
         rankItems.add(new Item("유통", "쿠팡 성장성 분석", "대신증권", "https://example.com/sample6.pdf", "2024-02-13", "85", "쿠팡의 성장성과 미래 전략.",""));
         rankAdapter.updateItems(rankItems);
